@@ -1,0 +1,74 @@
+name: dawiq test
+
+on: [push, pull_request]
+
+jobs:
+
+  lint:
+
+    runs-on: ubuntu-latest
+
+    steps: 
+
+      - name: get repo
+        uses: actions/checkout@v2
+
+      - name: set up Python
+        uses: actions/setup-python@v2
+
+      - name: install dependencies
+        run: |
+          pip install -r requirements/test.txt
+
+      - name: lint with flake8
+        run: |
+          flake8
+
+      - name: lint with black
+        run: |
+          black --check .
+
+  type-check:
+
+    needs: lint
+
+    runs-on: ubuntu-latest
+
+    steps: 
+
+      - name: get repo
+        uses: actions/checkout@v2
+
+      - name: set up Python
+        uses: actions/setup-python@v2
+
+      - name: install package
+        run: |
+          pip install .[test]
+
+      - name: run mypy check
+        run: mypy araviq6
+
+
+  doc:
+
+    needs: type-check
+
+    runs-on: ubuntu-latest
+
+    steps: 
+
+      - name: get repo
+        uses: actions/checkout@v2
+
+      - name: set up Python
+        uses: actions/setup-python@v2
+
+      - name: install package
+        run: |
+          pip install .[doc]
+
+      - name: build document
+        run: |
+          cd doc
+          make html SPHINXOPTS="-W --keep-going"
