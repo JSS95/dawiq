@@ -20,7 +20,9 @@ def read_readme():
 
 def get_package_data():
     pkgname = "dawiq"
-    pkg_datapaths = ["py.typed",]
+    pkg_datapaths = [
+        "py.typed",
+    ]
 
     ret = []
     for path in pkg_datapaths:
