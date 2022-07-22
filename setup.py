@@ -58,7 +58,7 @@ setup(
     name="dawiq",
     version=get_version(),
     python_requires=">=3.9",
-    description="Package to construct widgets from dataclasses",
+    description="Package to construct Qt widgets from dataclasses",
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     classifiers=[

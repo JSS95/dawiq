@@ -2,7 +2,7 @@
 DaWiQ - Dataclass Widget for Qt
 ===============================
 
-DaWiQ is a package to build widgets from Python dataclasses.
+DaWiQ is a package to build Qt widgets from dataclasses.
 
 """
 
