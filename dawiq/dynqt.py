@@ -60,3 +60,6 @@ class QtDriver(object):
 
 
 qt = QtDriver()
+
+QtCore = qt.QtCore
+QtWidgets = qt.QtWidgets
