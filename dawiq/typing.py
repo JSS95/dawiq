@@ -1,7 +1,10 @@
 from typing import Protocol, Dict, Any
 
 
-__all__ = ["DataclassProtocol", "DataWidgetProtocol"]
+__all__ = [
+    "DataclassProtocol",
+    "FieldWidgetProtocol",
+]
 
 
 class DataclassProtocol(Protocol):
@@ -11,7 +14,7 @@ class DataclassProtocol(Protocol):
     __dataclass_fields__: Dict
 
 
-class DataWidgetProtocol(Protocol):
+class FieldWidgetProtocol(Protocol):
     """Type annotation for data widget object."""
 
     def dataValue(self) -> Any:

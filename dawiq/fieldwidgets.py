@@ -1,6 +1,6 @@
 from .dynqt import QtWidgets
 from typing import Any
-from .typing import DataWidgetProtocol
+from .typing import FieldWidgetProtocol
 
 
 __all__ = [
@@ -9,7 +9,7 @@ __all__ = [
 ]
 
 
-def type2Widget(t: Any) -> DataWidgetProtocol:
+def type2Widget(t: Any) -> FieldWidgetProtocol:
     """Return the widget instance for given type annotation."""
     if isinstance(t, type) and issubclass(t, bool):
         return BoolCheckBox()
