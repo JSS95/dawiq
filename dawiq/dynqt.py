@@ -45,7 +45,7 @@ class QtDriver(object):
         assert drv in self.DRIVERS
         self._drv = drv
 
-        if self._drv.startswith("Qt"):
+        if self._drv.startswith("PyQt"):
             self.QtCore.Signal = self.QtCore.pyqtSignal
             self.QtCore.Slot = self.QtCore.pyqtSlot
 
