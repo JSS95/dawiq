@@ -1,3 +1,7 @@
+"""
+Widgets to represent the fields of the dataclass.
+"""
+
 from .qt_compat import QtCore, QtWidgets
 from typing import Any, Optional, Union
 from .typing import FieldWidgetProtocol
@@ -10,7 +14,7 @@ __all__ = [
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
-    """Return the widget instance for given type annotation."""
+    """Construct the widget for given type annotation."""
     if isinstance(t, type) and issubclass(t, bool):
         return BoolCheckBox()
     raise TypeError("Unknown type or annotation: %s" % t)
@@ -20,12 +24,15 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     """
     Checkbox for fuzzy boolean value.
 
-    If the box is checked, the value is True. If it is unchecked, the value is
-    False. Else, e.g. tristate is allowed, the value is None.
-
     :meth:`dataValue` returns the current value. When the check state is changed,
     :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
     check state of the checkbox.
+
+    If the box is checked, the data value is True. If unchecked, the value is
+    False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
+
+    Because of the nature of check box, default value always exists even if
+    the original dataclass does not define it.
 
     """
 
