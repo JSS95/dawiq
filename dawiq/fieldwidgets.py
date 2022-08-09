@@ -1,5 +1,5 @@
 from .dynqt import QtCore, QtWidgets
-from typing import Any, Optional
+from typing import Any, Optional, Union
 from .typing import FieldWidgetProtocol
 
 
@@ -60,9 +60,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     def dataValue(self) -> Optional[bool]:
         checkstate = self.checkState()
-        if checkstate == QtCore.Qt.Checked:
+        if checkstate == QtCore.Qt.CheckState.Checked:
             state = True
-        elif checkstate == QtCore.Qt.Unchecked:
+        elif checkstate == QtCore.Qt.CheckState.Unchecked:
             state = False
         else:
             state = None
@@ -70,17 +70,18 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     def setDataValue(self, value: Optional[bool]):
         if value is True:
-            state = QtCore.Qt.Checked
+            state = QtCore.Qt.CheckState.Checked
         elif value is False:
-            state = QtCore.Qt.Unchecked
+            state = QtCore.Qt.CheckState.Unchecked
         else:
-            state = QtCore.Qt.PartiallyChecked
+            state = QtCore.Qt.CheckState.PartiallyChecked
         self.setCheckState(state)
 
-    def emitDataValueChanged(self, checkstate: QtCore.Qt.CheckState):
-        if checkstate == QtCore.Qt.Checked:
+    def emitDataValueChanged(self, checkstate: Union[int, QtCore.Qt.CheckState]):
+        checkstate = QtCore.Qt.CheckState(checkstate)
+        if checkstate == QtCore.Qt.CheckState.Checked:
             state = True
-        elif checkstate == QtCore.Qt.Unchecked:
+        elif checkstate == QtCore.Qt.CheckState.Unchecked:
             state = False
         else:
             state = None

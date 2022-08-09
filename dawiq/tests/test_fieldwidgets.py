@@ -11,13 +11,13 @@ def test_BoolCheckBox(qtbot):
         raising=True,
         check_params_cb=lambda val: val is True,
     ):
-        widget.setCheckState(QtCore.Qt.Checked)
+        widget.setCheckState(QtCore.Qt.CheckState.Checked)
     with qtbot.waitSignal(
         widget.dataValueChanged,
         raising=True,
         check_params_cb=lambda val: val is False,
     ):
-        widget.setCheckState(QtCore.Qt.Unchecked)
+        widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     # test tristate
     widget.setTristate(True)
@@ -26,16 +26,16 @@ def test_BoolCheckBox(qtbot):
         raising=True,
         check_params_cb=lambda val: val is True,
     ):
-        widget.setCheckState(QtCore.Qt.Checked)
+        widget.setCheckState(QtCore.Qt.CheckState.Checked)
     with qtbot.waitSignal(
         widget.dataValueChanged,
         raising=True,
         check_params_cb=lambda val: val is False,
     ):
-        widget.setCheckState(QtCore.Qt.Unchecked)
+        widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
     with qtbot.waitSignal(
         widget.dataValueChanged,
         raising=True,
         check_params_cb=lambda val: val is None,
     ):
-        widget.setCheckState(QtCore.Qt.PartiallyChecked)
+        widget.setCheckState(QtCore.Qt.CheckState.PartiallyChecked)
