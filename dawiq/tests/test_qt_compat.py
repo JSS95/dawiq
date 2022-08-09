@@ -1,4 +1,4 @@
-from dawiq.dynqt import QtCore, QtWidgets
+from dawiq.qt_compat import QtCore, QtWidgets
 
 
 def test_import_QtCore():

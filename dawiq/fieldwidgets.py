@@ -1,4 +1,4 @@
-from .dynqt import QtCore, QtWidgets
+from .qt_compat import QtCore, QtWidgets
 from typing import Any, Optional, Union
 from .typing import FieldWidgetProtocol
 
@@ -32,7 +32,7 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     >>> import sys
     >>> from dawiq import BoolCheckBox
-    >>> from dawiq.dynqt import QtWidgets
+    >>> from dawiq.qt_compat import QtWidgets
     >>> def runGUI():
     ...     app = QtWidgets.QApplication(sys.argv)
     ...     widget = BoolCheckBox()

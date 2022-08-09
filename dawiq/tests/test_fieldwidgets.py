@@ -1,5 +1,5 @@
 from dawiq import BoolCheckBox
-from dawiq.dynqt import QtCore
+from dawiq.qt_compat import QtCore
 
 
 def test_BoolCheckBox(qtbot):
