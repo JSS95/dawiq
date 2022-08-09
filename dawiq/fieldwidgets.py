@@ -16,6 +16,7 @@ __all__ = [
     "BoolCheckBox",
     "MISSING",
     "EmptyIntValidator",
+    "IntLineEdit",
 ]
 
 
@@ -23,6 +24,24 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
     """Construct the widget for given type annotation."""
     if isinstance(t, type) and issubclass(t, bool):
         return BoolCheckBox()
+    if isinstance(t, type) and issubclass(t, int):
+        return IntLineEdit()
+
+    origin = getattr(t, "__origin__", None)
+
+    if origin is Union:
+        args = [a for a in getattr(t, "__args__") if not isinstance(None, a)]
+        if len(args) > 1:
+            msg = f"Cannot convert Union with multiple types: {t}"
+            raise TypeError(msg)
+        widget = type2Widget(args[0])
+        if isinstance(widget, BoolCheckBox):
+            widget.setTristate(True)
+            return widget
+        if isinstance(widget, IntLineEdit):
+            widget.setDefaultDataValue(None)
+            return widget
+
     raise TypeError("Unknown type or annotation: %s" % t)
 
 
@@ -103,3 +122,61 @@ class EmptyIntValidator(QtGui.QIntValidator):
         if not input:
             ret = QtGui.QValidator.State.Acceptable
         return ret
+
+
+class IntLineEdit(QtWidgets.QLineEdit):
+    """
+    Line edit for integer value. ``None`` is allowed for default value.
+
+    """
+
+    dataValueChanged = QtCore.Signal(int)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self._default_data_value = MISSING
+        self.setValidator(QtGui.QIntValidator(self))
+
+        self.editingFinished.connect(self.emitDataValueChanged)
+
+    def dataName(self) -> str:
+        return self.placeholderText()
+
+    def setDataName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
+
+    def defaultDataValue(self) -> Union[int, None, _MISSING]:
+        return self._default_data_value
+
+    def hasDefaultDataValue(self) -> bool:
+        return self.defaultDataValue() is not MISSING
+
+    def setDefaultDataValue(self, val: Union[int, None, _MISSING]):
+        self._default_data_value = val
+        if self.hasDefaultDataValue():
+            self.setValidator(EmptyIntValidator(self))
+        else:
+            self.setValidator(QtGui.QIntValidator(self))
+
+    def dataValue(self) -> Union[int, None, _MISSING]:
+        text = self.text()
+        if text:
+            val: Union[int, None, _MISSING] = int(text)
+        else:
+            val = self.defaultDataValue()
+        return val
+
+    def setDataValue(self, val: Union[int, None, _MISSING]):
+        if val is MISSING:
+            self.setText("")
+        elif val is None:
+            self.setText("")
+        else:
+            self.setText(str(val))
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        if val is not MISSING:
+            self.dataValueChanged.emit(val)

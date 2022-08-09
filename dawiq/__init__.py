@@ -14,6 +14,7 @@ from .fieldwidgets import (
     BoolCheckBox,
     MISSING,
     EmptyIntValidator,
+    IntLineEdit,
 )
 
 
@@ -22,4 +23,5 @@ __all__ = [
     "BoolCheckBox",
     "MISSING",
     "EmptyIntValidator",
+    "IntLineEdit",
 ]
