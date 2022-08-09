@@ -4,13 +4,10 @@ Qt API for PyQt5/6 and PySide2/6.
 Import the Qt subpackages from this module, as if importing from the Qt binding
 package.
 
-Examples
-========
-
->>> from dawiq.qt_compat import QtCore, QtWidgets
-
 Notes
 =====
+
+This module is not part of public API, therefore users must not rely on it.
 
 Based on https://github.com/hmeine/qimage2ndarray and
 https://github.com/pytest-dev/pytest-qt.

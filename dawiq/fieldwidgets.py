@@ -27,21 +27,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
     check state of the checkbox.
 
-    Examples
-    ========
-
-    >>> import sys
-    >>> from dawiq import BoolCheckBox
-    >>> from dawiq.qt_compat import QtWidgets
-    >>> def runGUI():
-    ...     app = QtWidgets.QApplication(sys.argv)
-    ...     widget = BoolCheckBox()
-    ...     widget.setTristate(True)
-    ...     widget.show()
-    ...     app.exec()
-    ...     app.quit()
-    >>> runGUI() # doctest: +SKIP
-
     """
 
     dataValueChanged = QtCore.Signal(object)
