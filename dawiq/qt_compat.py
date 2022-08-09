@@ -1,21 +1,34 @@
 """
 Qt API for PyQt5/6 and PySide2/6.
 
-Based on from https://github.com/hmeine/qimage2ndarray and
-https://github.com/pytest-dev/pytest-qt.
-"""
+Import the Qt subpackages from this module, as if importing from the Qt binding
+package.
 
-from collections import namedtuple
+Examples
+========
+
+>>> from dawiq.qt_compat import QtCore, QtWidgets
+
+Notes
+=====
+
+Based on https://github.com/hmeine/qimage2ndarray and
+https://github.com/pytest-dev/pytest-qt.
+
+"""
 
 
 class QtAPIError(Exception):
     pass
 
 
-VersionTuple = namedtuple("VersionTuple", "qt_api, qt_api_version, runtime, compiled")
-
-
 class _QtAPI:
+    """
+    Interface to access the Qt binding package installed in the environment.
+
+    This object can be treated as root namespace of the Qt package.
+
+    """
 
     supported_apis = [
         "PySide6",
@@ -38,13 +51,13 @@ class _QtAPI:
         # Not importing only the root namespace because when uninstalling from conda,
         # the namespace can still be there.
         if _can_import("PySide6.QtCore"):
-            self.qt_module = "PySide6"
+            self.qt_binding = "PySide6"
         elif _can_import("PySide2.QtCore"):
-            self.qt_module = "PySide2"
+            self.qt_binding = "PySide2"
         elif _can_import("PyQt6.QtCore"):
-            self.qt_module = "PyQt6"
+            self.qt_binding = "PyQt6"
         elif _can_import("PyQt5.QtCore"):
-            self.qt_module = "PyQt5"
+            self.qt_binding = "PyQt5"
         else:
             errors = "\n".join(
                 f"  {module}: {reason}"
@@ -53,16 +66,18 @@ class _QtAPI:
             msg = "Supported Qt not installed.\n" + errors
             raise QtAPIError(msg)
 
-        def _import_module(module_name):
-            m = __import__(self.qt_module, globals(), locals(), [module_name], 0)
-            return getattr(m, module_name)
+        if self.qt_binding in ("PyQt5", "PyQt6"):
+            self.QtCore.Signal = self.QtCore.pyqtSignal
+            self.QtCore.Slot = self.QtCore.pyqtSlot
 
-        self.QtCore = QtCore = _import_module("QtCore")
-        self.QtWidgets = _import_module("QtWidgets")
+    def _import_module(self, module_name):
+        m = __import__(self.qt_binding, globals(), locals(), [module_name], 0)
+        return getattr(m, module_name)
 
-        if self.qt_module in ("PyQt5", "PyQt6"):
-            self.QtCore.Signal = QtCore.pyqtSignal
-            self.QtCore.Slot = QtCore.pyqtSlot
+    def __getattr__(self, name):
+        if name.startswith("Qt"):
+            return self._import_module(name)
+        return super().__getattr__(name)
 
 
 qt_api = _QtAPI()
