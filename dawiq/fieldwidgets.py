@@ -30,11 +30,11 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     Examples
     ========
 
-    >>> from PySide6.QtWidgets import QApplication
     >>> import sys
     >>> from dawiq import BoolCheckBox
+    >>> from dawiq.dynqt import QtWidgets
     >>> def runGUI():
-    ...     app = QApplication(sys.argv)
+    ...     app = QtWidgets.QApplication(sys.argv)
     ...     widget = BoolCheckBox()
     ...     widget.setTristate(True)
     ...     widget.show()
