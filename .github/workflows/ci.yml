@@ -55,14 +55,13 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
-    strategy:
-      fail-fast: false
-
     env:
       DISPLAY: ":99.0"
       PYTEST_QT_API: ${{ matrix.qt }}
 
     strategy:
+      fail-fast: false
+
       matrix:
         os : [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.9", "3.10"]
