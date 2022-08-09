@@ -1,4 +1,4 @@
-from .dynqt import QtCore, QtWidgets
+from .qt_compat import QtCore, QtWidgets
 from typing import Any, Optional, Union
 from .typing import FieldWidgetProtocol
 
@@ -26,21 +26,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     :meth:`dataValue` returns the current value. When the check state is changed,
     :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
     check state of the checkbox.
-
-    Examples
-    ========
-
-    >>> import sys
-    >>> from dawiq import BoolCheckBox
-    >>> from dawiq.dynqt import QtWidgets
-    >>> def runGUI():
-    ...     app = QtWidgets.QApplication(sys.argv)
-    ...     widget = BoolCheckBox()
-    ...     widget.setTristate(True)
-    ...     widget.show()
-    ...     app.exec()
-    ...     app.quit()
-    >>> runGUI() # doctest: +SKIP
 
     """
 

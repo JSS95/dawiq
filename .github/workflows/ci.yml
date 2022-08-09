@@ -57,7 +57,6 @@ jobs:
 
     env:
       DISPLAY: ":99.0"
-      QT_DRIVER: ${{ matrix.qt }}
       PYTEST_QT_API: ${{ matrix.qt }}
 
     strategy:
