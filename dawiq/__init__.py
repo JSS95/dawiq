@@ -12,10 +12,14 @@ from .version import __version__  # noqa
 from .fieldwidgets import (
     type2Widget,
     BoolCheckBox,
+    MISSING,
+    EmptyIntValidator,
 )
 
 
 __all__ = [
     "type2Widget",
     "BoolCheckBox",
+    "MISSING",
+    "EmptyIntValidator",
 ]
