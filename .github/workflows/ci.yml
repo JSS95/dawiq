@@ -49,10 +49,58 @@ jobs:
       - name: run mypy check
         run: mypy dawiq
 
+  unit-test:
+
+    needs: type-check
+
+    runs-on: ${{ matrix.os }}
+
+    env:
+      DISPLAY: ":99.0"
+      QT_DRIVER: ${{ matrix.qt }}
+      PYTEST_QT_API: ${{ matrix.qt }}
+
+    strategy:
+      matrix:
+        os : [ubuntu-latest]
+        python: ["3.9", "3.10"]
+        qt: [PySide2, PySide6, PyQt5, PyQt6]
+
+    steps:
+
+      - name: get repo
+        uses: actions/checkout@v2
+
+      - name: set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: update apt-get
+        run: sudo apt-get update
+
+      - name: install openGL in ${{ matrix.os }}
+        run: |
+          sudo apt-get install -y libgles2-mesa-dev
+
+      - name: install Xvfb in ${{ matrix.os }}
+        run: |
+          sudo apt install libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0 x11-utils
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x1200x24 -ac +extension GLX
+
+      - name: install qt
+        run: |
+          pip install ${{ matrix.qt }}
+
+      - name: install package
+        run: |
+          pip install .[test-ci]
+
+      - run: pytest
 
   doc:
 
-    needs: type-check
+    needs: unit-test
 
     runs-on: ubuntu-latest
 
