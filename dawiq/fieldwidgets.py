@@ -1,5 +1,9 @@
 """
-Widgets to represent the fields of the dataclass.
+Data field widgets
+==================
+
+:mod:`dawiq.fieldwidgets` provides widgets to represent the fields of the
+dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets
