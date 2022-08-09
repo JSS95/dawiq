@@ -14,6 +14,7 @@ from .typing import FieldWidgetProtocol
 __all__ = [
     "type2Widget",
     "BoolCheckBox",
+    "MISSING",
 ]
 
 
@@ -82,3 +83,12 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         else:
             state = None
         self.dataValueChanged.emit(state)
+
+
+class _MISSING:
+    """Sentinel object to indicate empty field."""
+
+    pass
+
+
+MISSING = _MISSING()
