@@ -72,8 +72,7 @@ setup(
             "License :: OSI Approved :: "
             "GNU Library or Lesser General Public License (LGPL)"
         ),
-        "Operating System :: Microsoft :: Windows",
-        "Operating System :: POSIX :: Linux",
+        "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.9",
