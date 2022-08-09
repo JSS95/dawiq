@@ -81,3 +81,4 @@ qt_api = _QtAPI()
 
 QtCore = qt_api.QtCore
 QtWidgets = qt_api.QtWidgets
+QtGui = qt_api.QtGui

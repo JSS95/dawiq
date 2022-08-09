@@ -6,7 +6,7 @@ Data field widgets
 dataclass.
 """
 
-from .qt_compat import QtCore, QtWidgets
+from .qt_compat import QtCore, QtWidgets, QtGui
 from typing import Any, Optional, Union
 from .typing import FieldWidgetProtocol
 
@@ -15,6 +15,7 @@ __all__ = [
     "type2Widget",
     "BoolCheckBox",
     "MISSING",
+    "EmptyIntValidator",
 ]
 
 
@@ -92,3 +93,13 @@ class _MISSING:
 
 
 MISSING = _MISSING()
+
+
+class EmptyIntValidator(QtGui.QIntValidator):
+    """Validator which accpets integer and empty string"""
+
+    def validate(self, input: str, pos: int) -> QtGui.QValidator.State:
+        ret = super().validate(input, pos)
+        if not input:
+            ret = QtGui.QValidator.State.Acceptable
+        return ret
