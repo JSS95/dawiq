@@ -16,6 +16,9 @@ from .fieldwidgets import (
     EmptyIntValidator,
     IntLineEdit,
 )
+from .datawidget import (
+    DataWidget,
+)
 
 
 __all__ = [
@@ -24,4 +27,5 @@ __all__ = [
     "MISSING",
     "EmptyIntValidator",
     "IntLineEdit",
+    "DataWidget",
 ]
