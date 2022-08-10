@@ -138,7 +138,7 @@ class IntLineEdit(QtWidgets.QLineEdit):
 
     When the default value is :obj:`MISSING`, it indicates that the field has no
     default value. Data value with empty string is :obj:`MISSING` in this case
-    and should be filtered.
+    and should be specially handled.
 
     """
 
@@ -148,7 +148,7 @@ class IntLineEdit(QtWidgets.QLineEdit):
         super().__init__(parent)
 
         self._default_data_value = MISSING
-        self.setValidator(QtGui.QIntValidator(self))
+        self.setValidator(EmptyIntValidator(self))
 
         self.editingFinished.connect(self.emitDataValueChanged)
 
@@ -167,10 +167,6 @@ class IntLineEdit(QtWidgets.QLineEdit):
 
     def setDefaultDataValue(self, val: Union[int, None, _MISSING]):
         self._default_data_value = val
-        if self.hasDefaultDataValue():
-            self.setValidator(EmptyIntValidator(self))
-        else:
-            self.setValidator(QtGui.QIntValidator(self))
 
     def dataValue(self) -> Union[int, None, _MISSING]:
         text = self.text()
