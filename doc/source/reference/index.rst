@@ -12,3 +12,4 @@ This manual describes the modules and objects in :mod:`dawiq`.
    :maxdepth: 2
 
    fieldwidgets
+   datawidget
