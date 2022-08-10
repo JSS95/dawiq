@@ -126,11 +126,23 @@ class EmptyIntValidator(QtGui.QIntValidator):
 
 class IntLineEdit(QtWidgets.QLineEdit):
     """
-    Line edit for integer value. ``None`` is allowed for default value.
+    Line edit for integer field.
+
+    :meth:`dataValue` returns the current value. When editing is finished,
+    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
+    text on the line edit.
+
+    When the line edit is empty, :meth:`defaultDataValue` is used as data value.
+    Default value can be integer or ``None``, thus supporting the field with
+    ``Optional[int]`` type.
+
+    When the default value is :obj:`MISSING`, it indicates that the field has no
+    default value. Data value with empty string is :obj:`MISSING` in this case
+    and should be filtered.
 
     """
 
-    dataValueChanged = QtCore.Signal(int)
+    dataValueChanged = QtCore.Signal(object)
 
     def __init__(self, parent=None):
         super().__init__(parent)
