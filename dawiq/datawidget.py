@@ -156,10 +156,10 @@ def dataclass2Widget(
                 orientation,
                 globalns,
                 localns,
-                include_extras
+                include_extras,
             )
         else:
-            field_w = field_converter(typehint)
+            field_w = field_converter(typehint)  # type: ignore[assignment]
         field_w.setDataName(f.name)
         widget.addWidget(field_w)
     return widget

@@ -86,7 +86,6 @@ def test_type2Widget(qtbot):
 
 
 def test_dataclass2Widget(qtbot):
-
     @dataclasses.dataclass
     class Cls1:
         x: int
