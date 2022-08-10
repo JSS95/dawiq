@@ -7,7 +7,7 @@ dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets, QtGui
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Tuple
 from .typing import FieldWidgetProtocol
 
 
@@ -117,11 +117,11 @@ MISSING = _MISSING()
 class EmptyIntValidator(QtGui.QIntValidator):
     """Validator which accpets integer and empty string"""
 
-    def validate(self, input: str, pos: int) -> QtGui.QValidator.State:
-        ret = super().validate(input, pos)
+    def validate(self, input: str, pos: int) -> Tuple[QtGui.QValidator.State, str, int]:
+        state, ret_input, ret_pos = super().validate(input, pos)
         if not input:
-            ret = QtGui.QValidator.State.Acceptable
-        return ret
+            state = QtGui.QValidator.State.Acceptable
+        return (state, ret_input, ret_pos)
 
 
 class IntLineEdit(QtWidgets.QLineEdit):
