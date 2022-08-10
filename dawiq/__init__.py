@@ -18,14 +18,16 @@ from .fieldwidgets import (
 from .datawidget import (
     DataWidget,
     type2Widget,
+    dataclass2Widget,
 )
 
 
 __all__ = [
-    "type2Widget",
     "BoolCheckBox",
     "MISSING",
     "EmptyIntValidator",
     "IntLineEdit",
     "DataWidget",
+    "type2Widget",
+    "dataclass2Widget",
 ]

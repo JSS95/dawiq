@@ -1,9 +1,11 @@
 from dawiq import (
     DataWidget,
     type2Widget,
+    dataclass2Widget,
     BoolCheckBox,
     IntLineEdit,
 )
+import dataclasses
 from typing import Optional
 import pytest
 
@@ -81,3 +83,16 @@ def test_type2Widget(qtbot):
     assert not type2Widget(int).hasDefaultDataValue()
     assert isinstance(type2Widget(Optional[int]), IntLineEdit)
     assert type2Widget(Optional[int]).hasDefaultDataValue()
+
+
+def test_dataclass2Widget(qtbot):
+    @dataclasses.dataclass
+    class C:
+        x: "int"
+        y: bool
+
+    dataWidget = dataclass2Widget(C)
+    assert isinstance(dataWidget.widget(0), IntLineEdit)
+    assert dataWidget.widget(0).dataName() == "x"
+    assert isinstance(dataWidget.widget(1), BoolCheckBox)
+    assert dataWidget.widget(1).dataName() == "y"

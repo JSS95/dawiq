@@ -8,13 +8,15 @@ structure established by the dataclass.
 
 from .qt_compat import QtCore, QtWidgets
 from .fieldwidgets import BoolCheckBox, IntLineEdit
-from typing import Optional, Any, Union
-from .typing import FieldWidgetProtocol
+import dataclasses
+from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
+from .typing import FieldWidgetProtocol, DataclassProtocol
 
 
 __all__ = [
     "DataWidget",
     "type2Widget",
+    "dataclass2Widget",
 ]
 
 
@@ -113,3 +115,33 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
             return widget
 
     raise TypeError("Unknown type or annotation: %s" % t)
+
+
+def dataclass2Widget(
+    dcls: Type[DataclassProtocol],
+    field_converter: Callable[[Any], FieldWidgetProtocol] = type2Widget,
+    orientation: QtCore.Qt.Orientation = QtCore.Qt.Orientation.Vertical,
+    globalns: Optional[Dict] = None,
+    localns: Optional[Dict] = None,
+    include_extras: bool = False,
+) -> DataWidget:
+    """
+    Construct :class:`DataWidget` from *dcls*.
+
+    *field_converter* is a function which constructs the field widget from the
+    type hint of the dataclass field.
+    *orientation* is the argument for :class:`DataWidget`.
+    *globalns*, *localns*, and *include_extras* are the arguments for
+    :func:`get_type_hints` to resolve the forward-referenced type annotations.
+
+    """
+    widget = DataWidget(orientation)
+    fields = dataclasses.fields(dcls)
+    annots = get_type_hints(dcls, globalns, localns, include_extras)
+
+    for f in fields:
+        typehint = annots[f.name]
+        field_w = field_converter(typehint)
+        field_w.setDataName(f.name)
+        widget.addWidget(field_w)
+    return widget
