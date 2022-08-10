@@ -30,8 +30,8 @@ class FieldWidgetProtocol(Protocol):
     def setDataValue(self, value: Any):
         ...
 
-    def dataName(self) -> str:
+    def fieldName(self) -> str:
         ...
 
-    def setDataName(self, name: str):
+    def setFieldName(self, name: str):
         ...
