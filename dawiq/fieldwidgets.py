@@ -7,42 +7,15 @@ dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets, QtGui
-from typing import Any, Optional, Union, Tuple
-from .typing import FieldWidgetProtocol
+from typing import Optional, Union, Tuple
 
 
 __all__ = [
-    "type2Widget",
     "BoolCheckBox",
     "MISSING",
     "EmptyIntValidator",
     "IntLineEdit",
 ]
-
-
-def type2Widget(t: Any) -> FieldWidgetProtocol:
-    """Construct the widget for given type annotation."""
-    if isinstance(t, type) and issubclass(t, bool):
-        return BoolCheckBox()
-    if isinstance(t, type) and issubclass(t, int):
-        return IntLineEdit()
-
-    origin = getattr(t, "__origin__", None)
-
-    if origin is Union:
-        args = [a for a in getattr(t, "__args__") if not isinstance(None, a)]
-        if len(args) > 1:
-            msg = f"Cannot convert Union with multiple types: {t}"
-            raise TypeError(msg)
-        widget = type2Widget(args[0])
-        if isinstance(widget, BoolCheckBox):
-            widget.setTristate(True)
-            return widget
-        if isinstance(widget, IntLineEdit):
-            widget.setDefaultDataValue(None)
-            return widget
-
-    raise TypeError("Unknown type or annotation: %s" % t)
 
 
 class BoolCheckBox(QtWidgets.QCheckBox):

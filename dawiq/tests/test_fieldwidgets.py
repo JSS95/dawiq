@@ -1,24 +1,10 @@
 from dawiq import (
-    type2Widget,
     BoolCheckBox,
     EmptyIntValidator,
     IntLineEdit,
     MISSING,
 )
 from dawiq.qt_compat import QtCore, QtWidgets
-from typing import Optional
-
-
-def test_type2Widget(qtbot):
-    assert isinstance(type2Widget(bool), BoolCheckBox)
-    assert not type2Widget(bool).isTristate()
-    assert isinstance(type2Widget(Optional[bool]), BoolCheckBox)
-    assert type2Widget(Optional[bool]).isTristate()
-
-    assert isinstance(type2Widget(int), IntLineEdit)
-    assert not type2Widget(int).hasDefaultDataValue()
-    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
-    assert type2Widget(Optional[int]).hasDefaultDataValue()
 
 
 def test_BoolCheckBox(qtbot):

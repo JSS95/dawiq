@@ -1,4 +1,10 @@
-from dawiq import DataWidget, BoolCheckBox
+from dawiq import (
+    DataWidget,
+    type2Widget,
+    BoolCheckBox,
+    IntLineEdit,
+)
+from typing import Optional
 import pytest
 
 
@@ -63,3 +69,15 @@ def test_DataWidget_removeWidget(qtbot):
 
     datawidget.removeWidget(w0)
     assert datawidget.count() == 0
+
+
+def test_type2Widget(qtbot):
+    assert isinstance(type2Widget(bool), BoolCheckBox)
+    assert not type2Widget(bool).isTristate()
+    assert isinstance(type2Widget(Optional[bool]), BoolCheckBox)
+    assert type2Widget(Optional[bool]).isTristate()
+
+    assert isinstance(type2Widget(int), IntLineEdit)
+    assert not type2Widget(int).hasDefaultDataValue()
+    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
+    assert type2Widget(Optional[int]).hasDefaultDataValue()

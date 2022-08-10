@@ -7,12 +7,14 @@ structure established by the dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets
-from typing import Optional
+from .fieldwidgets import BoolCheckBox, IntLineEdit
+from typing import Optional, Any, Union
 from .typing import FieldWidgetProtocol
 
 
 __all__ = [
     "DataWidget",
+    "type2Widget",
 ]
 
 
@@ -86,3 +88,28 @@ class DataWidget(QtWidgets.QGroupBox):
 
     def removeWidget(self, widget: FieldWidgetProtocol):
         self.layout().removeWidget(widget)
+
+
+def type2Widget(t: Any) -> FieldWidgetProtocol:
+    """Construct the widget for given type annotation."""
+    if isinstance(t, type) and issubclass(t, bool):
+        return BoolCheckBox()
+    if isinstance(t, type) and issubclass(t, int):
+        return IntLineEdit()
+
+    origin = getattr(t, "__origin__", None)
+
+    if origin is Union:
+        args = [a for a in getattr(t, "__args__") if not isinstance(None, a)]
+        if len(args) > 1:
+            msg = f"Cannot convert Union with multiple types: {t}"
+            raise TypeError(msg)
+        widget = type2Widget(args[0])
+        if isinstance(widget, BoolCheckBox):
+            widget.setTristate(True)
+            return widget
+        if isinstance(widget, IntLineEdit):
+            widget.setDefaultDataValue(None)
+            return widget
+
+    raise TypeError("Unknown type or annotation: %s" % t)
