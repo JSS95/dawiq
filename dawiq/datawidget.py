@@ -130,6 +130,11 @@ def dataclass2Widget(
 
     *field_converter* is a function which constructs the field widget from the
     type hint of the dataclass field.
+
+    Each field is converted to field widget by passing its type hint to
+    *field_converter* argument. If the field has `Qt_typehint` metadata, its
+    value is passed to the converter instead.
+
     *orientation* is the argument for :class:`DataWidget`.
     *globalns*, *localns*, and *include_extras* are the arguments for
     :func:`get_type_hints` to resolve the forward-referenced type annotations.
@@ -140,7 +145,7 @@ def dataclass2Widget(
     annots = get_type_hints(dcls, globalns, localns, include_extras)
 
     for f in fields:
-        typehint = annots[f.name]
+        typehint = f.metadata.get("Qt_typehint", annots[f.name])
         field_w = field_converter(typehint)
         field_w.setDataName(f.name)
         widget.addWidget(field_w)
