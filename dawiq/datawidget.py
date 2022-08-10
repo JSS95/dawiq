@@ -60,7 +60,7 @@ class DataWidget(QtWidgets.QGroupBox):
         index: int,
         widget: FieldWidgetProtocol,
         stretch: int = 0,
-        alignment: QtCore.Qt.Alignment = QtCore.Qt.Alignment(),
+        alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
         for i in range(self.count()):
             w = self.widget(i)
@@ -74,7 +74,7 @@ class DataWidget(QtWidgets.QGroupBox):
         self,
         widget: FieldWidgetProtocol,
         stretch: int = 0,
-        alignment: QtCore.Qt.Alignment = QtCore.Qt.Alignment(),
+        alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
         for i in range(self.count()):
             w = self.widget(i)
