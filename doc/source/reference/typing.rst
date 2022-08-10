@@ -1,0 +1,2 @@
+.. automodule:: dawiq.typing
+   :members:

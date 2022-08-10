@@ -41,10 +41,10 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
         self.stateChanged.connect(self.emitDataValueChanged)
 
-    def dataName(self) -> str:
+    def fieldName(self) -> str:
         return self.text()
 
-    def setDataName(self, name: str):
+    def setFieldName(self, name: str):
         self.setText(name)
         self.setToolTip(name)
 
@@ -125,10 +125,10 @@ class IntLineEdit(QtWidgets.QLineEdit):
 
         self.editingFinished.connect(self.emitDataValueChanged)
 
-    def dataName(self) -> str:
+    def fieldName(self) -> str:
         return self.placeholderText()
 
-    def setDataName(self, name: str):
+    def setFieldName(self, name: str):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 

@@ -100,15 +100,15 @@ def test_dataclass2Widget(qtbot):
     dataWidget = dataclass2Widget(Cls2)
 
     assert isinstance(dataWidget.widget(0), IntLineEdit)
-    assert dataWidget.widget(0).dataName() == "a"
+    assert dataWidget.widget(0).fieldName() == "a"
 
     assert isinstance(dataWidget.widget(1), BoolCheckBox)
-    assert dataWidget.widget(1).dataName() == "b"
+    assert dataWidget.widget(1).fieldName() == "b"
 
     assert isinstance(dataWidget.widget(2), IntLineEdit)
-    assert dataWidget.widget(2).dataName() == "c"
+    assert dataWidget.widget(2).fieldName() == "c"
 
     assert isinstance(dataWidget.widget(3), DataWidget)
-    assert dataWidget.widget(3).dataName() == "d"
+    assert dataWidget.widget(3).fieldName() == "d"
     assert isinstance(dataWidget.widget(3).widget(0), IntLineEdit)
-    assert dataWidget.widget(3).widget(0).dataName() == "x"
+    assert dataWidget.widget(3).widget(0).fieldName() == "x"

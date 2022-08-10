@@ -41,10 +41,10 @@ class DataWidget(QtWidgets.QGroupBox):
             raise TypeError(f"Invalid orientation: {orientation}")
         self.setLayout(layout)
 
-    def dataName(self) -> str:
+    def fieldName(self) -> str:
         return self.title()
 
-    def setDataName(self, name: str):
+    def setFieldName(self, name: str):
         self.setTitle(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
@@ -70,8 +70,8 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif widget.dataName() == w.dataName():
-                raise KeyError(f"Data name '{widget.dataName()}' is duplicate")
+            elif widget.fieldName() == w.fieldName():
+                raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         self.layout().insertWidget(index, widget, stretch, alignment)
 
     def addWidget(
@@ -84,8 +84,8 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif widget.dataName() == w.dataName():
-                raise KeyError(f"Data name '{widget.dataName()}' is duplicate")
+            elif widget.fieldName() == w.fieldName():
+                raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
@@ -160,6 +160,6 @@ def dataclass2Widget(
             )
         else:
             field_w = field_converter(typehint)  # type: ignore[assignment]
-        field_w.setDataName(f.name)
+        field_w.setFieldName(f.name)
         widget.addWidget(field_w)
     return widget
