@@ -61,15 +61,15 @@ def test_EmptyIntValidator(qtbot):
 
     # empty text is valid
     with qtbot.waitSignal(widget.editingFinished):
-        qtbot.keyPress(widget, QtCore.Qt.Key_Return)
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
 
     with qtbot.assertNotEmitted(widget.editingFinished):
         qtbot.keyPress(widget, "-")
-        qtbot.keyPress(widget, QtCore.Qt.Key_Return)
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
 
     with qtbot.waitSignal(widget.editingFinished):
         qtbot.keyPress(widget, "1")
-        qtbot.keyPress(widget, QtCore.Qt.Key_Return)
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
 
 
 def test_IntLineEdit(qtbot):
