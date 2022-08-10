@@ -1,3 +1,10 @@
+"""
+Type annotations
+================
+
+:mod:`dawiq.typing` provides special type annotations.
+"""
+
 from typing import Protocol, Dict, Any
 
 
