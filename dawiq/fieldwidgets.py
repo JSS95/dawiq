@@ -178,5 +178,4 @@ class IntLineEdit(QtWidgets.QLineEdit):
 
     def emitDataValueChanged(self):
         val = self.dataValue()
-        if val is not MISSING:
-            self.dataValueChanged.emit(val)
+        self.dataValueChanged.emit(val)
