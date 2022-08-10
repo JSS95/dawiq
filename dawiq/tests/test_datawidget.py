@@ -86,13 +86,19 @@ def test_type2Widget(qtbot):
 
 
 def test_dataclass2Widget(qtbot):
+
     @dataclasses.dataclass
-    class C:
+    class Cls1:
+        x: int
+
+    @dataclasses.dataclass
+    class Cls2:
         a: "int"
         b: bool
         c: float = dataclasses.field(metadata=dict(Qt_typehint=int))
+        d: Cls1
 
-    dataWidget = dataclass2Widget(C)
+    dataWidget = dataclass2Widget(Cls2)
 
     assert isinstance(dataWidget.widget(0), IntLineEdit)
     assert dataWidget.widget(0).dataName() == "a"
@@ -102,3 +108,8 @@ def test_dataclass2Widget(qtbot):
 
     assert isinstance(dataWidget.widget(2), IntLineEdit)
     assert dataWidget.widget(2).dataName() == "c"
+
+    assert isinstance(dataWidget.widget(3), DataWidget)
+    assert dataWidget.widget(3).dataName() == "d"
+    assert isinstance(dataWidget.widget(3).widget(0), IntLineEdit)
+    assert dataWidget.widget(3).widget(0).dataName() == "x"
