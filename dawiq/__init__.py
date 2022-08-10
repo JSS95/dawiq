@@ -10,7 +10,6 @@ from .version import __version__  # noqa
 
 
 from .fieldwidgets import (
-    type2Widget,
     BoolCheckBox,
     MISSING,
     EmptyIntValidator,
@@ -18,14 +17,17 @@ from .fieldwidgets import (
 )
 from .datawidget import (
     DataWidget,
+    type2Widget,
+    dataclass2Widget,
 )
 
 
 __all__ = [
-    "type2Widget",
     "BoolCheckBox",
     "MISSING",
     "EmptyIntValidator",
     "IntLineEdit",
     "DataWidget",
+    "type2Widget",
+    "dataclass2Widget",
 ]

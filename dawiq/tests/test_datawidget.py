@@ -1,4 +1,12 @@
-from dawiq import DataWidget, BoolCheckBox
+from dawiq import (
+    DataWidget,
+    type2Widget,
+    dataclass2Widget,
+    BoolCheckBox,
+    IntLineEdit,
+)
+import dataclasses
+from typing import Optional
 import pytest
 
 
@@ -63,3 +71,44 @@ def test_DataWidget_removeWidget(qtbot):
 
     datawidget.removeWidget(w0)
     assert datawidget.count() == 0
+
+
+def test_type2Widget(qtbot):
+    assert isinstance(type2Widget(bool), BoolCheckBox)
+    assert not type2Widget(bool).isTristate()
+    assert isinstance(type2Widget(Optional[bool]), BoolCheckBox)
+    assert type2Widget(Optional[bool]).isTristate()
+
+    assert isinstance(type2Widget(int), IntLineEdit)
+    assert not type2Widget(int).hasDefaultDataValue()
+    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
+    assert type2Widget(Optional[int]).hasDefaultDataValue()
+
+
+def test_dataclass2Widget(qtbot):
+    @dataclasses.dataclass
+    class Cls1:
+        x: int
+
+    @dataclasses.dataclass
+    class Cls2:
+        a: "int"
+        b: bool
+        c: float = dataclasses.field(metadata=dict(Qt_typehint=int))
+        d: Cls1
+
+    dataWidget = dataclass2Widget(Cls2)
+
+    assert isinstance(dataWidget.widget(0), IntLineEdit)
+    assert dataWidget.widget(0).dataName() == "a"
+
+    assert isinstance(dataWidget.widget(1), BoolCheckBox)
+    assert dataWidget.widget(1).dataName() == "b"
+
+    assert isinstance(dataWidget.widget(2), IntLineEdit)
+    assert dataWidget.widget(2).dataName() == "c"
+
+    assert isinstance(dataWidget.widget(3), DataWidget)
+    assert dataWidget.widget(3).dataName() == "d"
+    assert isinstance(dataWidget.widget(3).widget(0), IntLineEdit)
+    assert dataWidget.widget(3).widget(0).dataName() == "x"
