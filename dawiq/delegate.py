@@ -5,9 +5,8 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets, QtCore
+from .qt_compat import QtWidgets
 from .fieldwidgets import MISSING
-from .datawidget import DataWidget
 from .typing import DataclassProtocol
 from typing import Optional, Type, Dict, Any
 
