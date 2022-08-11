@@ -7,7 +7,7 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 """
 
 from .qt_compat import QtCore, QtWidgets, QtGui
-from typing import Optional, Union, Tuple
+from typing import Optional, Union, Tuple, Any
 
 
 __all__ = [
@@ -29,8 +29,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     If the box is checked, the data value is True. If unchecked, the value is
     False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
 
-    Because of the nature of check box, default value always exists even if
-    the original dataclass does not define it.
+    Because of the nature of check box, it is impossible to define empty state of
+    the widget. Data value is always either True, False or None, and never
+    :obj:`MISSING`.
 
     """
 
@@ -99,19 +100,14 @@ class EmptyIntValidator(QtGui.QIntValidator):
 
 class IntLineEdit(QtWidgets.QLineEdit):
     """
-    Line edit for integer field.
+    Line edit for integer value.
 
     :meth:`dataValue` returns the current value. When editing is finished,
     :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
     text on the line edit.
 
-    When the line edit is empty, :meth:`defaultDataValue` is used as data value.
-    Default value can be integer or ``None``, thus supporting the field with
-    ``Optional[int]`` type.
-
-    When the default value is :obj:`MISSING`, it indicates that the field has no
-    default value. Data value with empty string is :obj:`MISSING` in this case
-    and should be specially handled.
+    If the text is not empty, the data value is the integer that the string is
+    converted to. If the string is empty, :meth:`defaultValue` is used instead.
 
     """
 
@@ -132,24 +128,29 @@ class IntLineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def defaultDataValue(self) -> Union[int, None, _MISSING]:
+    def defaultDataValue(self) -> Any:
+        """
+        Value which is used as :meth:`dataValue` if the text is empty.
+
+        Default value can be any object. :obj:`MISSING` indicates there is no
+        default value and thus the field is null when the text is empty.
+
+        """
         return self._default_data_value
 
-    def hasDefaultDataValue(self) -> bool:
-        return self.defaultDataValue() is not MISSING
-
-    def setDefaultDataValue(self, val: Union[int, None, _MISSING]):
+    def setDefaultDataValue(self, val: Any):
+        """Set :meth:`defaultDataValue`."""
         self._default_data_value = val
 
-    def dataValue(self) -> Union[int, None, _MISSING]:
+    def dataValue(self) -> Any:
         text = self.text()
         if text:
-            val: Union[int, None, _MISSING] = int(text)
+            val: Any = int(text)
         else:
             val = self.defaultDataValue()
         return val
 
-    def setDataValue(self, val: Union[int, None, _MISSING]):
+    def setDataValue(self, val: Any):
         if val is MISSING:
             self.setText("")
         elif val is None:

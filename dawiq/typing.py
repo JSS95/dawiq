@@ -32,24 +32,11 @@ class FieldWidgetProtocol(Protocol):
         affecting the data value. Placeholder text of the line edit or title of
         the group box are good examples.
 
-        See Also
-        ========
-
-        setFieldName
-
         """
         ...
 
     def setFieldName(self, name: str):
-        """
-        Set the name of the field.
-
-        See Also
-        ========
-
-        fieldName
-
-        """
+        """Set the name of the field."""
         ...
 
     def dataValue(self) -> Any:
@@ -61,10 +48,8 @@ class FieldWidgetProtocol(Protocol):
         this method converts :class:`bool` to :obj:`Qt.CheckState` and sets the
         check state.
 
-        See Also
-        ========
-
-        setDataValue
+        If the data value is :obj:`dawid.MISSING`, it indicates that the field is
+        empty and delegate should handle it specially.
 
         """
         ...
@@ -76,11 +61,6 @@ class FieldWidgetProtocol(Protocol):
         This method is the API for the delegate to set the data to the widget.
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
         this method converts the check state to :class:`bool` and returns.
-
-        See Also
-        ========
-
-        dataValue
 
         """
         ...
