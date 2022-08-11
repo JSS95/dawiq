@@ -32,15 +32,55 @@ class FieldWidgetProtocol(Protocol):
         affecting the data value. Placeholder text of the line edit or title of
         the group box are good examples.
 
-        :attr:`setFieldName` changes the field name.
+        See Also
+        ========
+
+        setFieldName
+
         """
         ...
 
     def setFieldName(self, name: str):
+        """
+        Set the name of the field.
+
+        See Also
+        ========
+
+        fieldName
+
+        """
         ...
 
     def dataValue(self) -> Any:
+        """
+        Data value that the widget represents.
+
+        This is the API for the delegate to get the data from the widget.
+        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        this method converts :class:`bool` to :obj:`Qt.CheckState` and sets the
+        check state.
+
+        See Also
+        ========
+
+        setDataValue
+
+        """
         ...
 
     def setDataValue(self, value: Any):
+        """
+        Set the data value to the widget.
+
+        This method is the API for the delegate to set the data to the widget.
+        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        this method converts the check state to :class:`bool` and returns.
+
+        See Also
+        ========
+
+        dataValue
+
+        """
         ...

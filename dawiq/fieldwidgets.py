@@ -3,7 +3,7 @@ Data field widgets
 ==================
 
 :mod:`dawiq.fieldwidgets` provides widgets to represent the fields of the
-dataclass.
+dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 """
 
 from .qt_compat import QtCore, QtWidgets, QtGui
