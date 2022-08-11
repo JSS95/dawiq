@@ -1,0 +1,2 @@
+.. automodule:: dawiq.delegate
+   :members:
