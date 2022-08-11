@@ -1,5 +1,7 @@
 import dataclasses
-from dawiq.delegate import convertFromQt
+from dawiq.datawidget import dataclass2Widget
+from dawiq.delegate import convertFromQt, DataclassDelegate
+from dawiq.qt_compat import QtGui, QtWidgets, QtCore
 
 
 def test_convertFromQt():
@@ -28,3 +30,24 @@ def test_convertFromQt():
     assert convertFromQt(Cls1, dict(x=1, y=(2, 3), z=dict(a=(3, 4)))) == dict(
         x=1, y=CustomField(2, 3), z=dict(a=CustomField(3, 4))
     )
+
+
+def test_DataclassDelegate_setModelData(qtbot):
+    @dataclasses.dataclass
+    class Dcls:
+        x: int
+
+    dataWidget = dataclass2Widget(Dcls)
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper = QtWidgets.QDataWidgetMapper()
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(Dcls)
+
+    mapper.setModel(model)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
+    modelIndex = model.index(0, 0)
+    mapper.setCurrentModelIndex(modelIndex)
+    assert model.data(modelIndex, QtCore.Qt.EditRole) == None
