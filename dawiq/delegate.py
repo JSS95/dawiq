@@ -5,8 +5,9 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets
+from .qt_compat import QtWidgets, QtCore
 from .fieldwidgets import MISSING
+from .datawidget import DataWidget
 from .typing import DataclassProtocol
 from typing import Optional, Type, Dict, Any
 
@@ -55,3 +56,16 @@ class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
 
     def setDataclassType(self, dcls: Optional[Type[DataclassProtocol]]):
         self._dataclass_type = dcls
+
+    def setModelData(
+        self,
+        editor: DataWidget,
+        model: QtCore.QAbstractItemModel,
+        index: QtCore.QModelIndex,
+    ):
+        dcls = self.dataclassType()
+        if dcls is None:
+            data = editor.dataValue()
+        else:
+            data = convertFromQt(dcls, editor.dataValue())
+        model.setData(index, data)
