@@ -36,6 +36,8 @@ def convertFromQt(
         val = data[f.name]
         if val is MISSING:
             continue
+        elif dataclasses.is_dataclass(f.type):
+            val = convertFromQt(f.type, val)
         converter = f.metadata.get("fromQt_converter", None)
         if converter is not None:
             val = converter(val)
