@@ -20,6 +20,9 @@ from .datawidget import (
     type2Widget,
     dataclass2Widget,
 )
+from .delegate import (
+    DataclassDelegate,
+)
 
 
 __all__ = [
@@ -30,4 +33,5 @@ __all__ = [
     "DataWidget",
     "type2Widget",
     "dataclass2Widget",
+    "DataclassDelegate",
 ]
