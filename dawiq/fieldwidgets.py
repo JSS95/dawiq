@@ -138,6 +138,10 @@ class IntLineEdit(QtWidgets.QLineEdit):
         """
         return self._default_data_value
 
+    def hasDefaultDataValue(self) -> bool:
+        """Return True if :meth:`defaultDataValue` is not :obj:`MISSING`."""
+        return self.defaultDataValue() is not MISSING
+
     def setDefaultDataValue(self, val: Any):
         """Set :meth:`defaultDataValue`."""
         self._default_data_value = val
