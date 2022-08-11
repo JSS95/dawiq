@@ -91,6 +91,16 @@ class DataWidget(QtWidgets.QGroupBox):
     def removeWidget(self, widget: FieldWidgetProtocol):
         self.layout().removeWidget(widget)
 
+    def dataValue(self) -> Dict[str, Any]:
+        ret = {}
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+            else:
+                ret[w.fieldName()] = w.dataValue()
+        return ret
+
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
     """Construct the widget for given type annotation."""

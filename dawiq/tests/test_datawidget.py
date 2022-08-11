@@ -4,6 +4,7 @@ from dawiq import (
     dataclass2Widget,
     BoolCheckBox,
     IntLineEdit,
+    MISSING,
 )
 import dataclasses
 from typing import Optional
@@ -112,3 +113,21 @@ def test_dataclass2Widget(qtbot):
     assert dataWidget.widget(3).fieldName() == "d"
     assert isinstance(dataWidget.widget(3).widget(0), IntLineEdit)
     assert dataWidget.widget(3).widget(0).fieldName() == "x"
+
+
+def test_DataWidget_dataValue(qtbot):
+    @dataclasses.dataclass
+    class Cls1:
+        x: int
+
+    @dataclasses.dataclass
+    class Cls2:
+        a: int
+        b: Cls1
+
+    dataWidget = dataclass2Widget(Cls2)
+    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=MISSING))
+
+    dataWidget.widget(0).setText("1")
+    dataWidget.widget(1).widget(0).setText("2")
+    assert dataWidget.dataValue() == dict(a=1, b=dict(x=2))
