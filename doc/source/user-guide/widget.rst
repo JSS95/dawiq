@@ -1,5 +1,5 @@
 ===============
-Creating Widget
+Creating widget
 ===============
 
 .. currentmodule:: dawiq

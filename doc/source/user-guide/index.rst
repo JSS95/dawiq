@@ -6,3 +6,4 @@ User guide
    :maxdepth: 1
 
    widget
+   model
