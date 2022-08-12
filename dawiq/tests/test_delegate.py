@@ -1,7 +1,7 @@
 import dataclasses
 from dawiq.datawidget import dataclass2Widget
 from dawiq.delegate import convertFromQt, DataclassDelegate
-from dawiq.qt_compat import QtGui, QtWidgets, QtCore
+from dawiq.qt_compat import QtGui, QtWidgets
 
 
 def test_convertFromQt():

@@ -6,6 +6,7 @@ Type annotations
 """
 
 from typing import Protocol, Dict, Any
+from .qt_compat import QtCore
 
 
 __all__ = [
@@ -24,20 +25,7 @@ class DataclassProtocol(Protocol):
 class FieldWidgetProtocol(Protocol):
     """Type annotation for field widget object."""
 
-    def fieldName(self) -> str:
-        """
-        Name of the field.
-
-        It is recommended to make this name visible in the widget without
-        affecting the data value. Placeholder text of the line edit or title of
-        the group box are good examples.
-
-        """
-        ...
-
-    def setFieldName(self, name: str):
-        """Set the name of the field."""
-        ...
+    dataValueChanged: QtCore.Signal
 
     def dataValue(self) -> Any:
         """
@@ -51,6 +39,9 @@ class FieldWidgetProtocol(Protocol):
         If the data value is :obj:`dawid.MISSING`, it indicates that the field is
         empty and delegate should handle it specially.
 
+        When the data value is changed, :attr:`dataValueChanged` signal must emit
+        the new value.
+
         """
         ...
 
@@ -63,4 +54,19 @@ class FieldWidgetProtocol(Protocol):
         this method converts the check state to :class:`bool` and returns.
 
         """
+        ...
+
+    def fieldName(self) -> str:
+        """
+        Name of the field.
+
+        It is recommended to make this name visible in the widget without
+        affecting the data value. Placeholder text of the line edit or title of
+        the group box are good examples.
+
+        """
+        ...
+
+    def setFieldName(self, name: str):
+        """Set the name of the field."""
         ...

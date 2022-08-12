@@ -6,6 +6,7 @@ from dawiq import (
     IntLineEdit,
     MISSING,
 )
+from dawiq.qt_compat import QtCore
 import dataclasses
 from typing import Optional
 import pytest
@@ -16,22 +17,27 @@ def test_DataWidget_addWidget(qtbot):
     assert datawidget.count() == 0
 
     w0 = BoolCheckBox()
-    w0.setText("w0")
+    w0.setFieldName("w0")
     datawidget.addWidget(w0)
     assert datawidget.count() == 1
     assert datawidget.widget(0) is w0
     assert datawidget.widget(1) is None
 
-    w1 = BoolCheckBox()
-    w1.setText("w0")
+    w1 = IntLineEdit()
+    w1.setFieldName("w0")
     with pytest.raises(KeyError):
         datawidget.addWidget(w1)
 
-    w1.setText("w1")
+    w1.setFieldName("w1")
     datawidget.addWidget(w1)
     assert datawidget.count() == 2
     assert datawidget.widget(0) is w0
     assert datawidget.widget(1) is w1
+
+    with qtbot.waitSignal(datawidget.dataValueChanged):
+        w0.click()
+    with qtbot.waitSignal(datawidget.dataValueChanged):
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
 def test_DataWidget_insertWidget(qtbot):
@@ -39,30 +45,35 @@ def test_DataWidget_insertWidget(qtbot):
     assert datawidget.count() == 0
 
     w0 = BoolCheckBox()
-    w0.setText("w0")
+    w0.setFieldName("w0")
     datawidget.insertWidget(0, w0)
     assert datawidget.count() == 1
     assert datawidget.widget(0) is w0
     assert datawidget.widget(1) is None
 
-    w1 = BoolCheckBox()
-    w1.setText("w0")
+    w1 = IntLineEdit()
+    w1.setFieldName("w0")
     with pytest.raises(KeyError):
         datawidget.insertWidget(0, w1)
 
-    w1.setText("w1")
+    w1.setFieldName("w1")
     datawidget.insertWidget(0, w1)
     assert datawidget.count() == 2
     assert datawidget.widget(0) is w1
     assert datawidget.widget(1) is w0
 
+    with qtbot.waitSignal(datawidget.dataValueChanged):
+        w0.click()
+    with qtbot.waitSignal(datawidget.dataValueChanged):
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
+
 
 def test_DataWidget_removeWidget(qtbot):
     datawidget = DataWidget()
     w0 = BoolCheckBox()
-    w0.setText("w0")
-    w1 = BoolCheckBox()
-    w1.setText("w1")
+    w0.setFieldName("w0")
+    w1 = IntLineEdit()
+    w1.setFieldName("w1")
 
     datawidget.addWidget(w0)
     assert datawidget.count() == 1
@@ -72,6 +83,27 @@ def test_DataWidget_removeWidget(qtbot):
 
     datawidget.removeWidget(w0)
     assert datawidget.count() == 0
+
+    with qtbot.assertNotEmitted(datawidget.dataValueChanged):
+        w0.click()
+
+
+def test_DataWidget_dataValue(qtbot):
+    @dataclasses.dataclass
+    class Cls1:
+        x: int
+
+    @dataclasses.dataclass
+    class Cls2:
+        a: int
+        b: Cls1
+
+    dataWidget = dataclass2Widget(Cls2)
+    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=MISSING))
+
+    dataWidget.widget(0).setText("1")
+    dataWidget.widget(1).widget(0).setText("2")
+    assert dataWidget.dataValue() == dict(a=1, b=dict(x=2))
 
 
 def test_type2Widget(qtbot):
@@ -113,21 +145,3 @@ def test_dataclass2Widget(qtbot):
     assert dataWidget.widget(3).fieldName() == "d"
     assert isinstance(dataWidget.widget(3).widget(0), IntLineEdit)
     assert dataWidget.widget(3).widget(0).fieldName() == "x"
-
-
-def test_DataWidget_dataValue(qtbot):
-    @dataclasses.dataclass
-    class Cls1:
-        x: int
-
-    @dataclasses.dataclass
-    class Cls2:
-        a: int
-        b: Cls1
-
-    dataWidget = dataclass2Widget(Cls2)
-    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=MISSING))
-
-    dataWidget.widget(0).setText("1")
-    dataWidget.widget(1).widget(0).setText("2")
-    assert dataWidget.dataValue() == dict(a=1, b=dict(x=2))

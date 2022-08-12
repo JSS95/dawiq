@@ -25,6 +25,8 @@ class DataWidget(QtWidgets.QGroupBox):
     Widget to represent the data structure.
     """
 
+    dataValueChanged = QtCore.Signal(object)
+
     def __init__(
         self,
         orientation: QtCore.Qt.Orientation = QtCore.Qt.Orientation.Vertical,
@@ -72,6 +74,7 @@ class DataWidget(QtWidgets.QGroupBox):
                 break
             elif widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
+        widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().insertWidget(index, widget, stretch, alignment)
 
     def addWidget(
@@ -86,9 +89,17 @@ class DataWidget(QtWidgets.QGroupBox):
                 break
             elif widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
+        widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+            elif w == widget:
+                widget.dataValueChanged.disconnect(self.emitDataValueChanged)
+                break
         self.layout().removeWidget(widget)
 
     def dataValue(self) -> Dict[str, Any]:
@@ -100,6 +111,10 @@ class DataWidget(QtWidgets.QGroupBox):
             else:
                 ret[w.fieldName()] = w.dataValue()
         return ret
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
