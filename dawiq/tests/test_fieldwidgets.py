@@ -9,36 +9,62 @@ from dawiq.qt_compat import QtCore, QtWidgets
 
 def test_BoolCheckBox(qtbot):
     widget = BoolCheckBox()
-
-    # test dataValueChanged signal
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is True,
-    ):
-        widget.setCheckState(QtCore.Qt.CheckState.Checked)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is False,
-    ):
-        widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
-
-    # test tristate
     widget.setTristate(True)
+    widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+    # test value setting
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is True,
     ):
-        widget.setCheckState(QtCore.Qt.CheckState.Checked)
+        widget.setDataValue(True)
+    assert widget.checkState() == QtCore.Qt.CheckState.Checked
+
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is False,
     ):
-        widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
+        widget.setDataValue(False)
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
+    widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test MISSING
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        widget.setCheckState(QtCore.Qt.CheckState.PartiallyChecked)
+        widget.setDataValue(None)
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
+
+    widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+    # test clicking
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is None,
+    ):
+        widget.click()
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is True,
+    ):
+        widget.click()
+    assert widget.checkState() == QtCore.Qt.CheckState.Checked
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.click()
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
 
 def test_EmptyIntValidator(qtbot):

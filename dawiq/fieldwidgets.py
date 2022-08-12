@@ -11,11 +11,20 @@ from typing import Optional, Union, Tuple, Any
 
 
 __all__ = [
-    "BoolCheckBox",
     "MISSING",
+    "BoolCheckBox",
     "EmptyIntValidator",
     "IntLineEdit",
 ]
+
+
+class _MISSING:
+    """Sentinel object to indicate empty field."""
+
+    pass
+
+
+MISSING = _MISSING()
 
 
 class BoolCheckBox(QtWidgets.QCheckBox):
@@ -30,8 +39,8 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
 
     Because of the nature of check box, it is impossible to define empty state of
-    the widget. Data value is always either True, False or None, and never
-    :obj:`MISSING`.
+    the widget. :meth:`dataValue` is always either True, False or None, and never
+    :obj:`MISSING`. :meth:`setDataValue` treats :obj:`MISSING` as False.
 
     """
 
@@ -59,7 +68,10 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         return state
 
-    def setDataValue(self, value: Optional[bool]):
+    def setDataValue(self, value: Union[Optional[bool], _MISSING]):
+        if value is MISSING:
+            value = False
+
         if value is True:
             state = QtCore.Qt.CheckState.Checked
         elif value is False:
@@ -77,15 +89,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         else:
             state = None
         self.dataValueChanged.emit(state)
-
-
-class _MISSING:
-    """Sentinel object to indicate empty field."""
-
-    pass
-
-
-MISSING = _MISSING()
 
 
 class EmptyIntValidator(QtGui.QIntValidator):
