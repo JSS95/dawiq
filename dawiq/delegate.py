@@ -15,6 +15,7 @@ from typing import Optional, Type, Dict, Any
 __all__ = [
     "convertFromQt",
     "DataclassDelegate",
+    "DataclassMapper",
 ]
 
 
@@ -69,3 +70,24 @@ class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
         else:
             data = convertFromQt(dcls, editor.dataValue())
         model.setData(index, data)
+
+
+class DataclassMapper(QtWidgets.QDataWidgetMapper):
+    """
+    Mapper between :class:`DataWidget` and model.
+
+    Notes
+    =====
+
+    When mapping :class:`DataWidget`, *propertyName* argument must not be passed.
+    """
+
+    def addMapping(self, widget, section, propertyName=b""):
+        super().addMapping(widget, section, propertyName)
+        if isinstance(widget, DataWidget):
+            widget.dataValueChanged.connect(self.submit)
+
+    def removeMapping(self, widget):
+        super().removeMapping(widget)
+        if isinstance(widget, DataWidget):
+            widget.dataValueChanged.disconnect(self.submit)

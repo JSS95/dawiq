@@ -1,7 +1,7 @@
 import dataclasses
 from dawiq.datawidget import dataclass2Widget
-from dawiq.delegate import convertFromQt, DataclassDelegate
-from dawiq.qt_compat import QtGui, QtWidgets
+from dawiq.delegate import convertFromQt, DataclassDelegate, DataclassMapper
+from dawiq.qt_compat import QtGui, QtWidgets, QtCore
 
 
 def test_convertFromQt():
@@ -52,7 +52,107 @@ def test_DataclassDelegate_setModelData(qtbot):
     mapper.setCurrentModelIndex(modelIndex)
     assert model.data(modelIndex) is None
 
-    # set widget
+    dataWidget.widget(0).setText("0")
+    delegate.commitData.emit(dataWidget)
+    assert model.data(modelIndex) == dict(x=0)
+
     dataWidget.widget(0).setText("1")
     mapper.submit()
     assert model.data(modelIndex) == dict(x=1)
+
+    dataWidget.dataValueChanged.connect(mapper.submit)
+    with qtbot.waitSignal(dataWidget.dataValueChanged):
+        dataWidget.widget(0).setText("2")
+        qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
+    assert model.data(modelIndex) == dict(x=2)
+
+
+def test_DataclassMapper_addMapping(qtbot):
+    @dataclasses.dataclass
+    class Dcls:
+        x: int
+        y: bool
+
+    dataWidget = dataclass2Widget(Dcls)
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper = DataclassMapper()
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(Dcls)
+
+    mapper.setModel(model)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
+    modelIndex = model.index(0, 0)
+    mapper.setCurrentModelIndex(modelIndex)
+    assert model.data(modelIndex) is None
+
+    dataWidget.widget(0).setText("0")
+    qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
+    assert model.data(modelIndex) == dict(x=0, y=False)
+
+    dataWidget.widget(1).click()
+    assert model.data(modelIndex) == dict(x=0, y=True)
+
+
+def test_DataclassMapper_removeMapping(qtbot):
+    @dataclasses.dataclass
+    class Dcls:
+        x: int
+        y: bool
+
+    dataWidget = dataclass2Widget(Dcls)
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper = DataclassMapper()
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(Dcls)
+
+    mapper.setModel(model)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
+    mapper.removeMapping(dataWidget)
+
+    modelIndex = model.index(0, 0)
+    mapper.setCurrentModelIndex(modelIndex)
+    assert model.data(modelIndex) is None
+
+    dataWidget.widget(0).setText("0")
+    qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
+    assert model.data(modelIndex) is None
+
+    dataWidget.widget(1).click()
+    assert model.data(modelIndex) is None
+
+
+def test_DataclassMapper_clearMapping(qtbot):
+    @dataclasses.dataclass
+    class Dcls:
+        x: int
+        y: bool
+
+    dataWidget = dataclass2Widget(Dcls)
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper = DataclassMapper()
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(Dcls)
+
+    mapper.setModel(model)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
+    mapper.clearMapping()
+
+    modelIndex = model.index(0, 0)
+    mapper.setCurrentModelIndex(modelIndex)
+    assert model.data(modelIndex) is None
+
+    dataWidget.widget(0).setText("0")
+    qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
+    assert model.data(modelIndex) is None
+
+    dataWidget.widget(1).click()
+    assert model.data(modelIndex) is None
