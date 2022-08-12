@@ -85,6 +85,7 @@ def convertToQt(
 
 class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
     """Delegate to update the model and editor with structured dictionary."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._dataclass_type = None
