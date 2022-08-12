@@ -13,4 +13,5 @@ This manual describes the modules and objects in :mod:`dawiq`.
 
    fieldwidgets
    datawidget
+   delegate
    typing

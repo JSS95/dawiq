@@ -6,6 +6,7 @@ Type annotations
 """
 
 from typing import Protocol, Dict, Any
+from .qt_compat import QtCore
 
 
 __all__ = [
@@ -24,6 +25,37 @@ class DataclassProtocol(Protocol):
 class FieldWidgetProtocol(Protocol):
     """Type annotation for field widget object."""
 
+    dataValueChanged: QtCore.Signal
+
+    def dataValue(self) -> Any:
+        """
+        Data value that the widget represents.
+
+        This is the API for the delegate to get the data from the widget.
+        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        this method converts :class:`bool` to :obj:`Qt.CheckState` and sets the
+        check state.
+
+        If the data value is :obj:`dawid.MISSING`, it indicates that the field is
+        empty and delegate should handle it specially.
+
+        When the data value is changed, :attr:`dataValueChanged` signal must emit
+        the new value.
+
+        """
+        ...
+
+    def setDataValue(self, value: Any):
+        """
+        Set the data value to the widget.
+
+        This method is the API for the delegate to set the data to the widget.
+        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        this method converts the check state to :class:`bool` and returns.
+
+        """
+        ...
+
     def fieldName(self) -> str:
         """
         Name of the field.
@@ -32,15 +64,9 @@ class FieldWidgetProtocol(Protocol):
         affecting the data value. Placeholder text of the line edit or title of
         the group box are good examples.
 
-        :attr:`setFieldName` changes the field name.
         """
         ...
 
     def setFieldName(self, name: str):
-        ...
-
-    def dataValue(self) -> Any:
-        ...
-
-    def setDataValue(self, value: Any):
+        """Set the name of the field."""
         ...
