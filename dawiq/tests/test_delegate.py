@@ -116,7 +116,7 @@ def test_DataclassMapper_addMapping(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex) == dict(y=False)
 
     dataWidget.widget(0).setText("0")
     qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)

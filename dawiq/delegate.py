@@ -101,11 +101,19 @@ class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
         index: QtCore.QModelIndex,
     ):
         dcls = self.dataclassType()
-        if dcls is None:
-            data = editor.dataValue()
-        else:
-            data = convertFromQt(dcls, editor.dataValue())
+        data = editor.dataValue()
+        if dcls is not None:
+            data = convertFromQt(dcls, data)
         model.setData(index, data)
+
+    def setEditorData(self, editor: DataWidget, index: QtCore.QModelIndex):
+        dcls = self.dataclassType()
+        data = index.data()
+        if data is None:
+            data = {}
+        if dcls is not None:
+            data = convertToQt(dcls, data)
+        editor.setDataValue(data)
 
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
