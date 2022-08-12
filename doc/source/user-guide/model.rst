@@ -37,6 +37,36 @@ Then we construct a model with two rows and set it to the mapper.
             model.appendRow(QStandardItem())
         mapper.setModel(model)
 
+    .. code-tab:: python
+        :caption: PyQt6
+
+        from PyQt6.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for i in range(2):
+            model.appendRow(QStandardItem())
+        mapper.setModel(model)
+
+    .. code-tab:: python
+        :caption: PySide2
+
+        from PySide2.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for i in range(2):
+            model.appendRow(QStandardItem())
+        mapper.setModel(model)
+
+    .. code-tab:: python
+        :caption: PyQt5
+
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for i in range(2):
+            model.appendRow(QStandardItem())
+        mapper.setModel(model)
+
 Now, we create a widget with data widget from ``DataClass`` and buttons to change the model index.
 
 .. tabs::
@@ -63,10 +93,95 @@ Now, we create a widget with data widget from ``DataClass`` and buttons to chang
         btn2.clicked.connect(mapper.toNext)
 
         mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
 
         widget.show()
         app.exec()
         app.quit()
 
-Now, the widget and the model are synchronized.
-Try change the index and the editor data.
+    .. code-tab:: python
+        :caption: PyQt6
+
+        from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
+
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
+
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
+
+        widget.show()
+        app.exec()
+        app.quit()
+
+    .. code-tab:: python
+        :caption: PySide2
+
+        from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
+
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
+
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
+
+        widget.show()
+        app.exec_()
+        app.quit()
+
+    .. code-tab:: python
+        :caption: PyQt5
+
+        from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
+
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
+
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
+
+        widget.show()
+        app.exec()
+        app.quit()
+
+
+Now, the widget and the model are synchronized. Try change the index and the editor data.
