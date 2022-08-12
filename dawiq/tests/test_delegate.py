@@ -63,13 +63,14 @@ def test_convertToQt():
 
 
 def test_DataclassDelegate_setModelData(qtbot):
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+
     @dataclasses.dataclass
     class Dcls:
         x: int
 
     dataWidget = dataclass2Widget(Dcls)
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
     mapper = QtWidgets.QDataWidgetMapper()
     delegate = DataclassDelegate()
     delegate.setDataclassType(Dcls)
@@ -81,6 +82,9 @@ def test_DataclassDelegate_setModelData(qtbot):
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
     assert model.data(modelIndex) is None
+
+    delegate.commitData.emit(dataWidget)
+    assert model.data(modelIndex) == dict()
 
     dataWidget.widget(0).setText("0")
     delegate.commitData.emit(dataWidget)
@@ -97,15 +101,56 @@ def test_DataclassDelegate_setModelData(qtbot):
     assert model.data(modelIndex) == dict(x=2)
 
 
+def test_DataclassDelegate_setEditorData(qtbot):
+    model = QtGui.QStandardItemModel()
+    for i in range(3):
+        model.appendRow(QtGui.QStandardItem())
+
+    @dataclasses.dataclass
+    class Dcls:
+        x: int
+
+    dataWidget = dataclass2Widget(Dcls)
+    mapper = QtWidgets.QDataWidgetMapper()
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(Dcls)
+
+    mapper.setModel(model)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
+    modelIndex0 = model.index(0, 0)
+    model.setData(modelIndex0, dict(x=0))
+    modelIndex1 = model.index(1, 0)
+    model.setData(modelIndex1, dict(x=1))
+    modelIndex2 = model.index(2, 0)
+    model.setData(modelIndex2, dict())
+
+    assert dataWidget.dataValue() == dict(x=MISSING)
+
+    mapper.setCurrentModelIndex(modelIndex0)
+    assert dataWidget.dataValue() == dict(x=0)
+
+    mapper.setCurrentModelIndex(modelIndex1)
+    assert dataWidget.dataValue() == dict(x=1)
+
+    mapper.setCurrentModelIndex(modelIndex2)
+    assert dataWidget.dataValue() == dict(x=MISSING)
+
+    model.setData(modelIndex2, dict(x=10))
+    assert dataWidget.dataValue() == dict(x=10)
+
+
 def test_DataclassMapper_addMapping(qtbot):
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+
     @dataclasses.dataclass
     class Dcls:
         x: int
         y: bool
 
     dataWidget = dataclass2Widget(Dcls)
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
     mapper = DataclassMapper()
     delegate = DataclassDelegate()
     delegate.setDataclassType(Dcls)
