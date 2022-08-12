@@ -112,7 +112,7 @@ def test_DataWidget_dataValue(qtbot):
 def test_DataWidget_setDataValue(qtbot):
     @dataclasses.dataclass
     class Cls1:
-        x: int
+        x: bool
 
     @dataclasses.dataclass
     class Cls2:
@@ -130,7 +130,7 @@ def test_DataWidget_setDataValue(qtbot):
 
     counter = Counter()
     dataWidget.dataValueChanged.connect(counter.count)
-    dval = dict(a=1, b=dict(x=2))
+    dval = dict(a=1, b=dict(x=True))
 
     with qtbot.waitSignal(
         dataWidget.dataValueChanged, check_params_cb=lambda val: val == dval
@@ -138,6 +138,13 @@ def test_DataWidget_setDataValue(qtbot):
         dataWidget.setDataValue(dval)
     assert dataWidget.dataValue() == dval
     assert counter.i == 1
+
+    with qtbot.waitSignal(
+        dataWidget.dataValueChanged,
+        check_params_cb=lambda val: val == dict(a=MISSING, b=dict(x=False)),
+    ):
+        dataWidget.setDataValue(MISSING)
+    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=False))
 
 
 def test_type2Widget(qtbot):

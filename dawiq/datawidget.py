@@ -7,7 +7,7 @@ structure established by the dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets
-from .fieldwidgets import BoolCheckBox, IntLineEdit
+from .fieldwidgets import _MISSING, MISSING, BoolCheckBox, IntLineEdit
 import dataclasses
 from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
 from .typing import FieldWidgetProtocol, DataclassProtocol
@@ -111,13 +111,16 @@ class DataWidget(QtWidgets.QGroupBox):
             ret[w.fieldName()] = w.dataValue()
         return ret
 
-    def setDataValue(self, data: Dict[str, Any]):
+    def setDataValue(self, data: Union[Dict[str, Any], _MISSING]):
+        if data is MISSING:
+            data = {}
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             with QtCore.QSignalBlocker(w):
-                w.setDataValue(data[w.fieldName()])
+                val = data.get(w.fieldName(), MISSING)  # type: ignore[union-attr]
+                w.setDataValue(val)
         self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
