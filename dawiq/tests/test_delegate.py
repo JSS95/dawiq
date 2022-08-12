@@ -1,6 +1,11 @@
 import dataclasses
-from dawiq.datawidget import dataclass2Widget
-from dawiq.delegate import convertFromQt, DataclassDelegate, DataclassMapper
+from dawiq import dataclass2Widget, MISSING
+from dawiq.delegate import (
+    convertFromQt,
+    convertToQt,
+    DataclassDelegate,
+    DataclassMapper,
+)
 from dawiq.qt_compat import QtGui, QtWidgets, QtCore
 
 
@@ -30,16 +35,42 @@ def test_convertFromQt():
     assert convertFromQt(Cls1, dict(x=1, y=(2, 3), z=dict(a=(3, 4)))) == dict(
         x=1, y=CustomField(2, 3), z=dict(a=CustomField(3, 4))
     )
+    assert convertFromQt(Cls1, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
+
+
+def test_convertToQt():
+    class CustomField:
+        def __init__(self, a):
+            self.a = a
+
+        def __eq__(self, other):
+            return type(self) == type(other) and (self.a,) == (other.a,)
+
+    @dataclasses.dataclass
+    class Cls0:
+        a: CustomField = dataclasses.field(metadata=dict(toQt_converter=lambda x: x.a))
+
+    @dataclasses.dataclass
+    class Cls1:
+        x: int
+        y: CustomField = dataclasses.field(metadata=dict(toQt_converter=lambda x: x.a))
+        z: Cls0
+
+    assert convertToQt(
+        Cls1, dict(x=1, y=CustomField(2), z=dict(a=CustomField(3)))
+    ) == dict(x=1, y=2, z=dict(a=3))
+    assert convertToQt(Cls1, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
 
 
 def test_DataclassDelegate_setModelData(qtbot):
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+
     @dataclasses.dataclass
     class Dcls:
         x: int
 
     dataWidget = dataclass2Widget(Dcls)
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
     mapper = QtWidgets.QDataWidgetMapper()
     delegate = DataclassDelegate()
     delegate.setDataclassType(Dcls)
@@ -51,6 +82,9 @@ def test_DataclassDelegate_setModelData(qtbot):
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
     assert model.data(modelIndex) is None
+
+    delegate.commitData.emit(dataWidget)
+    assert model.data(modelIndex) == dict()
 
     dataWidget.widget(0).setText("0")
     delegate.commitData.emit(dataWidget)
@@ -67,15 +101,56 @@ def test_DataclassDelegate_setModelData(qtbot):
     assert model.data(modelIndex) == dict(x=2)
 
 
+def test_DataclassDelegate_setEditorData(qtbot):
+    model = QtGui.QStandardItemModel()
+    for i in range(3):
+        model.appendRow(QtGui.QStandardItem())
+
+    @dataclasses.dataclass
+    class Dcls:
+        x: int
+
+    dataWidget = dataclass2Widget(Dcls)
+    mapper = QtWidgets.QDataWidgetMapper()
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(Dcls)
+
+    mapper.setModel(model)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
+    modelIndex0 = model.index(0, 0)
+    model.setData(modelIndex0, dict(x=0))
+    modelIndex1 = model.index(1, 0)
+    model.setData(modelIndex1, dict(x=1))
+    modelIndex2 = model.index(2, 0)
+    model.setData(modelIndex2, dict())
+
+    assert dataWidget.dataValue() == dict(x=MISSING)
+
+    mapper.setCurrentModelIndex(modelIndex0)
+    assert dataWidget.dataValue() == dict(x=0)
+
+    mapper.setCurrentModelIndex(modelIndex1)
+    assert dataWidget.dataValue() == dict(x=1)
+
+    mapper.setCurrentModelIndex(modelIndex2)
+    assert dataWidget.dataValue() == dict(x=MISSING)
+
+    model.setData(modelIndex2, dict(x=10))
+    assert dataWidget.dataValue() == dict(x=10)
+
+
 def test_DataclassMapper_addMapping(qtbot):
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+
     @dataclasses.dataclass
     class Dcls:
         x: int
         y: bool
 
     dataWidget = dataclass2Widget(Dcls)
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
     mapper = DataclassMapper()
     delegate = DataclassDelegate()
     delegate.setDataclassType(Dcls)
@@ -86,7 +161,7 @@ def test_DataclassMapper_addMapping(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex) == dict(y=False)
 
     dataWidget.widget(0).setText("0")
     qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)

@@ -7,7 +7,7 @@ structure established by the dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets
-from .fieldwidgets import BoolCheckBox, IntLineEdit
+from .fieldwidgets import _MISSING, MISSING, BoolCheckBox, IntLineEdit
 import dataclasses
 from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
 from .typing import FieldWidgetProtocol, DataclassProtocol
@@ -34,6 +34,7 @@ class DataWidget(QtWidgets.QGroupBox):
     ):
         super().__init__(parent)
         self._orientation = orientation
+        self._block_dataValueChanged = False
 
         if orientation == QtCore.Qt.Orientation.Vertical:
             layout = QtWidgets.QVBoxLayout()
@@ -72,7 +73,7 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif widget.fieldName() == w.fieldName():
+            if widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().insertWidget(index, widget, stretch, alignment)
@@ -87,7 +88,7 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif widget.fieldName() == w.fieldName():
+            if widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().addWidget(widget, stretch, alignment)
@@ -97,7 +98,7 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif w == widget:
+            if w == widget:
                 widget.dataValueChanged.disconnect(self.emitDataValueChanged)
                 break
         self.layout().removeWidget(widget)
@@ -108,13 +109,28 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            else:
-                ret[w.fieldName()] = w.dataValue()
+            ret[w.fieldName()] = w.dataValue()
         return ret
 
+    def setDataValue(self, data: Union[Dict[str, Any], _MISSING]):
+        if data is MISSING:
+            data = {}
+
+        self._block_dataValueChanged = True
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+            val = data.get(w.fieldName(), MISSING)  # type: ignore[union-attr]
+            w.setDataValue(val)
+        self._block_dataValueChanged = False
+
+        self.emitDataValueChanged()
+
     def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
+        if not self._block_dataValueChanged:
+            val = self.dataValue()
+            self.dataValueChanged.emit(val)
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
@@ -134,9 +150,6 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
         widget = type2Widget(args[0])
         if isinstance(widget, BoolCheckBox):
             widget.setTristate(True)
-            return widget
-        if isinstance(widget, IntLineEdit):
-            widget.setDefaultDataValue(None)
             return widget
 
     raise TypeError("Unknown type or annotation: %s" % t)

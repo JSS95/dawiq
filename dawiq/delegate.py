@@ -14,6 +14,7 @@ from typing import Optional, Type, Dict, Any
 
 __all__ = [
     "convertFromQt",
+    "convertToQt",
     "DataclassDelegate",
     "DataclassMapper",
 ]
@@ -26,9 +27,15 @@ def convertFromQt(
     """
     Convert the data from :class:`DataWidget` to structured data for dataclass.
 
+    If the field value is :obj:`MISSING`, it is not included in the resulting
+    dictionary.
+
     If the field has `fromQt_converter` metadata which is a unary callable,
     widget data is converted by it. This allows complicated type to be
     represented by simple widget.
+
+    Notes
+    =====
 
     Return value is not dataclass but dictionary because necessary fields might
     be missing from the widget.
@@ -47,7 +54,38 @@ def convertFromQt(
     return ret
 
 
+def convertToQt(
+    dcls: Type[DataclassProtocol],
+    data: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Convert the dictionary from dataclass to the data for :class:`DataWidget`.
+
+    If the field does not exist in the data, :obj:`MISSING` is passed as its
+    value instead.
+
+    If the field has `toQt_converter` metadata which is a unary callable,
+    dataclass data is converted by it. This allows complicated type to be
+    represented by simple widget.
+
+    """
+    ret = {}
+    for f in dataclasses.fields(dcls):
+        val = data.get(f.name, MISSING)
+        if val is MISSING:
+            pass
+        elif dataclasses.is_dataclass(f.type):
+            val = convertToQt(f.type, val)
+        converter = f.metadata.get("toQt_converter", None)
+        if val is not MISSING and converter is not None:
+            val = converter(val)
+        ret[f.name] = val
+    return ret
+
+
 class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
+    """Delegate to update the model and editor with structured dictionary."""
+
     def __init__(self, parent=None):
         super().__init__(parent)
         self._dataclass_type = None
@@ -65,11 +103,19 @@ class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
         index: QtCore.QModelIndex,
     ):
         dcls = self.dataclassType()
-        if dcls is None:
-            data = editor.dataValue()
-        else:
-            data = convertFromQt(dcls, editor.dataValue())
+        data = editor.dataValue()
+        if dcls is not None:
+            data = convertFromQt(dcls, data)
         model.setData(index, data)
+
+    def setEditorData(self, editor: DataWidget, index: QtCore.QModelIndex):
+        dcls = self.dataclassType()
+        data = index.data()
+        if data is None:
+            data = {}
+        if dcls is not None:
+            data = convertToQt(dcls, data)
+        editor.setDataValue(data)
 
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):

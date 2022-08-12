@@ -53,6 +53,8 @@ class FieldWidgetProtocol(Protocol):
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
         this method converts the check state to :class:`bool` and returns.
 
+        This method must specially treat :obj:`dawid.MISSING` as empty data by
+        clearing the widget.
         """
         ...
 

@@ -34,6 +34,7 @@ def test_DataWidget_addWidget(qtbot):
     assert datawidget.widget(0) is w0
     assert datawidget.widget(1) is w1
 
+    # test that signals are connected
     with qtbot.waitSignal(datawidget.dataValueChanged):
         w0.click()
     with qtbot.waitSignal(datawidget.dataValueChanged):
@@ -62,6 +63,7 @@ def test_DataWidget_insertWidget(qtbot):
     assert datawidget.widget(0) is w1
     assert datawidget.widget(1) is w0
 
+    # test that signals are disconnected
     with qtbot.waitSignal(datawidget.dataValueChanged):
         w0.click()
     with qtbot.waitSignal(datawidget.dataValueChanged):
@@ -84,6 +86,7 @@ def test_DataWidget_removeWidget(qtbot):
     datawidget.removeWidget(w0)
     assert datawidget.count() == 0
 
+    # test that signals are disconnected
     with qtbot.assertNotEmitted(datawidget.dataValueChanged):
         w0.click()
 
@@ -106,6 +109,44 @@ def test_DataWidget_dataValue(qtbot):
     assert dataWidget.dataValue() == dict(a=1, b=dict(x=2))
 
 
+def test_DataWidget_setDataValue(qtbot):
+    @dataclasses.dataclass
+    class Cls1:
+        x: bool
+
+    @dataclasses.dataclass
+    class Cls2:
+        a: int
+        b: Cls1
+
+    dataWidget = dataclass2Widget(Cls2)
+
+    class Counter:
+        def __init__(self):
+            self.i = 0
+
+        def count(self):
+            self.i += 1
+
+    counter = Counter()
+    dataWidget.dataValueChanged.connect(counter.count)
+    dval = dict(a=1, b=dict(x=True))
+
+    with qtbot.waitSignal(
+        dataWidget.dataValueChanged, check_params_cb=lambda val: val == dval
+    ):
+        dataWidget.setDataValue(dval)
+    assert dataWidget.dataValue() == dval
+    assert counter.i == 1
+
+    with qtbot.waitSignal(
+        dataWidget.dataValueChanged,
+        check_params_cb=lambda val: val == dict(a=MISSING, b=dict(x=False)),
+    ):
+        dataWidget.setDataValue(MISSING)
+    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=False))
+
+
 def test_type2Widget(qtbot):
     assert isinstance(type2Widget(bool), BoolCheckBox)
     assert not type2Widget(bool).isTristate()
@@ -113,9 +154,6 @@ def test_type2Widget(qtbot):
     assert type2Widget(Optional[bool]).isTristate()
 
     assert isinstance(type2Widget(int), IntLineEdit)
-    assert not type2Widget(int).hasDefaultDataValue()
-    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
-    assert type2Widget(Optional[int]).hasDefaultDataValue()
 
 
 def test_dataclass2Widget(qtbot):

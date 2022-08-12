@@ -9,36 +9,69 @@ from dawiq.qt_compat import QtCore, QtWidgets
 
 def test_BoolCheckBox(qtbot):
     widget = BoolCheckBox()
-
-    # test dataValueChanged signal
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is True,
-    ):
-        widget.setCheckState(QtCore.Qt.CheckState.Checked)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is False,
-    ):
-        widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
-
-    # test tristate
     widget.setTristate(True)
+    widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+    # test value change by setDataValue
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is True,
     ):
-        widget.setCheckState(QtCore.Qt.CheckState.Checked)
+        widget.setDataValue(True)
+    assert widget.dataValue() is True
+    assert widget.checkState() == QtCore.Qt.CheckState.Checked
+
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is False,
     ):
-        widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
+        widget.setDataValue(False)
+    assert widget.dataValue() is False
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
+    widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test MISSING
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.dataValue() is False
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        widget.setCheckState(QtCore.Qt.CheckState.PartiallyChecked)
+        widget.setDataValue(None)
+    assert widget.dataValue() is None
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
+
+    widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
+
+    # test value change by clicking
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is None,
+    ):
+        widget.click()
+    assert widget.dataValue() is None
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is True,
+    ):
+        widget.click()
+    assert widget.dataValue() is True
+    assert widget.checkState() == QtCore.Qt.CheckState.Checked
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.click()
+    assert widget.dataValue() is False
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
 
 def test_EmptyIntValidator(qtbot):
@@ -61,50 +94,42 @@ def test_EmptyIntValidator(qtbot):
 def test_IntLineEdit(qtbot):
     widget = IntLineEdit()
 
-    widget.setText("")
-    widget.setDefaultDataValue(MISSING)
-    assert not widget.hasDefaultDataValue()
+    # test value change by setDataValue
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is MISSING,
+    ):
+        widget.setDataValue(MISSING)
     assert widget.dataValue() is MISSING
+    assert not widget.text()
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == 1,
+    ):
+        widget.setDataValue(1)
+    assert widget.dataValue() == 1
+    assert widget.text() == "1"
+
+    widget.clear()
+
+    # test value change by keyboard
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is MISSING,
     ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
-    ):
-        qtbot.keyPress(widget, "1")
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() is MISSING
 
-    widget.setText("")
-    widget.setDefaultDataValue(None)
-    assert widget.hasDefaultDataValue()
-    assert widget.dataValue() is None
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is None,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
+        qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
-    ):
-        qtbot.keyPress(widget, "1")
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() is MISSING
 
-    widget.setText("")
-    widget.setDefaultDataValue(10)
-    assert widget.hasDefaultDataValue()
-    assert widget.dataValue() == 10
     with qtbot.waitSignal(
         widget.dataValueChanged,
-        check_params_cb=lambda val: val == 10,
-    ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
+        check_params_cb=lambda val: val == -1,
     ):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == -1

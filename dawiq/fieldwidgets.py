@@ -7,15 +7,24 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 """
 
 from .qt_compat import QtCore, QtWidgets, QtGui
-from typing import Optional, Union, Tuple, Any
+from typing import Optional, Union, Tuple
 
 
 __all__ = [
-    "BoolCheckBox",
     "MISSING",
+    "BoolCheckBox",
     "EmptyIntValidator",
     "IntLineEdit",
 ]
+
+
+class _MISSING:
+    """Sentinel object to indicate empty field."""
+
+    pass
+
+
+MISSING = _MISSING()
 
 
 class BoolCheckBox(QtWidgets.QCheckBox):
@@ -30,8 +39,8 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
 
     Because of the nature of check box, it is impossible to define empty state of
-    the widget. Data value is always either True, False or None, and never
-    :obj:`MISSING`.
+    the widget. :meth:`dataValue` is always either True, False or None, and never
+    :obj:`MISSING`. :meth:`setDataValue` treats :obj:`MISSING` as False.
 
     """
 
@@ -59,7 +68,10 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         return state
 
-    def setDataValue(self, value: Optional[bool]):
+    def setDataValue(self, value: Union[Optional[bool], _MISSING]):
+        if value is MISSING:
+            value = False
+
         if value is True:
             state = QtCore.Qt.CheckState.Checked
         elif value is False:
@@ -77,15 +89,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         else:
             state = None
         self.dataValueChanged.emit(state)
-
-
-class _MISSING:
-    """Sentinel object to indicate empty field."""
-
-    pass
-
-
-MISSING = _MISSING()
 
 
 class EmptyIntValidator(QtGui.QIntValidator):
@@ -107,7 +110,10 @@ class IntLineEdit(QtWidgets.QLineEdit):
     text on the line edit.
 
     If the text is not empty, the data value is the integer that the string is
-    converted to. If the string is empty, :meth:`defaultValue` is used instead.
+    converted to. If the line edit is empty, :obj:`MISSING` is the data value.
+
+    :meth:`setDataValue` sets the line edit text. If :obj:`MISSING` is passed,
+    line edit is cleared.
 
     """
 
@@ -116,7 +122,6 @@ class IntLineEdit(QtWidgets.QLineEdit):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-        self._default_data_value = MISSING
         self.setValidator(EmptyIntValidator(self))
 
         self.editingFinished.connect(self.emitDataValueChanged)
@@ -128,39 +133,25 @@ class IntLineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def defaultDataValue(self) -> Any:
-        """
-        Value which is used as :meth:`dataValue` if the text is empty.
-
-        Default value can be any object. :obj:`MISSING` indicates there is no
-        default value and thus the field is null when the text is empty.
-
-        """
-        return self._default_data_value
-
-    def hasDefaultDataValue(self) -> bool:
-        """Return True if :meth:`defaultDataValue` is not :obj:`MISSING`."""
-        return self.defaultDataValue() is not MISSING
-
-    def setDefaultDataValue(self, val: Any):
-        """Set :meth:`defaultDataValue`."""
-        self._default_data_value = val
-
-    def dataValue(self) -> Any:
+    def dataValue(self) -> Union[int, _MISSING]:
         text = self.text()
-        if text:
-            val: Any = int(text)
+
+        if not text:
+            val: Union[int, _MISSING] = MISSING
         else:
-            val = self.defaultDataValue()
+            try:
+                val = int(text)
+            except ValueError:
+                val = MISSING
         return val
 
-    def setDataValue(self, val: Any):
+    def setDataValue(self, val: Union[int, _MISSING]):
         if val is MISSING:
-            self.setText("")
-        elif val is None:
-            self.setText("")
+            txt = ""
         else:
-            self.setText(str(val))
+            txt = str(val)
+        self.setText(txt)
+        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
         val = self.dataValue()
