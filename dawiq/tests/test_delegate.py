@@ -11,17 +11,16 @@ from dawiq.qt_compat import QtGui, QtWidgets, QtCore
 
 def test_convertFromQt():
     class CustomField:
-        def __init__(self, a, b):
-            self.a = a
-            self.b = b
+        def __init__(self, x):
+            self.x = x
 
         def __eq__(self, other):
-            return type(self) == type(other) and (self.a, self.b) == (other.a, other.b)
+            return type(self) == type(other) and self.x == other.x
 
     def converter(arg):
         if isinstance(arg, CustomField):
             return arg
-        return CustomField(*arg)
+        return CustomField(arg)
 
     @dataclasses.dataclass
     class Cls0:
@@ -33,8 +32,8 @@ def test_convertFromQt():
         y: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
         z: Cls0
 
-    assert convertFromQt(Cls1, dict(x=1, y=(2, 3), z=dict(a=(3, 4)))) == dict(
-        x=1, y=CustomField(2, 3), z=dict(a=CustomField(3, 4))
+    assert convertFromQt(Cls1, dict(x=1, y=2, z=dict(a=3))) == dict(
+        x=1, y=CustomField(2), z=dict(a=CustomField(3))
     )
     assert convertFromQt(Cls1, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
 
