@@ -127,18 +127,23 @@ def test_DataclassDelegate_setEditorData(qtbot):
     model.setData(modelIndex2, dict())
 
     assert dataWidget.dataValue() == dict(x=MISSING)
+    assert dataWidget.widget(0).text() == ""
 
     mapper.setCurrentModelIndex(modelIndex0)
     assert dataWidget.dataValue() == dict(x=0)
+    assert dataWidget.widget(0).text() == "0"
 
     mapper.setCurrentModelIndex(modelIndex1)
     assert dataWidget.dataValue() == dict(x=1)
+    assert dataWidget.widget(0).text() == "1"
 
     mapper.setCurrentModelIndex(modelIndex2)
     assert dataWidget.dataValue() == dict(x=MISSING)
+    assert dataWidget.widget(0).text() == ""
 
     model.setData(modelIndex2, dict(x=10))
     assert dataWidget.dataValue() == dict(x=10)
+    assert dataWidget.widget(0).text() == "10"
 
 
 def test_DataclassMapper_addMapping(qtbot):
