@@ -72,7 +72,7 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif widget.fieldName() == w.fieldName():
+            if widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().insertWidget(index, widget, stretch, alignment)
@@ -87,7 +87,7 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif widget.fieldName() == w.fieldName():
+            if widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().addWidget(widget, stretch, alignment)
@@ -97,7 +97,7 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            elif w == widget:
+            if w == widget:
                 widget.dataValueChanged.disconnect(self.emitDataValueChanged)
                 break
         self.layout().removeWidget(widget)
@@ -108,9 +108,17 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            else:
-                ret[w.fieldName()] = w.dataValue()
+            ret[w.fieldName()] = w.dataValue()
         return ret
+
+    def setDataValue(self, data: Dict[str, Any]):
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+            with QtCore.QSignalBlocker(w):
+                w.setDataValue(data[w.fieldName()])
+        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
         val = self.dataValue()
