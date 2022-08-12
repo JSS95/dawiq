@@ -25,28 +25,56 @@ def convertFromQt(
     data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Convert the data from :class:`DataWidget` to structured data for dataclass.
+    Convert dict from :class:`DataWidget` to structured dict for dataclass.
 
-    If the field value is :obj:`MISSING`, it is not included in the resulting
-    dictionary.
+    If the field value does not exist or is :obj:`MISSING`, default value of the
+    field is used. If there is no default value, the field is not included in
+    the resulting dictionary.
 
-    If the field has `fromQt_converter` metadata which is a unary callable,
-    widget data is converted by it. This allows complicated type to be
-    represented by simple widget.
+    Field may define `fromQt_converter` metadata to convert the widget data to
+    field data. It is a unary callable which takes the widget data and returns
+    the field data.
 
-    Notes
-    =====
+    If the data is nested or default value is used, field data itself may be
+    passed to the converter. Therefore `fromQt_converter` must perform type check
+    to distinguish the field data input and widget data input.
 
-    Return value is not dataclass but dictionary because necessary fields might
-    be missing from the widget.
+    Examples
+    ========
+
+    >>> from dataclasses import dataclass, field
+    >>> from dawiq.delegate import convertFromQt
+    >>> def conv(arg):
+    ...     if isinstance(arg, tuple):
+    ...         return arg
+    ...     return (arg,)
+    >>> @dataclass
+    ... class Cls:
+    ...     x: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
+    >>> convertFromQt(Cls, dict(x=10))
+    {'x': (10,)}
+    >>> convertFromQt(Cls, dict())
+    {'x': (1,)}
+
     """
+    # Return value is not dataclass but dictionary because necessary fields might
+    # be missing from the widget.
     ret = {}
     for f in dataclasses.fields(dcls):
-        val = data[f.name]
+        val = data.get(f.name, MISSING)
+
         if val is MISSING:
-            continue
-        elif dataclasses.is_dataclass(f.type):
+            default = f.default
+            if default is dataclasses.MISSING:
+                continue
+            val = default  # this may be dataclass instance
+
+        if dataclasses.is_dataclass(f.type):
+            if dataclasses.is_dataclass(val) and not isinstance(val, type):
+                # convert dataclass instance to dict
+                val = dataclasses.asdict(val)
             val = convertFromQt(f.type, val)
+
         converter = f.metadata.get("fromQt_converter", None)
         if converter is not None:
             val = converter(val)
@@ -59,14 +87,25 @@ def convertToQt(
     data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Convert the dictionary from dataclass to the data for :class:`DataWidget`.
+    Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
     If the field does not exist in the data, :obj:`MISSING` is passed as its
     value instead.
 
-    If the field has `toQt_converter` metadata which is a unary callable,
-    dataclass data is converted by it. This allows complicated type to be
-    represented by simple widget.
+    Field may define `toQt_converter` metadata to convert the field data to
+    widget data. It is a unary callable which takes the field data and returns
+    the widget data.
+
+    Examples
+    ========
+
+    >>> from dataclasses import dataclass, field
+    >>> from dawiq.delegate import convertToQt
+    >>> @dataclass
+    ... class Cls:
+    ...     x: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
+    >>> convertToQt(Cls, dict(x=(10,)))
+    {'x': 10}
 
     """
     ret = {}
@@ -97,6 +136,12 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         self._dataclass_type = dcls
 
     def setModelData(self, editor, model, index):
+        """
+        Set the data from *editor* to the item of *model* at *index*.
+
+        If *editor* is :class:`DataWidget`, its data is converted by
+        :func:`convertFromQt` before being set to the model.
+        """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
             data = editor.dataValue()
@@ -107,6 +152,12 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             super().setModelData(editor, model, index)
 
     def setEditorData(self, editor, index):
+        """
+        Set the data from *index* to *editor*.
+
+        If *editor* is :class:`DataWidget`, the data is converted by
+        :func:`convertToQt` before being set to the editor.
+        """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
             data = index.data()
