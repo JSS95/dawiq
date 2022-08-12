@@ -87,50 +87,22 @@ def test_EmptyIntValidator(qtbot):
 def test_IntLineEdit(qtbot):
     widget = IntLineEdit()
 
-    widget.setText("")
-    widget.setDefaultDataValue(MISSING)
-    assert not widget.hasDefaultDataValue()
-    assert widget.dataValue() is MISSING
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is MISSING,
     ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
-    ):
-        qtbot.keyPress(widget, "1")
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() is MISSING
 
-    widget.setText("")
-    widget.setDefaultDataValue(None)
-    assert widget.hasDefaultDataValue()
-    assert widget.dataValue() is None
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is None,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
+        qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
-    ):
-        qtbot.keyPress(widget, "1")
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() is MISSING
 
-    widget.setText("")
-    widget.setDefaultDataValue(10)
-    assert widget.hasDefaultDataValue()
-    assert widget.dataValue() == 10
     with qtbot.waitSignal(
         widget.dataValueChanged,
-        check_params_cb=lambda val: val == 10,
-    ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
+        check_params_cb=lambda val: val == -1,
     ):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == -1

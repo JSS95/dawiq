@@ -135,9 +135,6 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
         if isinstance(widget, BoolCheckBox):
             widget.setTristate(True)
             return widget
-        if isinstance(widget, IntLineEdit):
-            widget.setDefaultDataValue(None)
-            return widget
 
     raise TypeError("Unknown type or annotation: %s" % t)
 

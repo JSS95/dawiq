@@ -113,9 +113,6 @@ def test_type2Widget(qtbot):
     assert type2Widget(Optional[bool]).isTristate()
 
     assert isinstance(type2Widget(int), IntLineEdit)
-    assert not type2Widget(int).hasDefaultDataValue()
-    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
-    assert type2Widget(Optional[int]).hasDefaultDataValue()
 
 
 def test_dataclass2Widget(qtbot):
