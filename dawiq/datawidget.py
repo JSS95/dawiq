@@ -34,6 +34,7 @@ class DataWidget(QtWidgets.QGroupBox):
     ):
         super().__init__(parent)
         self._orientation = orientation
+        self._block_dataValueChanged = False
 
         if orientation == QtCore.Qt.Orientation.Vertical:
             layout = QtWidgets.QVBoxLayout()
@@ -114,18 +115,22 @@ class DataWidget(QtWidgets.QGroupBox):
     def setDataValue(self, data: Union[Dict[str, Any], _MISSING]):
         if data is MISSING:
             data = {}
+
+        self._block_dataValueChanged = True
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
-            with QtCore.QSignalBlocker(w):
-                val = data.get(w.fieldName(), MISSING)  # type: ignore[union-attr]
-                w.setDataValue(val)
+            val = data.get(w.fieldName(), MISSING)  # type: ignore[union-attr]
+            w.setDataValue(val)
+        self._block_dataValueChanged = False
+
         self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
+        if not self._block_dataValueChanged:
+            val = self.dataValue()
+            self.dataValueChanged.emit(val)
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
