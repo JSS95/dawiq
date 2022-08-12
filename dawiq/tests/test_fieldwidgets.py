@@ -12,12 +12,13 @@ def test_BoolCheckBox(qtbot):
     widget.setTristate(True)
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-    # test value setting
+    # test value change by setDataValue
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is True,
     ):
         widget.setDataValue(True)
+    assert widget.dataValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
     with qtbot.waitSignal(
@@ -25,6 +26,7 @@ def test_BoolCheckBox(qtbot):
         check_params_cb=lambda val: val is False,
     ):
         widget.setDataValue(False)
+    assert widget.dataValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
     widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test MISSING
@@ -33,6 +35,7 @@ def test_BoolCheckBox(qtbot):
         check_params_cb=lambda val: val is False,
     ):
         widget.setDataValue(MISSING)
+    assert widget.dataValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
     with qtbot.waitSignal(
@@ -40,16 +43,18 @@ def test_BoolCheckBox(qtbot):
         check_params_cb=lambda val: val is None,
     ):
         widget.setDataValue(None)
+    assert widget.dataValue() is None
     assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-    # test clicking
+    # test value change by clicking
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is None,
     ):
         widget.click()
+    assert widget.dataValue() is None
     assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
     with qtbot.waitSignal(
@@ -57,6 +62,7 @@ def test_BoolCheckBox(qtbot):
         check_params_cb=lambda val: val is True,
     ):
         widget.click()
+    assert widget.dataValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
     with qtbot.waitSignal(
@@ -64,6 +70,7 @@ def test_BoolCheckBox(qtbot):
         check_params_cb=lambda val: val is False,
     ):
         widget.click()
+    assert widget.dataValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
 
@@ -87,6 +94,26 @@ def test_EmptyIntValidator(qtbot):
 def test_IntLineEdit(qtbot):
     widget = IntLineEdit()
 
+    # test value change by setDataValue
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is MISSING,
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.dataValue() is MISSING
+    assert not widget.text()
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == 1,
+    ):
+        widget.setDataValue(1)
+    assert widget.dataValue() == 1
+    assert widget.text() == "1"
+
+    widget.clear()
+
+    # test value change by keyboard
     with qtbot.waitSignal(
         widget.dataValueChanged,
         check_params_cb=lambda val: val is MISSING,

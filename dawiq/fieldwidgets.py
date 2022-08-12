@@ -147,9 +147,11 @@ class IntLineEdit(QtWidgets.QLineEdit):
 
     def setDataValue(self, val: Union[int, _MISSING]):
         if val is MISSING:
-            self.setText("")
+            txt = ""
         else:
-            self.setText(str(val))
+            txt = str(val)
+        self.setText(txt)
+        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
         val = self.dataValue()
