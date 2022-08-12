@@ -5,7 +5,7 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets, QtCore
+from .qt_compat import QtWidgets
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .typing import DataclassProtocol
@@ -83,7 +83,7 @@ def convertToQt(
     return ret
 
 
-class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
+class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """Delegate to update the model and editor with structured dictionary."""
 
     def __init__(self, parent=None):
@@ -96,26 +96,27 @@ class DataclassDelegate(QtWidgets.QAbstractItemDelegate):
     def setDataclassType(self, dcls: Optional[Type[DataclassProtocol]]):
         self._dataclass_type = dcls
 
-    def setModelData(
-        self,
-        editor: DataWidget,
-        model: QtCore.QAbstractItemModel,
-        index: QtCore.QModelIndex,
-    ):
-        dcls = self.dataclassType()
-        data = editor.dataValue()
-        if dcls is not None:
-            data = convertFromQt(dcls, data)
-        model.setData(index, data)
+    def setModelData(self, editor, model, index):
+        if isinstance(editor, DataWidget):
+            dcls = self.dataclassType()
+            data = editor.dataValue()
+            if dcls is not None:
+                data = convertFromQt(dcls, data)
+            model.setData(index, data)
+        else:
+            super().setModelData(editor, model, index)
 
-    def setEditorData(self, editor: DataWidget, index: QtCore.QModelIndex):
-        dcls = self.dataclassType()
-        data = index.data()
-        if data is None:
-            data = {}
-        if dcls is not None:
-            data = convertToQt(dcls, data)
-        editor.setDataValue(data)
+    def setEditorData(self, editor, index):
+        if isinstance(editor, DataWidget):
+            dcls = self.dataclassType()
+            data = index.data()
+            if data is None:
+                data = {}
+            if dcls is not None:
+                data = convertToQt(dcls, data)
+            editor.setDataValue(data)
+        else:
+            super().setEditorData(editor, index)
 
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
