@@ -18,24 +18,80 @@ def test_convertFromQt():
         def __eq__(self, other):
             return type(self) == type(other) and (self.a, self.b) == (other.a, other.b)
 
+    def converter(arg):
+        if isinstance(arg, CustomField):
+            return arg
+        return CustomField(*arg)
+
     @dataclasses.dataclass
     class Cls0:
-        a: CustomField = dataclasses.field(
-            metadata=dict(fromQt_converter=lambda args: CustomField(*args))
-        )
+        a: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
 
     @dataclasses.dataclass
     class Cls1:
         x: int
-        y: CustomField = dataclasses.field(
-            metadata=dict(fromQt_converter=lambda args: CustomField(*args))
-        )
+        y: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
         z: Cls0
 
     assert convertFromQt(Cls1, dict(x=1, y=(2, 3), z=dict(a=(3, 4)))) == dict(
         x=1, y=CustomField(2, 3), z=dict(a=CustomField(3, 4))
     )
     assert convertFromQt(Cls1, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
+
+
+def test_convertFromQt_defaultvalue():
+    class CustomField:
+        def __init__(self, x):
+            self.x = x
+
+        def __eq__(self, other):
+            return type(self) == type(other) and self.x == other.x
+
+    def converter(arg):
+        if isinstance(arg, CustomField):
+            return arg
+        return CustomField(arg)
+
+    @dataclasses.dataclass
+    class Cls0:
+        x: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
+        y: CustomField = dataclasses.field(
+            default=CustomField(0),
+            metadata=dict(fromQt_converter=converter),
+        )
+        z: int = 3
+
+    assert convertFromQt(Cls0, dict(x=3, y=2, z=1)) == dict(
+        x=CustomField(3), y=CustomField(2), z=1
+    )
+    assert convertFromQt(Cls0, dict()) == dict(y=CustomField(0), z=3)
+
+    @dataclasses.dataclass
+    class Cls1:
+        a: Cls0
+        b: Cls0 = Cls0(x=CustomField(1))
+
+    assert convertFromQt(
+        Cls1, dict(a=dict(x=1, y=2, z=5), b=dict(x=3, y=2, z=1))
+    ) == dict(
+        a=dict(x=CustomField(1), y=CustomField(2), z=5),
+        b=dict(x=CustomField(3), y=CustomField(2), z=1),
+    )
+    assert convertFromQt(Cls1, dict()) == dict(
+        b=dict(x=CustomField(1), y=CustomField(0), z=3)
+    )
+
+    @dataclasses.dataclass
+    class Cls2:
+        c: Cls1
+        d: Cls1 = Cls1(Cls0(CustomField(10)))
+
+    assert convertFromQt(Cls2, dict()) == dict(
+        d=dict(
+            a=dict(x=CustomField(10), y=CustomField(0), z=3),
+            b=dict(x=CustomField(1), y=CustomField(0), z=3),
+        )
+    )
 
 
 def test_convertToQt():
