@@ -50,4 +50,9 @@ def test_DataclassDelegate_setModelData(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex, QtCore.Qt.EditRole) is None
+    assert model.data(modelIndex) is None
+
+    # set widget
+    dataWidget.widget(0).setText("1")
+    mapper.submit()
+    assert model.data(modelIndex) == dict(x=1)
