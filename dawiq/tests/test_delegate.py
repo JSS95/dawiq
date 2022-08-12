@@ -1,6 +1,11 @@
 import dataclasses
 from dawiq.datawidget import dataclass2Widget
-from dawiq.delegate import convertFromQt, DataclassDelegate, DataclassMapper
+from dawiq.delegate import (
+    convertFromQt,
+    convertToQt,
+    DataclassDelegate,
+    DataclassMapper,
+)
 from dawiq.qt_compat import QtGui, QtWidgets, QtCore
 
 
@@ -30,6 +35,29 @@ def test_convertFromQt():
     assert convertFromQt(Cls1, dict(x=1, y=(2, 3), z=dict(a=(3, 4)))) == dict(
         x=1, y=CustomField(2, 3), z=dict(a=CustomField(3, 4))
     )
+
+
+def test_convertToQt():
+    class CustomField:
+        def __init__(self, a):
+            self.a = a
+
+        def __eq__(self, other):
+            return type(self) == type(other) and (self.a,) == (other.a,)
+
+    @dataclasses.dataclass
+    class Cls0:
+        a: CustomField = dataclasses.field(metadata=dict(toQt_converter=lambda x: x.a))
+
+    @dataclasses.dataclass
+    class Cls1:
+        x: int
+        y: CustomField = dataclasses.field(metadata=dict(toQt_converter=lambda x: x.a))
+        z: Cls0
+
+    assert convertToQt(
+        Cls1, dict(x=1, y=CustomField(2), z=dict(a=CustomField(3)))
+    ) == dict(x=1, y=2, z=dict(a=3))
 
 
 def test_DataclassDelegate_setModelData(qtbot):

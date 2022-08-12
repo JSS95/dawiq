@@ -14,6 +14,7 @@ from typing import Optional, Type, Dict, Any
 
 __all__ = [
     "convertFromQt",
+    "convertToQt",
     "DataclassDelegate",
     "DataclassMapper",
 ]
@@ -25,6 +26,9 @@ def convertFromQt(
 ) -> Dict[str, Any]:
     """
     Convert the data from :class:`DataWidget` to structured data for dataclass.
+
+    If the field value is :obj:`MISSING`, it is not included in the resulting
+    dictionary.
 
     If the field has `fromQt_converter` metadata which is a unary callable,
     widget data is converted by it. This allows complicated type to be
@@ -42,6 +46,35 @@ def convertFromQt(
             val = convertFromQt(f.type, val)
         converter = f.metadata.get("fromQt_converter", None)
         if converter is not None:
+            val = converter(val)
+        ret[f.name] = val
+    return ret
+
+
+def convertToQt(
+    dcls: Type[DataclassProtocol],
+    data: Dict[str, Any],
+) -> Dict[str, Any]:
+    """
+    Convert the dictionary from dataclass to the data for :class:`DataWidget`.
+
+    If the field does not exist in the data, :obj:`MISSING` is passed as its
+    value instead.
+
+    If the field has `toQt_converter` metadata which is a unary callable,
+    dataclass data is converted by it. This allows complicated type to be
+    represented by simple widget.
+
+    """
+    ret = {}
+    for f in dataclasses.fields(dcls):
+        val = data.get(f.name, MISSING)
+        if val is MISSING:
+            pass
+        elif dataclasses.is_dataclass(f.type):
+            val = convertToQt(f.type, val)
+        converter = f.metadata.get("toQt_converter", None)
+        if val is not MISSING and converter is not None:
             val = converter(val)
         ret[f.name] = val
     return ret
