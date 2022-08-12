@@ -34,6 +34,9 @@ def convertFromQt(
     widget data is converted by it. This allows complicated type to be
     represented by simple widget.
 
+    Notes
+    =====
+
     Return value is not dataclass but dictionary because necessary fields might
     be missing from the widget.
     """
