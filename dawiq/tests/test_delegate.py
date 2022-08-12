@@ -1,5 +1,5 @@
 import dataclasses
-from dawiq.datawidget import dataclass2Widget
+from dawiq import dataclass2Widget, MISSING
 from dawiq.delegate import (
     convertFromQt,
     convertToQt,
@@ -35,6 +35,7 @@ def test_convertFromQt():
     assert convertFromQt(Cls1, dict(x=1, y=(2, 3), z=dict(a=(3, 4)))) == dict(
         x=1, y=CustomField(2, 3), z=dict(a=CustomField(3, 4))
     )
+    assert convertFromQt(Cls1, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
 
 
 def test_convertToQt():
@@ -58,6 +59,7 @@ def test_convertToQt():
     assert convertToQt(
         Cls1, dict(x=1, y=CustomField(2), z=dict(a=CustomField(3)))
     ) == dict(x=1, y=2, z=dict(a=3))
+    assert convertToQt(Cls1, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
 
 
 def test_DataclassDelegate_setModelData(qtbot):
