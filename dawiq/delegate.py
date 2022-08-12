@@ -25,7 +25,7 @@ def convertFromQt(
     data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Convert the data from :class:`DataWidget` to structured data for dataclass.
+    Convert dict from :class:`DataWidget` to structured dict for dataclass.
 
     If the field value does not exist or is :obj:`MISSING`, default value of the
     field is used. If there is no default value, the field is not included in
@@ -87,14 +87,25 @@ def convertToQt(
     data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Convert the dictionary from dataclass to the data for :class:`DataWidget`.
+    Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
     If the field does not exist in the data, :obj:`MISSING` is passed as its
     value instead.
 
-    If the field has `toQt_converter` metadata which is a unary callable,
-    dataclass data is converted by it. This allows complicated type to be
-    represented by simple widget.
+    Field may define `toQt_converter` metadata to convert the field data to
+    widget data. It is a unary callable which takes the field data and returns
+    the widget data.
+
+    Examples
+    ========
+
+    >>> from dataclasses import dataclass, field
+    >>> from dawiq.delegate import convertToQt
+    >>> @dataclass
+    ... class Cls:
+    ...     x: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
+    >>> convertToQt(Cls, dict(x=(10,)))
+    {'x': 10}
 
     """
     ret = {}
@@ -129,7 +140,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         Set the data from *editor* to the item of *model* at *index*.
 
         If *editor* is :class:`DataWidget`, its data is converted by
-        :func:`convertFromQt` before set to the model.
+        :func:`convertFromQt` before being set to the model.
         """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
@@ -141,6 +152,12 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             super().setModelData(editor, model, index)
 
     def setEditorData(self, editor, index):
+        """
+        Set the data from *index* to *editor*.
+
+        If *editor* is :class:`DataWidget`, the data is converted by
+        :func:`convertToQt` before being set to the editor.
+        """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
             data = index.data()
