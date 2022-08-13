@@ -315,10 +315,10 @@ class EnumComboBox(QtWidgets.QComboBox):
 
         self.currentIndexChanged.connect(self.emitDataValueChanged)
 
-    def dataName(self) -> str:
+    def fieldName(self) -> str:
         return self.placeholderText()
 
-    def setDataName(self, name: str):
+    def setfieldName(self, name: str):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
@@ -397,10 +397,10 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             item = item.widget()
         return item
 
-    def dataName(self) -> str:
+    def fieldName(self) -> str:
         return self.title()
 
-    def setDataName(self, name: str):
+    def setfieldName(self, name: str):
         self.setTitle(name)
         self.setToolTip(name)
 
