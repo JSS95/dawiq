@@ -16,6 +16,7 @@ __all__ = [
     "EmptyIntValidator",
     "IntLineEdit",
     "EmptyFloatValidator",
+    "FloatLineEdit",
 ]
 
 
@@ -167,3 +168,60 @@ class EmptyFloatValidator(QtGui.QDoubleValidator):
         if not input:
             state = QtGui.QValidator.State.Acceptable
         return (state, ret_input, ret_pos)
+
+
+class FloatLineEdit(QtWidgets.QLineEdit):
+    """
+    Line edit for float value.
+
+    :meth:`dataValue` returns the current value. When editing is finished,
+    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
+    text on the line edit.
+
+    If the text is not empty, the data value is the float that the string is
+    converted to. If the line edit is empty, :obj:`MISSING` is the data value.
+
+    :meth:`setDataValue` sets the line edit text. If :obj:`MISSING` is passed,
+    line edit is cleared.
+
+    """
+
+    dataValueChanged = QtCore.Signal(object)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.setValidator(EmptyFloatValidator(self))
+
+        self.editingFinished.connect(self.emitDataValueChanged)
+
+    def fieldName(self) -> str:
+        return self.placeholderText()
+
+    def setFieldName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
+
+    def dataValue(self) -> Union[float, _MISSING]:
+        text = self.text()
+
+        if not text:
+            val: Union[float, _MISSING] = MISSING
+        else:
+            try:
+                val = float(text)
+            except ValueError:
+                val = MISSING
+        return val
+
+    def setDataValue(self, val: Union[float, _MISSING]):
+        if val is MISSING:
+            txt = ""
+        else:
+            txt = str(val)
+        self.setText(txt)
+        self.emitDataValueChanged()
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)

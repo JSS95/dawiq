@@ -15,6 +15,7 @@ from .fieldwidgets import (
     EmptyIntValidator,
     IntLineEdit,
     EmptyFloatValidator,
+    FloatLineEdit,
 )
 from .datawidget import (
     DataWidget,
@@ -33,6 +34,7 @@ __all__ = [
     "EmptyIntValidator",
     "IntLineEdit",
     "EmptyFloatValidator",
+    "FloatLineEdit",
     "DataWidget",
     "type2Widget",
     "dataclass2Widget",

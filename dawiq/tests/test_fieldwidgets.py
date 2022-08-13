@@ -3,6 +3,7 @@ from dawiq import (
     EmptyIntValidator,
     IntLineEdit,
     EmptyFloatValidator,
+    FloatLineEdit,
     MISSING,
 )
 from dawiq.qt_compat import QtCore, QtWidgets
@@ -159,3 +160,47 @@ def test_EmptyFloatValidator(qtbot):
     with qtbot.waitSignal(widget.editingFinished):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+
+
+def test_FloatLineEdit(qtbot):
+    widget = FloatLineEdit()
+
+    # test value change by setDataValue
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is MISSING,
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.dataValue() is MISSING
+    assert not widget.text()
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == float(1),
+    ):
+        widget.setDataValue(1)
+    assert widget.dataValue() == 1
+    assert widget.text() == "1"
+
+    widget.clear()
+
+    # test value change by keyboard
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val is MISSING,
+    ):
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() is MISSING
+
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
+        qtbot.keyPress(widget, "-")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() is MISSING
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == float(-1),
+    ):
+        qtbot.keyPress(widget, "1")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == -1
