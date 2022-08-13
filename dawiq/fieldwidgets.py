@@ -17,6 +17,7 @@ __all__ = [
     "IntLineEdit",
     "EmptyFloatValidator",
     "FloatLineEdit",
+    "StrLineEdit",
 ]
 
 
@@ -219,6 +220,52 @@ class FloatLineEdit(QtWidgets.QLineEdit):
             txt = ""
         else:
             txt = str(val)
+        self.setText(txt)
+        self.emitDataValueChanged()
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)
+
+
+class StrLineEdit(QtWidgets.QLineEdit):
+    """
+    Line edit for string value.
+
+    :meth:`dataValue` returns the current value. When editing is finished,
+    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
+    text on the line edit.
+
+    Data value is the text of line edit. If the line edit is empty, data value is
+    empty string. Thus, the data value is never :obj:`MISSING`.
+
+    :meth:`setDataValue` sets the line edit text. If :obj:`MISSING` is passed,
+    line edit is cleared.
+
+    """
+
+    dataValueChanged = QtCore.Signal(str)
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.editingFinished.connect(self.emitDataValueChanged)
+
+    def fieldName(self) -> str:
+        return self.placeholderText()
+
+    def setFieldName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
+
+    def dataValue(self) -> str:
+        return self.text()
+
+    def setDataValue(self, val: Union[str, _MISSING]):
+        if val is MISSING:
+            txt = ""
+        else:
+            txt = val  # type: ignore[assignment]
         self.setText(txt)
         self.emitDataValueChanged()
 

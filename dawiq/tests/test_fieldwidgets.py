@@ -4,6 +4,7 @@ from dawiq import (
     IntLineEdit,
     EmptyFloatValidator,
     FloatLineEdit,
+    StrLineEdit,
     MISSING,
 )
 from dawiq.qt_compat import QtCore, QtWidgets
@@ -179,7 +180,7 @@ def test_FloatLineEdit(qtbot):
         check_params_cb=lambda val: val == float(1),
     ):
         widget.setDataValue(1)
-    assert widget.dataValue() == 1
+    assert widget.dataValue() == float(1)
     assert widget.text() == "1"
 
     widget.clear()
@@ -203,4 +204,51 @@ def test_FloatLineEdit(qtbot):
     ):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == -1
+    assert widget.dataValue() == float(-1)
+
+
+def test_StrLineEdit(qtbot):
+    widget = StrLineEdit()
+
+    # test value change by setDataValue
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == "",
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.dataValue() == ""
+    assert not widget.text()
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == "1",
+    ):
+        widget.setDataValue("1")
+    assert widget.dataValue() == "1"
+    assert widget.text() == "1"
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == "x",
+    ):
+        widget.setDataValue("x")
+    assert widget.dataValue() == "x"
+    assert widget.text() == "x"
+
+    widget.clear()
+
+    # test value change by keyboard
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == "",
+    ):
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == ""
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        check_params_cb=lambda val: val == "x",
+    ):
+        qtbot.keyPress(widget, "x")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == "x"

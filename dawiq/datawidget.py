@@ -7,7 +7,14 @@ structure established by the dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets
-from .fieldwidgets import _MISSING, MISSING, BoolCheckBox, IntLineEdit, FloatLineEdit
+from .fieldwidgets import (
+    _MISSING,
+    MISSING,
+    BoolCheckBox,
+    IntLineEdit,
+    FloatLineEdit,
+    StrLineEdit,
+)
 import dataclasses
 from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
 from .typing import FieldWidgetProtocol, DataclassProtocol
@@ -141,6 +148,8 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
         return IntLineEdit()
     if isinstance(t, type) and issubclass(t, float):
         return FloatLineEdit()
+    if isinstance(t, type) and issubclass(t, str):
+        return StrLineEdit()
 
     origin = getattr(t, "__origin__", None)
 
