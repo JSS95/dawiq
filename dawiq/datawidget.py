@@ -64,9 +64,13 @@ class DataWidget(QtWidgets.QGroupBox):
         return self._orientation
 
     def count(self) -> int:
+        """Number of subwidgets."""
         return self.layout().count()
 
     def widget(self, index: int) -> Optional[FieldWidgetProtocol]:
+        """
+        Returns the subwidget at the given index, or None for invalid index.
+        """
         item = self.layout().itemAt(index)
         if item is not None:
             item = item.widget()

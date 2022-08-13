@@ -349,8 +349,9 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     """
     Group box for tuple data with fixed length.
 
-    Standard way to construct this widget is by :meth:`fromWidgets` class method.
-    Widgets must be other data widgets.
+    This is the group box which contains subwidgets generated from the tuple's
+    item types. Standard way to construct this widget is by :meth:`fromWidgets`
+    class method.
 
     :meth:`dataValue` returns the current tuple value. When data value of any
     subwidget is changed, :attr:`dataValueChanged` signal is emitted.
@@ -384,9 +385,13 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self._block_dataValueChanged = False
 
     def count(self) -> int:
+        """Number of subwidgets."""
         return self.layout().count()
 
     def widget(self, index: int) -> Optional[FieldWidgetProtocol]:
+        """
+        Returns the subwidget at the given index, or None for invalid index.
+        """
         item = self.layout().itemAt(index)
         if item is not None:
             item = item.widget()
