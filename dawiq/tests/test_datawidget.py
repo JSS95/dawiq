@@ -7,12 +7,13 @@ from dawiq import (
     FloatLineEdit,
     StrLineEdit,
     EnumComboBox,
+    TupleGroupBox,
     MISSING,
 )
 from dawiq.qt_compat import QtCore
 import dataclasses
 from enum import Enum
-from typing import Optional
+from typing import Optional, Tuple
 import pytest
 
 
@@ -151,6 +152,34 @@ def test_DataWidget_setDataValue(qtbot):
     assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=False))
 
 
+def test_DataWidget_subwidget(qtbot):
+    @dataclasses.dataclass
+    class Cls1:
+        x: bool
+
+    @dataclasses.dataclass
+    class Cls2:
+        a: int
+        b: Cls1
+
+    dataWidget = dataclass2Widget(Cls2)
+
+    with qtbot.waitSignal(
+        dataWidget.dataValueChanged,
+        check_params_cb=lambda val: val == dict(a=MISSING, b=dict(x=True)),
+    ):
+        dataWidget.widget(1).widget(0).click()
+    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=True))
+
+    with qtbot.waitSignal(
+        dataWidget.dataValueChanged,
+        check_params_cb=lambda tup: tup == dict(a=1, b=dict(x=True)),
+    ):
+        qtbot.keyPress(dataWidget.widget(0), "1")
+        qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
+    assert dataWidget.dataValue() == dict(a=1, b=dict(x=True))
+
+
 def test_type2Widget(qtbot):
     assert isinstance(type2Widget(bool), BoolCheckBox)
     assert not type2Widget(bool).isTristate()
@@ -167,6 +196,12 @@ def test_type2Widget(qtbot):
         x = 1
 
     assert isinstance(type2Widget(E), EnumComboBox)
+
+    with pytest.raises(TypeError):
+        type2Widget(Tuple)
+    with pytest.raises(TypeError):
+        type2Widget(Tuple[int, ...])
+    assert isinstance(type2Widget(Tuple[int, bool, E]), TupleGroupBox)
 
 
 def test_dataclass2Widget(qtbot):

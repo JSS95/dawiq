@@ -8,7 +8,8 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 
 from .qt_compat import QtCore, QtWidgets, QtGui
 from enum import Enum
-from typing import Optional, Union, Tuple, TypeVar, Type
+from typing import Optional, Union, Tuple, TypeVar, Type, List
+from .typing import FieldWidgetProtocol
 
 
 __all__ = [
@@ -20,6 +21,7 @@ __all__ = [
     "FloatLineEdit",
     "StrLineEdit",
     "EnumComboBox",
+    "TupleGroupBox",
 ]
 
 
@@ -338,3 +340,92 @@ class EnumComboBox(QtWidgets.QComboBox):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+
+V = TypeVar("V", bound="TupleGroupBox")
+
+
+class TupleGroupBox(QtWidgets.QGroupBox):
+    """
+    Group box for tuple data with fixed length.
+
+    Standard way to construct this widget is by :meth:`fromWidgets` class method.
+    Widgets must be other data widgets.
+
+    :meth:`dataValue` returns the current tuple value. When data value of any
+    subwidget is changed, :attr:`dataValueChanged` signal is emitted.
+    :meth:`setDataValue` changes the data of subwidgets.
+
+    Data value is the tuple containing subwidget data, and never :obj:`MISSING`.
+
+    :meth:`setDataValue` sets the subwidget data. If :obj:`MISSING` is passed,
+    it is propagated to all subwidget.
+
+    """
+
+    dataValueChanged = QtCore.Signal(tuple)
+
+    @classmethod
+    def fromWidgets(cls: Type[V], widgets: List[FieldWidgetProtocol]) -> V:
+        obj = cls()
+
+        for widget in widgets:
+            widget.dataValueChanged.connect(obj.emitDataValueChanged)
+
+        layout = QtWidgets.QHBoxLayout()
+        for widget in widgets:
+            layout.addWidget(widget)
+        obj.setLayout(layout)
+
+        return obj
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._block_dataValueChanged = False
+
+    def count(self) -> int:
+        return self.layout().count()
+
+    def widget(self, index: int) -> Optional[FieldWidgetProtocol]:
+        item = self.layout().itemAt(index)
+        if item is not None:
+            item = item.widget()
+        return item
+
+    def dataName(self) -> str:
+        return self.title()
+
+    def setDataName(self, name: str):
+        self.setTitle(name)
+        self.setToolTip(name)
+
+    def dataValue(self) -> tuple:
+        ret = []
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                break
+            ret.append(widget.dataValue())
+        return tuple(ret)
+
+    def setDataValue(self, value: Union[tuple, _MISSING]):
+        self._block_dataValueChanged = True
+        if value is MISSING:
+            for i in range(self.count()):
+                widget = self.widget(i)
+                if widget is None:
+                    break
+                widget.setDataValue(MISSING)
+        else:
+            for i in range(self.count()):
+                widget = self.widget(i)
+                if widget is None:
+                    break
+                widget.setDataValue(value[i])  # type: ignore[index]
+        self._block_dataValueChanged = False
+        self.emitDataValueChanged()
+
+    def emitDataValueChanged(self):
+        if not self._block_dataValueChanged:
+            val = self.dataValue()
+            self.dataValueChanged.emit(val)

@@ -6,6 +6,7 @@ from dawiq import (
     FloatLineEdit,
     StrLineEdit,
     EnumComboBox,
+    TupleGroupBox,
     MISSING,
 )
 import enum
@@ -338,3 +339,57 @@ def test_EnumComboBox(qtbot):
     ):
         widget.setCurrentIndex(-1)
     assert widget.dataValue() is MISSING
+
+
+def test_TupleGroupBox_dataValue(qtbot):
+    widget = TupleGroupBox.fromWidgets([IntLineEdit(), IntLineEdit()])
+    assert widget.dataValue() == (MISSING, MISSING)
+
+    widget.widget(0).setText("1")
+    widget.widget(1).setText("2")
+    assert widget.dataValue() == (1, 2)
+
+
+def test_TupleGroupBox_setDataValue(qtbot):
+    widget = TupleGroupBox.fromWidgets([IntLineEdit(), IntLineEdit()])
+
+    class Counter:
+        def __init__(self):
+            self.i = 0
+
+        def count(self):
+            self.i += 1
+
+    counter = Counter()
+    widget.dataValueChanged.connect(counter.count)
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, 2)
+    ):
+        widget.setDataValue((1, 2))
+    assert widget.dataValue() == (1, 2)
+    assert counter.i == 1
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged, check_params_cb=lambda tup: tup == (MISSING, MISSING)
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.dataValue() == (MISSING, MISSING)
+
+
+def test_TupleGroupBox_subwidget(qtbot):
+    widget = TupleGroupBox.fromWidgets([IntLineEdit(), IntLineEdit()])
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, MISSING)
+    ):
+        qtbot.keyPress(widget.widget(0), "1")
+        qtbot.keyPress(widget.widget(0), QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == (1, MISSING)
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, 2)
+    ):
+        qtbot.keyPress(widget.widget(1), "2")
+        qtbot.keyPress(widget.widget(1), QtCore.Qt.Key.Key_Return)
+    assert widget.dataValue() == (1, 2)

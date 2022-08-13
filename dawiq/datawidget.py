@@ -15,6 +15,7 @@ from .fieldwidgets import (
     FloatLineEdit,
     StrLineEdit,
     EnumComboBox,
+    TupleGroupBox,
 )
 import dataclasses
 from enum import Enum
@@ -34,7 +35,7 @@ class DataWidget(QtWidgets.QGroupBox):
     Widget to represent the data structure.
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    dataValueChanged = QtCore.Signal(dict)
 
     def __init__(
         self,
@@ -146,16 +147,27 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
     """Construct the widget for given type annotation."""
     if isinstance(t, type) and issubclass(t, Enum):
         return EnumComboBox.fromEnum(t)
-    if isinstance(t, type) and issubclass(t, bool):
+    if t is bool:
         return BoolCheckBox()
-    if isinstance(t, type) and issubclass(t, int):
+    if t is int:
         return IntLineEdit()
-    if isinstance(t, type) and issubclass(t, float):
+    if t is float:
         return FloatLineEdit()
-    if isinstance(t, type) and issubclass(t, str):
+    if t is str:
         return StrLineEdit()
 
-    origin = getattr(t, "__origin__", None)
+    origin = getattr(t, "__origin__", None)  # t is tuple
+
+    if origin is tuple:
+        args = getattr(t, "__args__", None)
+        if args is None:
+            raise TypeError("%s does not have argument type" % t)
+        if Ellipsis in args:
+            txt = "Number of arguments of %s not fixed" % t
+            raise TypeError(txt)
+
+        widgets = [type2Widget(arg) for arg in args]
+        return TupleGroupBox.fromWidgets(widgets)
 
     if origin is Union:
         args = [a for a in getattr(t, "__args__") if not isinstance(None, a)]

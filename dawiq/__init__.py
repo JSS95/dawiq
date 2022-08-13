@@ -18,6 +18,7 @@ from .fieldwidgets import (
     FloatLineEdit,
     StrLineEdit,
     EnumComboBox,
+    TupleGroupBox,
 )
 from .datawidget import (
     DataWidget,
@@ -39,6 +40,7 @@ __all__ = [
     "FloatLineEdit",
     "StrLineEdit",
     "EnumComboBox",
+    "TupleGroupBox",
     "DataWidget",
     "type2Widget",
     "dataclass2Widget",
