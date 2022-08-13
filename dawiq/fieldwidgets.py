@@ -8,7 +8,7 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 
 from .qt_compat import QtCore, QtWidgets, QtGui
 from enum import Enum
-from typing import Optional, Union, Tuple, TypeVar, Type, List
+from typing import Optional, Union, Tuple, TypeVar, Type
 from .typing import FieldWidgetProtocol
 
 
@@ -349,9 +349,8 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     """
     Group box for tuple data with fixed length.
 
-    This is the group box which contains subwidgets generated from the tuple's
-    item types. Standard way to construct this widget is by :meth:`fromWidgets`
-    class method.
+    This is the group box which contains field widgets as subwidgets. Data value
+    is constructed from the data of subwidgets.
 
     :meth:`dataValue` returns the current tuple value. When data value of any
     subwidget is changed, :attr:`dataValueChanged` signal is emitted.
@@ -366,23 +365,32 @@ class TupleGroupBox(QtWidgets.QGroupBox):
 
     dataValueChanged = QtCore.Signal(tuple)
 
-    @classmethod
-    def fromWidgets(cls: Type[V], widgets: List[FieldWidgetProtocol]) -> V:
-        obj = cls()
-
-        for widget in widgets:
-            widget.dataValueChanged.connect(obj.emitDataValueChanged)
-
-        layout = QtWidgets.QHBoxLayout()
-        for widget in widgets:
-            layout.addWidget(widget)
-        obj.setLayout(layout)
-
-        return obj
-
-    def __init__(self, parent=None):
+    def __init__(
+        self,
+        orientation: QtCore.Qt.Orientation = QtCore.Qt.Orientation.Horizontal,
+        parent=None,
+    ):
         super().__init__(parent)
+        self._orientation = orientation
         self._block_dataValueChanged = False
+
+        if orientation == QtCore.Qt.Orientation.Vertical:
+            layout = QtWidgets.QVBoxLayout()
+        elif orientation == QtCore.Qt.Orientation.Horizontal:
+            layout = QtWidgets.QHBoxLayout()
+        else:
+            raise TypeError(f"Invalid orientation: {orientation}")
+        self.setLayout(layout)
+
+    def fieldName(self) -> str:
+        return self.title()
+
+    def setfieldName(self, name: str):
+        self.setTitle(name)
+        self.setToolTip(name)
+
+    def orientation(self) -> QtCore.Qt.Orientation:
+        return self._orientation
 
     def count(self) -> int:
         """Number of subwidgets."""
@@ -397,12 +405,42 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             item = item.widget()
         return item
 
-    def fieldName(self) -> str:
-        return self.title()
+    def insertWidget(
+        self,
+        index: int,
+        widget: FieldWidgetProtocol,
+        stretch: int = 0,
+        alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
+    ):
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+        widget.dataValueChanged.connect(self.emitDataValueChanged)
+        self.layout().insertWidget(index, widget, stretch, alignment)
 
-    def setfieldName(self, name: str):
-        self.setTitle(name)
-        self.setToolTip(name)
+    def addWidget(
+        self,
+        widget: FieldWidgetProtocol,
+        stretch: int = 0,
+        alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
+    ):
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+        widget.dataValueChanged.connect(self.emitDataValueChanged)
+        self.layout().addWidget(widget, stretch, alignment)
+
+    def removeWidget(self, widget: FieldWidgetProtocol):
+        for i in range(self.count()):
+            w = self.widget(i)
+            if w is None:
+                break
+            if w == widget:
+                widget.dataValueChanged.disconnect(self.emitDataValueChanged)
+                break
+        self.layout().removeWidget(widget)
 
     def dataValue(self) -> tuple:
         ret = []

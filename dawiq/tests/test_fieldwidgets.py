@@ -341,8 +341,75 @@ def test_EnumComboBox(qtbot):
     assert widget.dataValue() is MISSING
 
 
+def test_TupleGroupBox_addWidget(qtbot):
+    tupleWidget = TupleGroupBox()
+    assert tupleWidget.count() == 0
+
+    w0 = BoolCheckBox()
+    tupleWidget.addWidget(w0)
+    assert tupleWidget.count() == 1
+    assert tupleWidget.widget(0) is w0
+    assert tupleWidget.widget(1) is None
+
+    w1 = IntLineEdit()
+    tupleWidget.addWidget(w1)
+    assert tupleWidget.count() == 2
+    assert tupleWidget.widget(0) is w0
+    assert tupleWidget.widget(1) is w1
+
+    # test that signals are connected
+    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+        w0.click()
+    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
+
+
+def test_TupleGroupBox_insertWidget(qtbot):
+    tupleWidget = TupleGroupBox()
+    assert tupleWidget.count() == 0
+
+    w0 = BoolCheckBox()
+    tupleWidget.insertWidget(0, w0)
+    assert tupleWidget.count() == 1
+    assert tupleWidget.widget(0) is w0
+    assert tupleWidget.widget(1) is None
+
+    w1 = IntLineEdit()
+    tupleWidget.insertWidget(0, w1)
+    assert tupleWidget.count() == 2
+    assert tupleWidget.widget(0) is w1
+    assert tupleWidget.widget(1) is w0
+
+    # test that signals are connected
+    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+        w0.click()
+    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
+
+
+def test_TupleGroupBox_removeWidget(qtbot):
+    tupleWidget = TupleGroupBox()
+    w0 = BoolCheckBox()
+    w1 = IntLineEdit()
+
+    tupleWidget.addWidget(w0)
+    assert tupleWidget.count() == 1
+
+    tupleWidget.removeWidget(w1)
+    assert tupleWidget.count() == 1
+
+    tupleWidget.removeWidget(w0)
+    assert tupleWidget.count() == 0
+
+    # test that signals are disconnected
+    with qtbot.assertNotEmitted(tupleWidget.dataValueChanged):
+        w0.click()
+
+
 def test_TupleGroupBox_dataValue(qtbot):
-    widget = TupleGroupBox.fromWidgets([IntLineEdit(), IntLineEdit()])
+    widget = TupleGroupBox()
+    widget.addWidget(IntLineEdit())
+    widget.addWidget(IntLineEdit())
     assert widget.dataValue() == (MISSING, MISSING)
 
     widget.widget(0).setText("1")
@@ -351,7 +418,9 @@ def test_TupleGroupBox_dataValue(qtbot):
 
 
 def test_TupleGroupBox_setDataValue(qtbot):
-    widget = TupleGroupBox.fromWidgets([IntLineEdit(), IntLineEdit()])
+    widget = TupleGroupBox()
+    widget.addWidget(IntLineEdit())
+    widget.addWidget(IntLineEdit())
 
     class Counter:
         def __init__(self):
@@ -378,7 +447,9 @@ def test_TupleGroupBox_setDataValue(qtbot):
 
 
 def test_TupleGroupBox_subwidget(qtbot):
-    widget = TupleGroupBox.fromWidgets([IntLineEdit(), IntLineEdit()])
+    widget = TupleGroupBox()
+    widget.addWidget(IntLineEdit())
+    widget.addWidget(IntLineEdit())
 
     with qtbot.waitSignal(
         widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, MISSING)

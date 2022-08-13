@@ -170,8 +170,11 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
             txt = "Number of arguments of %s not fixed" % t
             raise TypeError(txt)
 
-        widgets = [type2Widget(arg) for arg in args]
-        return TupleGroupBox.fromWidgets(widgets)
+        subwidgets = [type2Widget(arg) for arg in args]
+        tupwidget = TupleGroupBox()
+        for w in subwidgets:
+            tupwidget.addWidget(w)
+        return tupwidget
 
     if origin is Union:
         args = [a for a in getattr(t, "__args__") if not isinstance(None, a)]
