@@ -14,6 +14,11 @@ from .fieldwidgets import (
     BoolCheckBox,
     EmptyIntValidator,
     IntLineEdit,
+    EmptyFloatValidator,
+    FloatLineEdit,
+    StrLineEdit,
+    EnumComboBox,
+    TupleGroupBox,
 )
 from .datawidget import (
     DataWidget,
@@ -31,6 +36,11 @@ __all__ = [
     "MISSING",
     "EmptyIntValidator",
     "IntLineEdit",
+    "EmptyFloatValidator",
+    "FloatLineEdit",
+    "StrLineEdit",
+    "EnumComboBox",
+    "TupleGroupBox",
     "DataWidget",
     "type2Widget",
     "dataclass2Widget",

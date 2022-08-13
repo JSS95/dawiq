@@ -7,8 +7,18 @@ structure established by the dataclass.
 """
 
 from .qt_compat import QtCore, QtWidgets
-from .fieldwidgets import _MISSING, MISSING, BoolCheckBox, IntLineEdit
+from .fieldwidgets import (
+    _MISSING,
+    MISSING,
+    BoolCheckBox,
+    IntLineEdit,
+    FloatLineEdit,
+    StrLineEdit,
+    EnumComboBox,
+    TupleGroupBox,
+)
 import dataclasses
+from enum import Enum
 from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
 from .typing import FieldWidgetProtocol, DataclassProtocol
 
@@ -22,10 +32,23 @@ __all__ = [
 
 class DataWidget(QtWidgets.QGroupBox):
     """
-    Widget to represent the data structure.
+    Group box for structured data.
+
+    This is the group box which contains field widgets as subwidgets. Data value
+    is constructed from the data of subwidgets as dict.
+
+    :meth:`dataValue` returns the current dict value. When data value of any
+    subwidget is changed, :attr:`dataValueChanged` signal is emitted.
+    :meth:`setDataValue` changes the data of subwidgets.
+
+    Data value is the dict containing subwidget data, and never :obj:`MISSING`.
+
+    :meth:`setDataValue` sets the subwidget data. If :obj:`MISSING` is passed,
+    it is propagated to all subwidget.
+
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    dataValueChanged = QtCore.Signal(dict)
 
     def __init__(
         self,
@@ -51,12 +74,17 @@ class DataWidget(QtWidgets.QGroupBox):
         self.setTitle(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
+        """Orientation to stack the subwidgets."""
         return self._orientation
 
     def count(self) -> int:
+        """Number of subwidgets."""
         return self.layout().count()
 
     def widget(self, index: int) -> Optional[FieldWidgetProtocol]:
+        """
+        Returns the subwidget at the given index, or None for invalid index.
+        """
         item = self.layout().itemAt(index)
         if item is not None:
             item = item.widget()
@@ -69,6 +97,7 @@ class DataWidget(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
+        """Insert the widget to layout and connect data value change signal."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -84,6 +113,7 @@ class DataWidget(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
+        """Add the widget to layout and connect data value change signal."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -94,6 +124,9 @@ class DataWidget(QtWidgets.QGroupBox):
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
+        """
+        Remove the widget from layout and disconnect data value change signal.
+        """
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -134,13 +167,44 @@ class DataWidget(QtWidgets.QGroupBox):
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
-    """Construct the widget for given type annotation."""
-    if isinstance(t, type) and issubclass(t, bool):
-        return BoolCheckBox()
-    if isinstance(t, type) and issubclass(t, int):
-        return IntLineEdit()
+    """
+    Construct the widget for given type annotation *t*.
 
-    origin = getattr(t, "__origin__", None)
+    * Subclass of :class:`enum.Enum` -> :class:`.EnumComboBox`
+    * :class:`bool` -> :class:`.BoolCheckBox`
+    * ``Optional[bool]`` -> :class:`.BoolCheckBox` with tristate
+    * :class:`int` -> :class:`.IntLineEdit`
+    * :class:`float` -> :class:`.FloatLineEdit`
+    * :class:`str` -> :class:`.StrLineEdit`
+    * :class:`Tuple` with fixed length -> :class:`.TupleGroupBox`
+
+    """
+    if isinstance(t, type) and issubclass(t, Enum):
+        return EnumComboBox.fromEnum(t)
+    if t is bool:
+        return BoolCheckBox()
+    if t is int:
+        return IntLineEdit()
+    if t is float:
+        return FloatLineEdit()
+    if t is str:
+        return StrLineEdit()
+
+    origin = getattr(t, "__origin__", None)  # t is tuple
+
+    if origin is tuple:
+        args = getattr(t, "__args__", None)
+        if args is None:
+            raise TypeError("%s does not have argument type" % t)
+        if Ellipsis in args:
+            txt = "Number of arguments of %s not fixed" % t
+            raise TypeError(txt)
+
+        subwidgets = [type2Widget(arg) for arg in args]
+        tupwidget = TupleGroupBox()
+        for w in subwidgets:
+            tupwidget.addWidget(w)
+        return tupwidget
 
     if origin is Union:
         args = [a for a in getattr(t, "__args__") if not isinstance(None, a)]
