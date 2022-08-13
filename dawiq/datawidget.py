@@ -32,7 +32,20 @@ __all__ = [
 
 class DataWidget(QtWidgets.QGroupBox):
     """
-    Widget to represent the data structure.
+    Group box for structured data.
+
+    This is the group box which contains field widgets as subwidgets. Data value
+    is constructed from the data of subwidgets as dict.
+
+    :meth:`dataValue` returns the current dict value. When data value of any
+    subwidget is changed, :attr:`dataValueChanged` signal is emitted.
+    :meth:`setDataValue` changes the data of subwidgets.
+
+    Data value is the dict containing subwidget data, and never :obj:`MISSING`.
+
+    :meth:`setDataValue` sets the subwidget data. If :obj:`MISSING` is passed,
+    it is propagated to all subwidget.
+
     """
 
     dataValueChanged = QtCore.Signal(dict)
@@ -61,6 +74,7 @@ class DataWidget(QtWidgets.QGroupBox):
         self.setTitle(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
+        """Orientation to stack the subwidgets."""
         return self._orientation
 
     def count(self) -> int:
@@ -83,6 +97,7 @@ class DataWidget(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
+        """Insert the widget to layout and connect data value change signal."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -98,6 +113,7 @@ class DataWidget(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
+        """Add the widget to layout and connect data value change signal."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -108,6 +124,9 @@ class DataWidget(QtWidgets.QGroupBox):
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
+        """
+        Remove the widget from layout and disconnect data value change signal.
+        """
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -148,7 +167,18 @@ class DataWidget(QtWidgets.QGroupBox):
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
-    """Construct the widget for given type annotation."""
+    """
+    Construct the widget for given type annotation *t*.
+
+    * Subclass of :class:`enum.Enum` -> :class:`.EnumComboBox`
+    * :class:`bool` -> :class:`.BoolCheckBox`
+    * ``Optional[bool]`` -> :class:`.BoolCheckBox` with tristate
+    * :class:`int` -> :class:`.IntLineEdit`
+    * :class:`float` -> :class:`.FloatLineEdit`
+    * :class:`str` -> :class:`.StrLineEdit`
+    * :class:`Tuple` with fixed length -> :class:`.TupleGroupBox`
+
+    """
     if isinstance(t, type) and issubclass(t, Enum):
         return EnumComboBox.fromEnum(t)
     if t is bool:

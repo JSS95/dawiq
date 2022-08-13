@@ -350,7 +350,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     Group box for tuple data with fixed length.
 
     This is the group box which contains field widgets as subwidgets. Data value
-    is constructed from the data of subwidgets.
+    is constructed from the data of subwidgets as tuple.
 
     :meth:`dataValue` returns the current tuple value. When data value of any
     subwidget is changed, :attr:`dataValueChanged` signal is emitted.
@@ -390,6 +390,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self.setToolTip(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
+        """Orientation to stack the subwidgets."""
         return self._orientation
 
     def count(self) -> int:
@@ -412,6 +413,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
+        """Insert the widget to layout and connect data value change signal."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -425,6 +427,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
+        """Add the widget to layout and connect data value change signal."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
@@ -433,6 +436,9 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
+        """
+        Remove the widget from layout and disconnect data value change signal.
+        """
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
