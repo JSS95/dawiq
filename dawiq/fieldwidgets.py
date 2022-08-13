@@ -15,6 +15,7 @@ __all__ = [
     "BoolCheckBox",
     "EmptyIntValidator",
     "IntLineEdit",
+    "EmptyFloatValidator",
 ]
 
 
@@ -156,3 +157,13 @@ class IntLineEdit(QtWidgets.QLineEdit):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+
+class EmptyFloatValidator(QtGui.QDoubleValidator):
+    """Validator which accpets float and empty string"""
+
+    def validate(self, input: str, pos: int) -> Tuple[QtGui.QValidator.State, str, int]:
+        state, ret_input, ret_pos = super().validate(input, pos)
+        if not input:
+            state = QtGui.QValidator.State.Acceptable
+        return (state, ret_input, ret_pos)

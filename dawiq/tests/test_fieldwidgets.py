@@ -2,6 +2,7 @@ from dawiq import (
     BoolCheckBox,
     EmptyIntValidator,
     IntLineEdit,
+    EmptyFloatValidator,
     MISSING,
 )
 from dawiq.qt_compat import QtCore, QtWidgets
@@ -133,3 +134,28 @@ def test_IntLineEdit(qtbot):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
     assert widget.dataValue() == -1
+
+
+def test_EmptyFloatValidator(qtbot):
+    widget = QtWidgets.QLineEdit()
+    widget.setValidator(EmptyFloatValidator(widget))
+
+    # empty text is valid
+    with qtbot.waitSignal(widget.editingFinished):
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+
+    with qtbot.assertNotEmitted(widget.editingFinished):
+        qtbot.keyPress(widget, "-")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+
+    with qtbot.waitSignal(widget.editingFinished):
+        qtbot.keyPress(widget, "1")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+
+    with qtbot.waitSignal(widget.editingFinished):
+        qtbot.keyPress(widget, ".")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+
+    with qtbot.waitSignal(widget.editingFinished):
+        qtbot.keyPress(widget, "1")
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
