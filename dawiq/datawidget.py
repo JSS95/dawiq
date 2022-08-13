@@ -14,8 +14,10 @@ from .fieldwidgets import (
     IntLineEdit,
     FloatLineEdit,
     StrLineEdit,
+    EnumComboBox,
 )
 import dataclasses
+from enum import Enum
 from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
 from .typing import FieldWidgetProtocol, DataclassProtocol
 
@@ -142,6 +144,8 @@ class DataWidget(QtWidgets.QGroupBox):
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
     """Construct the widget for given type annotation."""
+    if isinstance(t, type) and issubclass(t, Enum):
+        return EnumComboBox.fromEnum(t)
     if isinstance(t, type) and issubclass(t, bool):
         return BoolCheckBox()
     if isinstance(t, type) and issubclass(t, int):

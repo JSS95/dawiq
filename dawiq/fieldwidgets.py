@@ -7,7 +7,8 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 """
 
 from .qt_compat import QtCore, QtWidgets, QtGui
-from typing import Optional, Union, Tuple
+from enum import Enum
+from typing import Optional, Union, Tuple, TypeVar, Type
 
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     "EmptyFloatValidator",
     "FloatLineEdit",
     "StrLineEdit",
+    "EnumComboBox",
 ]
 
 
@@ -268,6 +270,70 @@ class StrLineEdit(QtWidgets.QLineEdit):
             txt = val  # type: ignore[assignment]
         self.setText(txt)
         self.emitDataValueChanged()
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)
+
+
+T = TypeVar("T", bound="EnumComboBox")
+
+
+class EnumComboBox(QtWidgets.QComboBox):
+    """
+    Combo box for enum type.
+
+    Standard way to construct this widget is by :meth:`fromEnum` class method.
+    N-th item contains N-th member of the Enum as its data.
+
+    :meth:`dataValue` returns the current member. When current index is changed,
+    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
+    current index.
+
+    Data value is the Enum member. If the current index is empty, data value is
+    :obj:`MISSING`
+
+    :meth:`setDataValue` sets the current index. If :obj:`MISSING` is passed,
+    index is set to -1.
+
+    """
+
+    dataValueChanged = QtCore.Signal(object)
+
+    @classmethod
+    def fromEnum(cls: Type[T], enum: Type[Enum]) -> T:
+        obj = cls()
+        for e in enum:
+            obj.addItem(e.name, userData=e)
+        obj.setCurrentIndex(-1)
+        return obj
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+        self.currentIndexChanged.connect(self.emitDataValueChanged)
+
+    def dataName(self) -> str:
+        return self.placeholderText()
+
+    def setDataName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
+
+    def dataValue(self) -> Union[Enum, _MISSING]:
+        index = self.currentIndex()
+        if index == -1:
+            ret = MISSING
+        else:
+            ret = self.itemData(index)
+        return ret
+
+    def setDataValue(self, value: Union[Enum, _MISSING]):
+        if value is MISSING:
+            index = -1
+        else:
+            index = self.findData(value)
+        self.setCurrentIndex(index)
 
     def emitDataValueChanged(self):
         val = self.dataValue()

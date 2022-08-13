@@ -5,8 +5,10 @@ from dawiq import (
     EmptyFloatValidator,
     FloatLineEdit,
     StrLineEdit,
+    EnumComboBox,
     MISSING,
 )
+import enum
 from dawiq.qt_compat import QtCore, QtWidgets
 
 
@@ -252,3 +254,87 @@ def test_StrLineEdit(qtbot):
         qtbot.keyPress(widget, "x")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
     assert widget.dataValue() == "x"
+
+
+def test_EnumComboBox(qtbot):
+    class MyEnum(enum.Enum):
+        x = 1
+        y = 2
+        z = 3
+
+    widget = EnumComboBox.fromEnum(MyEnum)
+    assert widget.count() == 3
+    assert widget.currentIndex() == -1
+    assert widget.dataValue() is MISSING
+
+    # test with setDataValue
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val == MyEnum.x,
+    ):
+        widget.setDataValue(MyEnum.x)
+    assert widget.currentIndex() == 0
+    assert widget.dataValue() == MyEnum.x
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val == MyEnum.y,
+    ):
+        widget.setDataValue(MyEnum.y)
+    assert widget.currentIndex() == 1
+    assert widget.dataValue() == MyEnum.y
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val == MyEnum.z,
+    ):
+        widget.setDataValue(MyEnum.z)
+    assert widget.currentIndex() == 2
+    assert widget.dataValue() == MyEnum.z
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val is MISSING,
+    ):
+        widget.setDataValue(MISSING)
+    assert widget.currentIndex() == -1
+    assert widget.dataValue() is MISSING
+
+    # test with setCurrentIndex
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val == MyEnum.x,
+    ):
+        widget.setCurrentIndex(0)
+    assert widget.dataValue() == MyEnum.x
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val == MyEnum.y,
+    ):
+        widget.setCurrentIndex(1)
+    assert widget.dataValue() == MyEnum.y
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val == MyEnum.z,
+    ):
+        widget.setCurrentIndex(2)
+    assert widget.dataValue() == MyEnum.z
+
+    with qtbot.waitSignal(
+        widget.dataValueChanged,
+        raising=True,
+        check_params_cb=lambda val: val is MISSING,
+    ):
+        widget.setCurrentIndex(-1)
+    assert widget.dataValue() is MISSING

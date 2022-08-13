@@ -17,6 +17,7 @@ from .fieldwidgets import (
     EmptyFloatValidator,
     FloatLineEdit,
     StrLineEdit,
+    EnumComboBox,
 )
 from .datawidget import (
     DataWidget,
@@ -37,6 +38,7 @@ __all__ = [
     "EmptyFloatValidator",
     "FloatLineEdit",
     "StrLineEdit",
+    "EnumComboBox",
     "DataWidget",
     "type2Widget",
     "dataclass2Widget",

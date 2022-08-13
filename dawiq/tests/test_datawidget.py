@@ -4,10 +4,14 @@ from dawiq import (
     dataclass2Widget,
     BoolCheckBox,
     IntLineEdit,
+    FloatLineEdit,
+    StrLineEdit,
+    EnumComboBox,
     MISSING,
 )
 from dawiq.qt_compat import QtCore
 import dataclasses
+from enum import Enum
 from typing import Optional
 import pytest
 
@@ -154,6 +158,15 @@ def test_type2Widget(qtbot):
     assert type2Widget(Optional[bool]).isTristate()
 
     assert isinstance(type2Widget(int), IntLineEdit)
+
+    assert isinstance(type2Widget(float), FloatLineEdit)
+
+    assert isinstance(type2Widget(str), StrLineEdit)
+
+    class E(Enum):
+        x = 1
+
+    assert isinstance(type2Widget(E), EnumComboBox)
 
 
 def test_dataclass2Widget(qtbot):
