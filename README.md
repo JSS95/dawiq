@@ -8,12 +8,13 @@ DaWiQ is a Python package to generate Qt widget from dataclass.
 
 It provides:
 - Dynamic construction of widget from dataclass
+- Representing custom type with pre-defined widget
 - Delegate for dataclass widget
 
 The following Qt bindings are supported:
 - [PySide6](https://pypi.org/project/PySide6/)
-- [PyQt6](https://pypi.org/project/PyQt6/)
 - [PySide2](https://pypi.org/project/PySide2/)
+- [PyQt6](https://pypi.org/project/PyQt6/)
 - [PyQt5](https://pypi.org/project/PyQt5/)
 
 # Documentation
