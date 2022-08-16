@@ -1,11 +1,25 @@
 """
+Dynamic Qt import
+=================
+
 Qt API for PyQt5/6 and PySide2/6.
 
-Import the Qt subpackages from this module, as if importing from the Qt binding
-package.
+To access Qt objects independently to the installed Qt binding, import the Qt
+subpackages from this module as if importing from the Qt binding package.
+
+.. code:: python
+
+    from dawiq.qt_compat import QtCore
+
+Or you can use :obj:`qt_api` which is an instance of :class:`QtAPI`.
+
+.. code:: python
+
+    from dawiq.qt_compat import qt_api
+    widget = qt_api.QtWidgets.QWidget()
 
 Notes
-=====
+-----
 
 This module is not part of public API, therefore users must not rely on it.
 
@@ -15,26 +29,55 @@ https://github.com/pytest-dev/pytest-qt.
 """
 
 
-class QtAPIError(Exception):
-    pass
+import os
 
 
-class _QtAPI:
+__all__ = [
+    "QtAPI",
+    "QtAPIError",
+    "qt_api",
+]
+
+
+class QtAPI:
     """
     Interface to access the Qt binding package installed in the environment.
 
-    This object can be treated as root namespace of the Qt package.
+    The instance of this class can be treated as root namespace of Qt package.
+    At construction, this object determines the Qt binding package where it will
+    import the submodules. When attribute starting with ``Qt`` is called
+    (e.g. ``QtCore`` - this is the naming rule for Qt subpackages) this object
+    imports the module from root package.
+
+    For example, the following code imports :mod:`PyQt5.QtWidgets` module where
+    :class:`QWidget` is retrieved.
+
+    .. code:: python
+
+        from dawiq.qt_compat import QtAPI
+        widget = QtAPI("PyQt5").QtWidgets.QWidget()
+
+    Qt binding is determined by following steps.
+
+    1. If *api* argument is passed, use it.
+
+    2. If ``DAWIQ_QT_API`` environment variable is set, use it.
+
+    3. Try import the packages in following order.
+
+        * PySide6
+        * PySide2
+        * PyQt6
+        * PyQt5
+
+    Letter case does not matter when specifying the API. If importing fails,
+    :class:`QtAPIError` is raised.
 
     """
 
-    supported_apis = [
-        "PySide6",
-        "PySide2",
-        "PyQt6",
-        "PyQt5",
-    ]
+    # When new API is supported, update README and intro.rst
 
-    def __init__(self):
+    def __init__(self, api=os.environ.get("DAWIQ_QT_API")):
         self._import_errors = {}
 
         def _can_import(name):
@@ -45,9 +88,25 @@ class _QtAPI:
                 self._import_errors[name] = str(e)
                 return False
 
-        # Not importing only the root namespace because when uninstalling from conda,
-        # the namespace can still be there.
-        if _can_import("PySide6.QtCore"):
+        # If api is specified, use it.
+        if api is not None:
+            qtapi = {
+                "pyside6": "PySide6",
+                "pyside2": "PySide2",
+                "pyqt6": "PyQt6",
+                "pyqt5": "PyQt5",
+            }.get(api.lower())
+            if qtapi is None:
+                raise QtAPIError(f"Specified Qt API is not supported: '{api}'")
+            try:
+                __import__(f"{qtapi}.QtCore")
+            except ModuleNotFoundError:
+                raise QtAPIError(f"Specified Qt API is not installed: '{qtapi}'")
+            self.qt_binding = qtapi
+        # If api is not specified, try import supported Qt modules.
+        # Not importing only the root namespace because when uninstalling from
+        # conda, the namespace can still be there.
+        elif _can_import("PySide6.QtCore"):
             self.qt_binding = "PySide6"
         elif _can_import("PySide2.QtCore"):
             self.qt_binding = "PySide2"
@@ -74,10 +133,14 @@ class _QtAPI:
     def __getattr__(self, name):
         if name.startswith("Qt"):
             return self._import_module(name)
-        return super().__getattr__(name)
+        return self.__getattribute__(name)
 
 
-qt_api = _QtAPI()
+class QtAPIError(Exception):
+    pass
+
+
+qt_api = QtAPI()
 
 QtCore = qt_api.QtCore
 QtWidgets = qt_api.QtWidgets
