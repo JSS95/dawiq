@@ -75,12 +75,7 @@ class QtAPI:
 
     """
 
-    supported_apis = [
-        "PySide6",
-        "PySide2",
-        "PyQt6",
-        "PyQt5",
-    ]
+    # When new API is supported, update README and intro.rst
 
     def __init__(self, api=os.environ.get("DAWIQ_QT_API")):
         self._import_errors = {}
