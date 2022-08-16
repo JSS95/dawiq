@@ -73,3 +73,7 @@ We then create a widget and display it.
         app.exec()
         app.quit()
 
+Your widget will look like this:
+
+.. figure:: ../_images/widget-example.jpg
+   :align: center
