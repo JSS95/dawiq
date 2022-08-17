@@ -38,9 +38,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     """
     Checkbox for fuzzy boolean value.
 
-    :meth:`dataValue` returns the current value. When the check state is changed,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    check state of the checkbox.
+    :meth:`dataValue` returns the current value. When the check state is changed
+    by user, :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue`
+    changes the check state of the checkbox.
 
     If the box is checked, the data value is True. If unchecked, the value is
     False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
@@ -55,6 +55,7 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._block_dataValueChanged = False
 
         self.stateChanged.connect(self.emitDataValueChanged)
 
@@ -85,9 +86,15 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = QtCore.Qt.CheckState.Unchecked
         else:
             state = QtCore.Qt.CheckState.PartiallyChecked
+
+        self._block_dataValueChanged = True
         self.setCheckState(state)
+        self._block_dataValueChanged = False
 
     def emitDataValueChanged(self, checkstate: Union[int, QtCore.Qt.CheckState]):
+        if self._block_dataValueChanged:
+            return
+
         checkstate = QtCore.Qt.CheckState(checkstate)
         if checkstate == QtCore.Qt.CheckState.Checked:
             state = True
@@ -158,7 +165,6 @@ class IntLineEdit(QtWidgets.QLineEdit):
         else:
             txt = str(val)
         self.setText(txt)
-        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
         val = self.dataValue()
@@ -225,7 +231,6 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         else:
             txt = str(val)
         self.setText(txt)
-        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
         val = self.dataValue()
@@ -271,7 +276,6 @@ class StrLineEdit(QtWidgets.QLineEdit):
         else:
             txt = val  # type: ignore[assignment]
         self.setText(txt)
-        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
         val = self.dataValue()
@@ -288,9 +292,9 @@ class EnumComboBox(QtWidgets.QComboBox):
     Standard way to construct this widget is by :meth:`fromEnum` class method.
     N-th item contains N-th member of the Enum as its data.
 
-    :meth:`dataValue` returns the current member. When current index is changed,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    current index.
+    :meth:`dataValue` returns the current member. When current index is changed
+    by user, :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue`
+    changes the current index.
 
     Data value is the Enum member. If the current index is empty, data value is
     :obj:`MISSING`
@@ -312,6 +316,7 @@ class EnumComboBox(QtWidgets.QComboBox):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._block_dataValueChanged = False
 
         self.currentIndexChanged.connect(self.emitDataValueChanged)
 
@@ -335,9 +340,13 @@ class EnumComboBox(QtWidgets.QComboBox):
             index = -1
         else:
             index = self.findData(value)
+        self._block_dataValueChanged = True
         self.setCurrentIndex(index)
+        self._block_dataValueChanged = False
 
     def emitDataValueChanged(self):
+        if self._block_dataValueChanged:
+            return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
@@ -353,7 +362,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     is constructed from the data of subwidgets as tuple.
 
     :meth:`dataValue` returns the current tuple value. When data value of any
-    subwidget is changed, :attr:`dataValueChanged` signal is emitted.
+    subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
     Data value is the tuple containing subwidget data, and never :obj:`MISSING`.
@@ -472,9 +481,9 @@ class TupleGroupBox(QtWidgets.QGroupBox):
                     break
                 widget.setDataValue(value[i])  # type: ignore[index]
         self._block_dataValueChanged = False
-        self.emitDataValueChanged()
 
     def emitDataValueChanged(self):
-        if not self._block_dataValueChanged:
-            val = self.dataValue()
-            self.dataValueChanged.emit(val)
+        if self._block_dataValueChanged:
+            return
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)

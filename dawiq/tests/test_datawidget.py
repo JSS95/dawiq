@@ -137,17 +137,12 @@ def test_DataWidget_setDataValue(qtbot):
     dataWidget.dataValueChanged.connect(counter.count)
     dval = dict(a=1, b=dict(x=True))
 
-    with qtbot.waitSignal(
-        dataWidget.dataValueChanged, check_params_cb=lambda val: val == dval
-    ):
+    with qtbot.assertNotEmitted(dataWidget.dataValueChanged):
         dataWidget.setDataValue(dval)
     assert dataWidget.dataValue() == dval
-    assert counter.i == 1
+    assert counter.i == 0
 
-    with qtbot.waitSignal(
-        dataWidget.dataValueChanged,
-        check_params_cb=lambda val: val == dict(a=MISSING, b=dict(x=False)),
-    ):
+    with qtbot.assertNotEmitted(dataWidget.dataValueChanged):
         dataWidget.setDataValue(MISSING)
     assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=False))
 

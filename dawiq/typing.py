@@ -36,11 +36,11 @@ class FieldWidgetProtocol(Protocol):
         this method converts :class:`bool` to :obj:`Qt.CheckState` and sets the
         check state.
 
-        If the data value is :obj:`dawid.MISSING`, it indicates that the field is
+        If the data value is :obj:`dawiq.MISSING`, it indicates that the field is
         empty and delegate should handle it specially.
 
-        When the data value is changed, :attr:`dataValueChanged` signal must emit
-        the new value.
+        When the data value is changed by user input, :attr:`dataValueChanged`
+        signal must emit the new value.
 
         """
         ...
@@ -53,8 +53,11 @@ class FieldWidgetProtocol(Protocol):
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
         this method converts the check state to :class:`bool` and returns.
 
-        This method must specially treat :obj:`dawid.MISSING` as empty data by
+        This method must specially treat :obj:`dawiq.MISSING` as empty data by
         clearing the widget.
+
+        This method MUST NOT emit :attr:`dataValueChanged` signal, as doing so
+        can cause infinite loop.
         """
         ...
 
