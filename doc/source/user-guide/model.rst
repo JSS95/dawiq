@@ -195,3 +195,49 @@ Now, the widget and the model are synchronized. Try change the index and the edi
    :align: center
 
    Widget with model
+
+Data converter
+==============
+
+As explained in :ref:`Specifying type hint <type-hint>`, field type can be different from widget data.
+The converter between them can be defined by setting two metadata to the field:
+
+* ``toQt_converter``: converts field data to widget data
+* ``fromQt_converter``: converts widget data to field data
+
+Value of these metadata must be a unary callable. Here is a simple example:
+
+.. code-block:: python
+
+    from dataclasses import dataclass, field
+    from typing import Tuple
+    from dawiq import DataclassDelegate, DataclassMapper
+
+    class CustomClass:
+        def __init__(self, x: int, y: int):
+            self.x = x
+            self.y = y
+
+    @dataclass
+    class DataClass:
+        custom: CustomClass = field(metadata=dict(
+            default=CustomClass(1, 2),
+            Qt_typehint=Tuple[int, int],
+            toQt_converter=lambda obj: (obj.x, obj.y),
+            fromQt_converter=lambda args: CustomClass(*args),
+        ))
+
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(DataClass)
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+
+Constructing model and widget is same as the first section of this document. Here is the result:
+
+.. figure:: ../_images/model-converter-example.jpg
+   :align: center
+
+   Widget with model compatible to custom type
+
+Note that the dataclass defines default value, but the widget is still empty.
+Default value is not updated to model and to empty widget, in order to distinguish the intensional empty input by the user.
