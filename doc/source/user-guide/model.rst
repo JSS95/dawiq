@@ -6,6 +6,9 @@ Mapping with model
 
 .. currentmodule:: dawiq
 
+Delegate and mapper
+===================
+
 :class:`.DataclassDelegate` and :class:`.DataclassMapper` maps the widget constructed by :func:`.dataclass2Widget` with the model.
 
 First, let's define a dataclass, a delegate and a mapper.
@@ -187,3 +190,8 @@ Now, we create a widget with data widget from ``DataClass`` and buttons to chang
 
 
 Now, the widget and the model are synchronized. Try change the index and the editor data.
+
+.. figure:: ../_images/model-example.jpg
+   :align: center
+
+   Widget with model
