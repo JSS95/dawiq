@@ -17,12 +17,12 @@ Widget data can be stored in Qt's item model as dictionary, which can be easily 
         x: int
         y: bool
 
-    widget = dataclass2Widget(DataClass)
+    dataWidget = dataclass2Widget(DataClass)
 
 .. figure:: _images/widget-example.jpg
    :align: center
 
-   Widget constructed from ``DataClass``
+   Appearance of ``dataWidget``
 
 Supported types
 ===============
@@ -37,7 +37,7 @@ By default, the following types are supported:
 * ``float`` -> :class:`.FloatLineEdit`
 * ``str`` -> :class:`.StrLineEdit`
 * ``Tuple`` -> :class:`.TupleGroupBox` with nested field widgets
-* ``dataclass`` -> Nested :class:`DataWidget`
+* ``dataclass`` -> Nested :class:`.DataWidget`
 
 Custom type
 -----------
@@ -46,7 +46,7 @@ Custom types can be supported by defining special metadata to the field:
 
 * ``Qt_typehint``: type hint for widget construction
 * ``toQt_converter``: converts custom object to widget data
-* ``fromQt_converter``: converts custom object from widget data
+* ``fromQt_converter``: returns custom object from widget data
 
 Supported Qt bindings
 =====================
