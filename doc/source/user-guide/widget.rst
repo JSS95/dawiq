@@ -153,11 +153,3 @@ By passing ``Tuple[int, int]`` to ``Qt_typehint``, a widget for its arguments ca
 
 When setting or retrieving the data from this widget, other metadata are required to convert ``CustomClass`` to ``Tuple[int, int]`` and vice versa.
 It is explained in :ref:`data-model` page.
-
-Defining field widget
-=====================
-
-If you want a different widget to represent your field, you can define your custom field widget.
-Field widget must have the structure of :class:`FieldWidgetProtocol <.typing.FieldWidgetProtocol>`.
-
-Once you defined your field widget, define a function which replaces :func:`type2Widget` and pass it to :func:`dataclass2Widget` when constructing the data widget.

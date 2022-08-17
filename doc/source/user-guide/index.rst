@@ -9,3 +9,4 @@ User guide
 
    widget
    model
+   define-widget
