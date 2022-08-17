@@ -48,6 +48,8 @@ Custom types can be supported by defining special metadata to the field:
 * ``toQt_converter``: converts custom object to widget data
 * ``fromQt_converter``: returns custom object from widget data
 
+For more information, see :ref:`user-guide` document.
+
 Supported Qt bindings
 =====================
 
