@@ -1,8 +1,8 @@
 .. _data-model:
 
-==================
-Mapping with model
-==================
+=====================
+Storing data in model
+=====================
 
 .. currentmodule:: dawiq
 
