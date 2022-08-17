@@ -241,3 +241,28 @@ Constructing model and widget is same as the first section of this document. Her
 
 Note that the dataclass defines default value, but the widget is still empty.
 Default value is not updated to model and to empty widget, in order to distinguish the intensional empty input by the user.
+
+Constructing dataclass
+======================
+
+Dictionary from the model data can be used to construct the dataclass instance.
+
+>>> from dataclasses import dataclass
+>>> @dataclass
+... class DataClass:
+...     x: int
+...     y: int
+>>> data = dict(x=1, y=2)
+>>> DataClass(**data)
+DataClass(x=1, y=2)
+
+However, this does not recursively apply to nested dataclass.
+
+>>> @dataclass
+... class DataClass2:
+...     a: DataClass
+>>> data = dict(a=dict(x=1, y=2))
+>>> DataClass2(**data)  # expect DataClass2(a=DataClass(x=1, y=2))
+DataClass2(a={'x': 1, 'y': 2})
+
+Therefore it is recommended to use third-party packages such as `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ which supports this feature.
