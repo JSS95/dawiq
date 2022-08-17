@@ -1,16 +1,56 @@
+.. _intro:
+
 ============
 Introduction
 ============
 
 .. currentmodule:: dawiq
 
-DaWiQ is a Python package for generating Qt widget from dataclass.
+DaWiQ is a Python package for generating Qt widget from the dataclass.
 Widget data can be stored in Qt's item model as dictionary, which can be easily constructed to dataclass instance.
-Item delegate and widget mapper are provided for this purpose.
 
-Widgets for basic types such as :class:`int`, :class:`bool`, :class:`enum.Enum` are provided.
-You may represent the custom object with basic types and construct pre-defined widgets from them.
-This can be done by passing the converters to the metadata of dataclass fields.
+.. code-block:: python
+
+    from dataclasses import dataclass
+    from dawiq import dataclass2Widget
+
+    @dataclass
+    class DataClass:
+        x: int
+        y: bool
+
+    dataWidget = dataclass2Widget(DataClass)
+
+.. figure:: _images/widget-example.jpg
+   :align: center
+
+   Appearance of ``dataWidget``
+
+Supported types
+===============
+
+DaWiQ constructs the widget for each field by using its type hint.
+By default, the following types are supported:
+
+* ``Enum`` -> :class:`.EnumComboBox`
+* ``bool`` -> :class:`.BoolCheckBox`
+* ``Optional[bool]`` -> :class:`.BoolCheckBox` with tristate
+* ``int`` -> :class:`.IntLineEdit`
+* ``float`` -> :class:`.FloatLineEdit`
+* ``str`` -> :class:`.StrLineEdit`
+* ``Tuple`` -> :class:`.TupleGroupBox` with nested field widgets
+* ``dataclass`` -> Nested :class:`.DataWidget`
+
+Custom type
+-----------
+
+Custom types can be supported by defining special metadata to the field:
+
+* ``Qt_typehint``: type hint for widget construction
+* ``toQt_converter``: converts custom object to widget data
+* ``fromQt_converter``: returns custom object from widget data
+
+For more information, see :ref:`user-guide` document.
 
 Supported Qt bindings
 =====================

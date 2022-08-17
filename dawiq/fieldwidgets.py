@@ -318,7 +318,7 @@ class EnumComboBox(QtWidgets.QComboBox):
     def fieldName(self) -> str:
         return self.placeholderText()
 
-    def setfieldName(self, name: str):
+    def setFieldName(self, name: str):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
@@ -385,7 +385,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     def fieldName(self) -> str:
         return self.title()
 
-    def setfieldName(self, name: str):
+    def setFieldName(self, name: str):
         self.setTitle(name)
         self.setToolTip(name)
 
