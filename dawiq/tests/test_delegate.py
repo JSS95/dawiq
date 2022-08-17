@@ -65,6 +65,9 @@ def test_convertFromQt_defaultvalue():
         x=CustomField(3), y=CustomField(2), z=1
     )
     assert convertFromQt(Cls0, dict()) == dict(y=CustomField(0), z=3)
+    assert convertFromQt(Cls0, dict(x=MISSING, y=MISSING, z=MISSING)) == dict(
+        y=CustomField(0), z=3
+    )
 
     @dataclasses.dataclass
     class Cls1:
@@ -79,6 +82,12 @@ def test_convertFromQt_defaultvalue():
     )
     assert convertFromQt(Cls1, dict()) == dict(
         b=dict(x=CustomField(1), y=CustomField(0), z=3)
+    )
+    assert convertFromQt(Cls1, dict(a=MISSING, b=MISSING)) == dict(
+        b=dict(x=CustomField(1), y=CustomField(0), z=3)
+    )
+    assert convertFromQt(Cls1, dict(a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING))) == dict(
+        b=dict(y=CustomField(0), z=3)
     )
 
     @dataclasses.dataclass
