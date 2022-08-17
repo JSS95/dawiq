@@ -123,13 +123,29 @@ def convertToQt(
 
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
-    """Delegate to update the model and editor with structured dictionary."""
+    """
+    Delegate to update the model and editor with structured dictionary.
+
+    By setting :meth:`dataclassType`, this delegate can convert the widget data
+    to field data and vice versa.
+
+    Even if the fields of :meth:`dataclassType` has default value, it is not
+    applied to the widget and the model. This is to make sure that empty input
+    by user is distinguished.
+
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._dataclass_type = None
 
     def dataclassType(self) -> Optional[Type[DataclassProtocol]]:
+        """
+        Dataclass type whose fields are used to convert the data.
+
+        ``None`` indicates that the dataclass type is not set, and data will
+        not be converted.
+        """
         return self._dataclass_type
 
     def setDataclassType(self, dcls: Optional[Type[DataclassProtocol]]):
@@ -139,8 +155,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         """
         Set the data from *editor* to the item of *model* at *index*.
 
-        If *editor* is :class:`DataWidget`, its data is converted by
-        :func:`convertFromQt` before being set to the model.
+        If *editor* is :class:`DataWidget` and :meth:`dataclassType` is set, its
+        data is converted by :func:`convertFromQt` before being set to the model.
         """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
@@ -155,8 +171,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         """
         Set the data from *index* to *editor*.
 
-        If *editor* is :class:`DataWidget`, the data is converted by
-        :func:`convertToQt` before being set to the editor.
+        If *editor* is :class:`DataWidget` and :meth:`dataclassType` is set, the
+        data is converted by :func:`convertToQt` before being set to the editor.
         """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
@@ -177,7 +193,8 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
     Notes
     =====
 
-    When mapping :class:`DataWidget`, *propertyName* argument must not be passed.
+    When mapping :class:`DataWidget`, *propertyName* argument of
+    :meth:`addMapping` must not be passed.
     """
 
     def addMapping(self, widget, section, propertyName=b""):

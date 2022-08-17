@@ -86,9 +86,9 @@ def test_convertFromQt_defaultvalue():
     assert convertFromQt(Cls1, dict(a=MISSING, b=MISSING)) == dict(
         b=dict(x=CustomField(1), y=CustomField(0), z=3)
     )
-    assert convertFromQt(Cls1, dict(a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING))) == dict(
-        b=dict(y=CustomField(0), z=3)
-    )
+    assert convertFromQt(
+        Cls1, dict(a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING))
+    ) == dict(b=dict(y=CustomField(0), z=3))
 
     @dataclasses.dataclass
     class Cls2:
@@ -381,4 +381,29 @@ def test_DataclassMapper_Tuple_setCurrentIndex_crash(qtbot):
 
     dataWidget = dataclass2Widget(DataClass)
     mapper.addMapping(dataWidget, 0)
-    mapper.setCurrentIndex(0)
+    mapper.setCurrentIndex(0)  # must not crash
+
+
+def test_DataclassMapper_default(qtbot):
+    """Test that default value of dataclass is not applied to widget & model."""
+
+    @dataclasses.dataclass
+    class DataClass:
+        x: int = 3
+
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(DataClass)
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper.setModel(model)
+
+    dataWidget = dataclass2Widget(DataClass)
+    mapper.addMapping(dataWidget, 0)
+    modelIndex = model.index(0, 0)
+    mapper.setCurrentModelIndex(modelIndex)
+
+    assert model.data(modelIndex) is None
+    assert dataWidget.dataValue() == dict(x=MISSING)
