@@ -27,34 +27,28 @@ def convertFromQt(
     """
     Convert dict from :class:`DataWidget` to structured dict for dataclass.
 
-    If the field value does not exist or is :obj:`MISSING`, default value of the
-    field is used. If there is no default value, the field is not included in
-    the resulting dictionary.
+    If the field value does not exist or is :obj:`MISSING`, the field is not
+    included in the resulting dictionary. Default value of the field is ignored.
 
     Field may define `fromQt_converter` metadata to convert the widget data to
     field data. It is a unary callable which takes the widget data and returns
     the field data.
 
-    If the data is nested or default value is used, field data itself may be
-    passed to the converter. Therefore `fromQt_converter` must perform type check
-    to distinguish the field data input and widget data input.
-
     Examples
     ========
 
     >>> from dataclasses import dataclass, field
+    >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertFromQt
     >>> def conv(arg):
-    ...     if isinstance(arg, tuple):
-    ...         return arg
     ...     return (arg,)
     >>> @dataclass
     ... class Cls:
     ...     x: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
     >>> convertFromQt(Cls, dict(x=10))
     {'x': (10,)}
-    >>> convertFromQt(Cls, dict())
-    {'x': (1,)}
+    >>> convertFromQt(Cls, dict(x=MISSING))
+    {}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -62,17 +56,10 @@ def convertFromQt(
     ret = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, MISSING)
-
         if val is MISSING:
-            default = f.default
-            if default is dataclasses.MISSING:
-                continue
-            val = default  # this may be dataclass instance
+            continue
 
         if dataclasses.is_dataclass(f.type):
-            if dataclasses.is_dataclass(val) and not isinstance(val, type):
-                # convert dataclass instance to dict
-                val = dataclasses.asdict(val)
             val = convertFromQt(f.type, val)
 
         converter = f.metadata.get("fromQt_converter", None)
@@ -89,8 +76,8 @@ def convertToQt(
     """
     Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
-    If the field does not exist in the data, :obj:`MISSING` is passed as its
-    value instead.
+    If the data does not have the value for a field, :obj:`MISSING` is passed as
+    its value instead.
 
     Field may define `toQt_converter` metadata to convert the field data to
     widget data. It is a unary callable which takes the field data and returns
@@ -100,12 +87,15 @@ def convertToQt(
     ========
 
     >>> from dataclasses import dataclass, field
+    >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertToQt
     >>> @dataclass
     ... class Cls:
     ...     x: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
     >>> convertToQt(Cls, dict(x=(10,)))
     {'x': 10}
+    >>> convertToQt(Cls, dict()) == dict(x=MISSING)
+    True
 
     """
     ret = {}
@@ -123,13 +113,29 @@ def convertToQt(
 
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
-    """Delegate to update the model and editor with structured dictionary."""
+    """
+    Delegate to update the model and editor with structured dictionary.
+
+    By setting :meth:`dataclassType`, this delegate can convert the widget data
+    to field data and vice versa.
+
+    Even if the fields of :meth:`dataclassType` has default value, it is not
+    applied to the widget and the model. This is to make sure that empty input
+    by user is distinguished.
+
+    """
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._dataclass_type = None
 
     def dataclassType(self) -> Optional[Type[DataclassProtocol]]:
+        """
+        Dataclass type whose fields are used to convert the data.
+
+        ``None`` indicates that the dataclass type is not set, and data will
+        not be converted.
+        """
         return self._dataclass_type
 
     def setDataclassType(self, dcls: Optional[Type[DataclassProtocol]]):
@@ -139,8 +145,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         """
         Set the data from *editor* to the item of *model* at *index*.
 
-        If *editor* is :class:`DataWidget`, its data is converted by
-        :func:`convertFromQt` before being set to the model.
+        If *editor* is :class:`DataWidget` and :meth:`dataclassType` is set, its
+        data is converted by :func:`convertFromQt` before being set to the model.
         """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
@@ -155,8 +161,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         """
         Set the data from *index* to *editor*.
 
-        If *editor* is :class:`DataWidget`, the data is converted by
-        :func:`convertToQt` before being set to the editor.
+        If *editor* is :class:`DataWidget` and :meth:`dataclassType` is set, the
+        data is converted by :func:`convertToQt` before being set to the editor.
         """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
@@ -177,7 +183,8 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
     Notes
     =====
 
-    When mapping :class:`DataWidget`, *propertyName* argument must not be passed.
+    When mapping :class:`DataWidget`, *propertyName* argument of
+    :meth:`addMapping` must not be passed.
     """
 
     def addMapping(self, widget, section, propertyName=b""):

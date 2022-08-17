@@ -110,6 +110,8 @@ Nested dataclass is supported by nested widget.
 Specifying type hint
 ====================
 
+.. _type-hint:
+
 If the type hint of your field is not supported by :func:`.type2Widget`, you can specify the alternative type hint by setting ``Qt_typehint`` metadata.
 
 The following example defines a dataclass with a field of both :class:`int` and :class:`float`.

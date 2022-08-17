@@ -38,7 +38,7 @@ class DataWidget(QtWidgets.QGroupBox):
     is constructed from the data of subwidgets as dict.
 
     :meth:`dataValue` returns the current dict value. When data value of any
-    subwidget is changed, :attr:`dataValueChanged` signal is emitted.
+    subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
     Data value is the dict containing subwidget data, and never :obj:`MISSING`.
@@ -158,12 +158,11 @@ class DataWidget(QtWidgets.QGroupBox):
             w.setDataValue(val)
         self._block_dataValueChanged = False
 
-        self.emitDataValueChanged()
-
     def emitDataValueChanged(self):
-        if not self._block_dataValueChanged:
-            val = self.dataValue()
-            self.dataValueChanged.emit(val)
+        if self._block_dataValueChanged:
+            return
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)
 
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:

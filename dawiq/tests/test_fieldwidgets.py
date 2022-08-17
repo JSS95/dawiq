@@ -19,35 +19,23 @@ def test_BoolCheckBox(qtbot):
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     # test value change by setDataValue
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is True,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(True)
     assert widget.dataValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is False,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(False)
     assert widget.dataValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
     widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test MISSING
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is False,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
     assert widget.dataValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is None,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(None)
     assert widget.dataValue() is None
     assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
@@ -101,18 +89,12 @@ def test_IntLineEdit(qtbot):
     widget = IntLineEdit()
 
     # test value change by setDataValue
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is MISSING,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
     assert widget.dataValue() is MISSING
     assert not widget.text()
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == 1,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(1)
     assert widget.dataValue() == 1
     assert widget.text() == "1"
@@ -170,18 +152,12 @@ def test_FloatLineEdit(qtbot):
     widget = FloatLineEdit()
 
     # test value change by setDataValue
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is MISSING,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
     assert widget.dataValue() is MISSING
     assert not widget.text()
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == float(1),
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(1)
     assert widget.dataValue() == float(1)
     assert widget.text() == "1"
@@ -214,26 +190,17 @@ def test_StrLineEdit(qtbot):
     widget = StrLineEdit()
 
     # test value change by setDataValue
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == "",
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
     assert widget.dataValue() == ""
     assert not widget.text()
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == "1",
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue("1")
     assert widget.dataValue() == "1"
     assert widget.text() == "1"
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == "x",
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue("x")
     assert widget.dataValue() == "x"
     assert widget.text() == "x"
@@ -269,39 +236,22 @@ def test_EnumComboBox(qtbot):
     assert widget.dataValue() is MISSING
 
     # test with setDataValue
-
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
-        check_params_cb=lambda val: val == MyEnum.x,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MyEnum.x)
     assert widget.currentIndex() == 0
     assert widget.dataValue() == MyEnum.x
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
-        check_params_cb=lambda val: val == MyEnum.y,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MyEnum.y)
     assert widget.currentIndex() == 1
     assert widget.dataValue() == MyEnum.y
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
-        check_params_cb=lambda val: val == MyEnum.z,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MyEnum.z)
     assert widget.currentIndex() == 2
     assert widget.dataValue() == MyEnum.z
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
-        check_params_cb=lambda val: val is MISSING,
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
     assert widget.currentIndex() == -1
     assert widget.dataValue() is MISSING
@@ -432,16 +382,12 @@ def test_TupleGroupBox_setDataValue(qtbot):
     counter = Counter()
     widget.dataValueChanged.connect(counter.count)
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, 2)
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue((1, 2))
     assert widget.dataValue() == (1, 2)
-    assert counter.i == 1
+    assert counter.i == 0
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (MISSING, MISSING)
-    ):
+    with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
     assert widget.dataValue() == (MISSING, MISSING)
 

@@ -7,6 +7,7 @@ from dawiq.delegate import (
     DataclassMapper,
 )
 from dawiq.qt_compat import QtGui, QtWidgets, QtCore
+from typing import Tuple
 
 
 def test_convertFromQt():
@@ -17,19 +18,18 @@ def test_convertFromQt():
         def __eq__(self, other):
             return type(self) == type(other) and self.x == other.x
 
-    def converter(arg):
-        if isinstance(arg, CustomField):
-            return arg
-        return CustomField(arg)
-
     @dataclasses.dataclass
     class Cls0:
-        a: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
+        a: CustomField = dataclasses.field(
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
+        )
 
     @dataclasses.dataclass
     class Cls1:
         x: int
-        y: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
+        y: CustomField = dataclasses.field(
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
+        )
         z: Cls0
 
     assert convertFromQt(Cls1, dict(x=1, y=2, z=dict(a=3))) == dict(
@@ -39,6 +39,8 @@ def test_convertFromQt():
 
 
 def test_convertFromQt_defaultvalue():
+    """Test that default value is ignored."""
+
     class CustomField:
         def __init__(self, x):
             self.x = x
@@ -46,24 +48,22 @@ def test_convertFromQt_defaultvalue():
         def __eq__(self, other):
             return type(self) == type(other) and self.x == other.x
 
-    def converter(arg):
-        if isinstance(arg, CustomField):
-            return arg
-        return CustomField(arg)
-
     @dataclasses.dataclass
     class Cls0:
-        x: CustomField = dataclasses.field(metadata=dict(fromQt_converter=converter))
+        x: CustomField = dataclasses.field(
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
+        )
         y: CustomField = dataclasses.field(
             default=CustomField(0),
-            metadata=dict(fromQt_converter=converter),
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg)),
         )
         z: int = 3
 
     assert convertFromQt(Cls0, dict(x=3, y=2, z=1)) == dict(
         x=CustomField(3), y=CustomField(2), z=1
     )
-    assert convertFromQt(Cls0, dict()) == dict(y=CustomField(0), z=3)
+    assert convertFromQt(Cls0, dict()) == dict()
+    assert convertFromQt(Cls0, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
 
     @dataclasses.dataclass
     class Cls1:
@@ -76,21 +76,18 @@ def test_convertFromQt_defaultvalue():
         a=dict(x=CustomField(1), y=CustomField(2), z=5),
         b=dict(x=CustomField(3), y=CustomField(2), z=1),
     )
-    assert convertFromQt(Cls1, dict()) == dict(
-        b=dict(x=CustomField(1), y=CustomField(0), z=3)
-    )
+    assert convertFromQt(Cls1, dict()) == dict()
+    assert convertFromQt(Cls1, dict(a=MISSING, b=MISSING)) == dict()
+    assert convertFromQt(
+        Cls1, dict(a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING))
+    ) == dict(b=dict())
 
     @dataclasses.dataclass
     class Cls2:
         c: Cls1
         d: Cls1 = Cls1(Cls0(CustomField(10)))
 
-    assert convertFromQt(Cls2, dict()) == dict(
-        d=dict(
-            a=dict(x=CustomField(10), y=CustomField(0), z=3),
-            b=dict(x=CustomField(1), y=CustomField(0), z=3),
-        )
-    )
+    assert convertFromQt(Cls2, dict()) == dict()
 
 
 def test_convertToQt():
@@ -101,17 +98,18 @@ def test_convertToQt():
         def __eq__(self, other):
             return type(self) == type(other) and self.x == other.x
 
-    def converter(val):
-        return val.x
-
     @dataclasses.dataclass
     class Cls0:
-        a: CustomField = dataclasses.field(metadata=dict(toQt_converter=converter))
+        a: CustomField = dataclasses.field(
+            metadata=dict(toQt_converter=lambda val: val.x)
+        )
 
     @dataclasses.dataclass
     class Cls1:
         x: int
-        y: CustomField = dataclasses.field(metadata=dict(toQt_converter=converter))
+        y: CustomField = dataclasses.field(
+            metadata=dict(toQt_converter=lambda val: val.x)
+        )
         z: Cls0
 
     assert convertToQt(
@@ -121,6 +119,8 @@ def test_convertToQt():
 
 
 def test_convertToQt_defaultvalue():
+    """Test that default value is ignored."""
+
     class CustomField:
         def __init__(self, x):
             self.x = x
@@ -128,53 +128,38 @@ def test_convertToQt_defaultvalue():
         def __eq__(self, other):
             return type(self) == type(other) and self.x == other.x
 
-    def converter(val):
-        return val.x
-
     @dataclasses.dataclass
     class Cls0:
-        x: CustomField = dataclasses.field(metadata=dict(toQt_converter=converter))
+        x: CustomField = dataclasses.field(
+            metadata=dict(toQt_converter=lambda val: val.x)
+        )
         y: CustomField = dataclasses.field(
             default=CustomField(0),
-            metadata=dict(toQt_converter=converter),
+            metadata=dict(toQt_converter=lambda val: val.x),
         )
         z: int = 3
 
-    assert convertToQt(Cls0, dict(x=CustomField(3), y=CustomField(2), z=1)) == dict(
-        x=3, y=2, z=1
-    )
-    assert convertToQt(Cls0, dict(y=CustomField(0), z=3)) == dict(x=MISSING, y=0, z=3)
+    assert convertToQt(Cls0, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
 
     @dataclasses.dataclass
     class Cls1:
         a: Cls0
         b: Cls0 = Cls0(x=CustomField(1))
 
-    assert convertToQt(
-        Cls1,
-        dict(
-            a=dict(x=CustomField(1), y=CustomField(2), z=5),
-            b=dict(x=CustomField(3), y=CustomField(2), z=1),
-        ),
-    ) == dict(a=dict(x=1, y=2, z=5), b=dict(x=3, y=2, z=1))
-    assert convertToQt(
-        Cls1, dict(b=dict(x=CustomField(1), y=CustomField(0), z=3))
-    ) == dict(a=MISSING, b=dict(x=1, y=0, z=3))
+    assert convertToQt(Cls1, dict()) == dict(a=MISSING, b=MISSING)
+    assert convertToQt(Cls1, dict(b=dict())) == dict(
+        a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING)
+    )
 
     @dataclasses.dataclass
     class Cls2:
         c: Cls1
         d: Cls1 = Cls1(Cls0(CustomField(10)))
 
-    assert convertToQt(
-        Cls2,
-        dict(
-            d=dict(
-                a=dict(x=CustomField(10), y=CustomField(0), z=3),
-                b=dict(x=CustomField(1), y=CustomField(0), z=3),
-            )
-        ),
-    ) == dict(c=MISSING, d=dict(a=dict(x=10, y=0, z=3), b=dict(x=1, y=0, z=3)))
+    assert convertToQt(Cls2, dict()) == dict(c=MISSING, d=MISSING)
+    assert convertToQt(Cls2, dict(d=dict())) == dict(
+        c=MISSING, d=dict(a=MISSING, b=MISSING)
+    )
 
 
 def test_DataclassDelegate_setModelData(qtbot):
@@ -281,7 +266,7 @@ def test_DataclassMapper_addMapping(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex) == dict(y=False)
+    # assert model.data(modelIndex) == dict(y=False)
 
     dataWidget.widget(0).setText("0")
     qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
@@ -351,3 +336,49 @@ def test_DataclassMapper_clearMapping(qtbot):
 
     dataWidget.widget(1).click()
     assert model.data(modelIndex) is None
+
+
+def test_DataclassMapper_Tuple_setCurrentIndex_crash(qtbot):
+    """Test that setting index to nested widget does not cause infinite loop."""
+
+    @dataclasses.dataclass
+    class DataClass:
+        x: Tuple[int]
+
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(DataClass)
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper.setModel(model)
+
+    dataWidget = dataclass2Widget(DataClass)
+    mapper.addMapping(dataWidget, 0)
+    mapper.setCurrentIndex(0)  # must not crash
+
+
+def test_DataclassMapper_default(qtbot):
+    """Test that default value of dataclass is not applied to widget & model."""
+
+    @dataclasses.dataclass
+    class DataClass:
+        x: int = 3
+
+    delegate = DataclassDelegate()
+    delegate.setDataclassType(DataClass)
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+
+    model = QtGui.QStandardItemModel()
+    model.appendRow(QtGui.QStandardItem())
+    mapper.setModel(model)
+
+    dataWidget = dataclass2Widget(DataClass)
+    mapper.addMapping(dataWidget, 0)
+    modelIndex = model.index(0, 0)
+    mapper.setCurrentModelIndex(modelIndex)
+
+    assert model.data(modelIndex) is None
+    assert dataWidget.dataValue() == dict(x=MISSING)
