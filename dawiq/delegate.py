@@ -27,34 +27,28 @@ def convertFromQt(
     """
     Convert dict from :class:`DataWidget` to structured dict for dataclass.
 
-    If the field value does not exist or is :obj:`MISSING`, default value of the
-    field is used. If there is no default value, the field is not included in
-    the resulting dictionary.
+    If the field value does not exist or is :obj:`MISSING`, the field is not
+    included in the resulting dictionary. Default value of the field is ignored.
 
     Field may define `fromQt_converter` metadata to convert the widget data to
     field data. It is a unary callable which takes the widget data and returns
     the field data.
 
-    If the data is nested or default value is used, field data itself may be
-    passed to the converter. Therefore `fromQt_converter` must perform type check
-    to distinguish the field data input and widget data input.
-
     Examples
     ========
 
     >>> from dataclasses import dataclass, field
+    >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertFromQt
     >>> def conv(arg):
-    ...     if isinstance(arg, tuple):
-    ...         return arg
     ...     return (arg,)
     >>> @dataclass
     ... class Cls:
     ...     x: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
     >>> convertFromQt(Cls, dict(x=10))
     {'x': (10,)}
-    >>> convertFromQt(Cls, dict())
-    {'x': (1,)}
+    >>> convertFromQt(Cls, dict(x=MISSING))
+    {}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -62,17 +56,10 @@ def convertFromQt(
     ret = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, MISSING)
-
         if val is MISSING:
-            default = f.default
-            if default is dataclasses.MISSING:
-                continue
-            val = default  # this may be dataclass instance
+            continue
 
         if dataclasses.is_dataclass(f.type):
-            if dataclasses.is_dataclass(val) and not isinstance(val, type):
-                # convert dataclass instance to dict
-                val = dataclasses.asdict(val)
             val = convertFromQt(f.type, val)
 
         converter = f.metadata.get("fromQt_converter", None)
@@ -89,8 +76,8 @@ def convertToQt(
     """
     Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
-    If the field does not exist in the data, :obj:`MISSING` is passed as its
-    value instead.
+    If the data does not have the value for a field, :obj:`MISSING` is passed as
+    its value instead.
 
     Field may define `toQt_converter` metadata to convert the field data to
     widget data. It is a unary callable which takes the field data and returns
@@ -100,12 +87,15 @@ def convertToQt(
     ========
 
     >>> from dataclasses import dataclass, field
+    >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertToQt
     >>> @dataclass
     ... class Cls:
     ...     x: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
     >>> convertToQt(Cls, dict(x=(10,)))
     {'x': 10}
+    >>> convertToQt(Cls, dict()) == dict(x=MISSING)
+    True
 
     """
     ret = {}
