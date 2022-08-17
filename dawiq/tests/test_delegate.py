@@ -356,6 +356,7 @@ def test_DataclassMapper_clearMapping(qtbot):
 
 def test_DataclassMapper_Tuple_setCurrentIndex_crash(qtbot):
     """Test that setting index to nested widget does not cause infinite loop."""
+
     @dataclasses.dataclass
     class DataClass:
         x: Tuple[int]
