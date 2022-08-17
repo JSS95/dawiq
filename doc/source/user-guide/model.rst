@@ -1,3 +1,5 @@
+.. _data-model:
+
 ==================
 Mapping with model
 ==================
