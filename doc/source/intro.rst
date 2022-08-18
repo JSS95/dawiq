@@ -7,24 +7,33 @@ Introduction
 .. currentmodule:: dawiq
 
 DaWiQ is a Python package for generating Qt widget from the dataclass.
-Widget data can be stored in Qt's item model as dictionary, which can be easily constructed to dataclass instance.
+
+Here is a PySide6 example for widget construction.
 
 .. code-block:: python
 
     from dataclasses import dataclass
     from dawiq import dataclass2Widget
+    from PySide6.QtWidgets import QApplication
+    import sys
 
     @dataclass
     class DataClass:
         x: int
         y: bool
 
+    app = QApplication(sys.argv)
     dataWidget = dataclass2Widget(DataClass)
+    dataWidget.show()
+    app.exec()
+    app.quit()
 
 .. figure:: _images/widget-example.jpg
    :align: center
 
    Appearance of ``dataWidget``
+
+For other Qt bindings, see the examples in :ref:`user-guide`.
 
 Supported types
 ===============
@@ -44,13 +53,13 @@ By default, the following types are supported:
 Custom type
 -----------
 
-Custom types can be supported by defining special metadata to the field:
+Custom types can be supported by defining special metadata to the dataclass field:
 
 * ``Qt_typehint``: type hint for widget construction
 * ``toQt_converter``: converts custom object to widget data
 * ``fromQt_converter``: returns custom object from widget data
 
-For more information, see :ref:`user-guide` document.
+For more information, see :ref:`widget` and :ref:`data-model`.
 
 Supported Qt bindings
 =====================
@@ -62,5 +71,5 @@ DaWiQ is compatible with the following Qt binding packages:
 * `PySide2 <https://pypi.org/project/PySide2/>`_
 * `PyQt5 <https://pypi.org/project/PyQt5/>`_
 
-Available package is searched and selected in the order mentioned above.
+When DaWiQ is imported, available package is searched and selected in the order mentioned above.
 To force a particular API, set environment variable ``DAWIQ_QT_API`` with package name. Letter case does not matter.
