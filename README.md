@@ -1,5 +1,7 @@
 # DaWiQ - Dataclass Widget for Qt
 
+[![PyPI version](https://badge.fury.io/py/DaWiQ.svg)](https://badge.fury.io/py/DaWiQ)
+[![Python Version](https://img.shields.io/pypi/pyversions/dawiq)](https://pypi.org/project/dawiq/)
 [![Build Status](https://github.com/JSS95/dawiq/actions/workflows/ci.yml/badge.svg)](https://github.com/JSS95/dawiq/actions/workflows/ci.yml)
 [![Documentation Status](https://readthedocs.org/projects/dawiq/badge/?version=latest)](https://dawiq.readthedocs.io/en/latest/?badge=latest)
 [![License](https://img.shields.io/github/license/JSS95/dawiq)](https://github.com/JSS95/dawiq/blob/master/LICENSE)
@@ -52,8 +54,37 @@ app.quit()
 This widget can be mapped to item model for storing the data.
 More examples are provided in the documentation.
 
+# Installation
+
+DaWiQ can be installed from `PyPI`.
+
+```
+$ pip install dawiq
+```
+
+To install from GitHub source, clone the repository with `git` and install with `pip`.
+
+```
+$ git clone https://github.com/JSS95/dawiq.git
+$ cd dawiq
+$ pip install .
+```
+
+DaWiQ does not specify the Qt binding requirement, therefore you must manually install one.
+
 # Documentation
 
-Documentation can be found on Read the Docs:
+DaWiQ is documented with [Sphinx](https://pypi.org/project/Sphinx/). Documentation can be found on Read the Docs:
 
 > https://dawiq.readthedocs.io/
+
+If you want to build the document yourself, get the source code and install with `[doc]` option.
+Then go to `doc` directory and build the document.
+
+```
+$ pip install .[doc]
+$ cd doc
+$ make html
+```
+
+Document will be generated in `build/html` directory. Open `index.html` to see the central page.

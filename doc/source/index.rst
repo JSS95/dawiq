@@ -13,6 +13,7 @@ This is the central page for all documents.
    :caption: Contents:
 
    intro
+   install
    user-guide/index
    API reference <reference/index>
 
