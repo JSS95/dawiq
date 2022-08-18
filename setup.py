@@ -63,7 +63,7 @@ setup(
     long_description=read_readme(),
     long_description_content_type="text/markdown",
     classifiers=[
-        "Development Status :: 1 - Planning",
+        "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         (
             "License :: OSI Approved :: "
