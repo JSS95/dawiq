@@ -1,15 +1,28 @@
 .. _data-model:
 
 =====================
-Storing data in model
+How to use item model
 =====================
 
 .. currentmodule:: dawiq
 
-Delegate and mapper
-===================
+:class:`.DataWidget` can be synced with item model by using :class:`.DataclassDelegate` and :class:`.DataclassMapper`.
+The data are stored as :obj:`dict`, and converting them to dataclass instances must be done by user.
 
-:class:`.DataclassDelegate` and :class:`.DataclassMapper` maps the widget constructed by :func:`.dataclass2Widget` with the model.
+.. note::
+   Nested dataclasses are stored as nested dictionaries.
+   `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package provides easy reconstruction from this structure.
+
+As explained in :ref:`widget`, field type can be different from widget data type.
+In this case we need to define the converters between them by setting two metadata to the field:
+
+* ``toQt_converter``: converts field data to widget data
+* ``fromQt_converter``: converts widget data to field data
+
+Value of these metadata must be a unary callable. 
+
+Basic example
+=============
 
 First, let's define a dataclass, a delegate and a mapper.
 
@@ -196,16 +209,10 @@ Now, the widget and the model are synchronized. Try change the index and the edi
 
    Widget with model
 
-Data converter
-==============
+Data converter example
+======================
 
-As explained in :ref:`Specifying type hint <type-hint>`, field type can be different from widget data.
-The converter between them can be defined by setting two metadata to the field:
-
-* ``toQt_converter``: converts field data to widget data
-* ``fromQt_converter``: converts widget data to field data
-
-Value of these metadata must be a unary callable. Here is a simple example:
+In this example, we define the data converters for ``CustomClass`` from :ref:`Specifying type hint <type-hint>`.
 
 .. code-block:: python
 
@@ -232,8 +239,6 @@ Value of these metadata must be a unary callable. Here is a simple example:
     mapper = DataclassMapper()
     mapper.setItemDelegate(delegate)
 
-Constructing model and widget is same as the first section of this document. Here is the result:
-
 .. figure:: ../_images/model-converter-example.jpg
    :align: center
 
@@ -241,28 +246,3 @@ Constructing model and widget is same as the first section of this document. Her
 
 Note that the dataclass defines default value, but the widget is still empty.
 Default value is not updated to model and to empty widget, in order to distinguish the intensional empty input by the user.
-
-Constructing dataclass
-======================
-
-Dictionary from the model data can be used to construct the dataclass instance.
-
->>> from dataclasses import dataclass
->>> @dataclass
-... class DataClass:
-...     x: int
-...     y: int
->>> data = dict(x=1, y=2)
->>> DataClass(**data)
-DataClass(x=1, y=2)
-
-However, this does not recursively apply to nested dataclass.
-
->>> @dataclass
-... class DataClass2:
-...     a: DataClass
->>> data = dict(a=dict(x=1, y=2))
->>> DataClass2(**data)  # expect DataClass2(a=DataClass(x=1, y=2))
-DataClass2(a={'x': 1, 'y': 2})
-
-Therefore it is recommended to use third-party packages such as `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ which supports this feature.
