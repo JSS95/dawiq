@@ -1,12 +1,15 @@
 .. _widget:
 
-===============
-Creating widget
-===============
+==============================
+How to create dataclass widget
+==============================
 
 .. currentmodule:: dawiq
 
-:func:`.dataclass2Widget` constructs :class:`.DataWidget` from dataclass.
+User can create :class:`.DataWidget` from the dataclass type using :func:`.dataclass2Widget`.
+
+By default, type hint of every field must be supported by :func:`.type2Widget`.
+If your type hint is not supported, specify the alternative type hint by setting ``Qt_typehint`` metadata to the field.
 
 Basic example
 =============
@@ -86,8 +89,8 @@ Your widget will look like this:
 
    Widget with :class:`.IntLineEdit` and :class:`.BoolCheckBox`
 
-Nested dataclass
-================
+Nested dataclass example
+========================
 
 Nested dataclass is supported by nested widget.
 
@@ -109,15 +112,14 @@ Nested dataclass is supported by nested widget.
 
    Widget with :class:`.BoolCheckBox` and nested :class:`.DataWidget`
 
-Specifying type hint
-====================
+Type hint example
+=================
 
 .. _type-hint:
 
-If the type hint of your field is not supported by :func:`.type2Widget`, you can specify the alternative type hint by setting ``Qt_typehint`` metadata.
+The following example shows how to specify the alternative type hint using ``Qt_typehint`` metadata.
 
-The following example defines a dataclass with a field of both :class:`int` and :class:`float`.
-The widget constructed from it, however, treats the field as :class:`float`.
+On the first example, the type hint is ``Union[int, float]`` but :func:`.dataclass2Widget` treats the field as :class:`float`.
 
 .. code-block:: python
 
@@ -133,9 +135,8 @@ The widget constructed from it, however, treats the field as :class:`float`.
 
    Widget with :class:`.FloatLineEdit`
 
-This feature can be used to construct a widget for a custom type.
-Here, we define ``CustomClass`` which takes two integers as parameters.
-By passing ``Tuple[int, int]`` to ``Qt_typehint``, a widget for its arguments can be constructed.
+Now for the second example we define ``CustomClass`` which takes two integers as parameters.
+:func:`.dataclass2Widget` treats the field as ``Tuple[int, int]`` and creates the widget which fits to it.
 
 .. code-block:: python
 
