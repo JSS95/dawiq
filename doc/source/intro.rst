@@ -35,8 +35,8 @@ Here is a PySide6 example for widget construction.
 
 For other Qt bindings, see the examples in :ref:`user-guide`.
 
-Supported types
-===============
+Supported field types
+=====================
 
 DaWiQ constructs the widget for each field by using its type hint.
 By default, the following types are supported:
@@ -50,10 +50,10 @@ By default, the following types are supported:
 * ``Tuple`` -> :class:`.TupleGroupBox` with nested field widgets
 * ``dataclass`` -> Nested :class:`.DataWidget`
 
-Custom type
------------
+How about other types?
+----------------------
 
-Custom types can be supported by defining special metadata to the dataclass field:
+Any other type can be supported by defining special metadata to the dataclass field:
 
 * ``Qt_typehint``: type hint for widget construction
 * ``toQt_converter``: converts custom object to widget data
