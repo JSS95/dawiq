@@ -9,4 +9,5 @@ User guide
 
    widget
    model
+   multi-dcls
    define-widget
