@@ -186,12 +186,18 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
     """
     Mapper between :class:`DataWidget` and model.
 
+    Default submit policy is ``ManualSubmit``.
+
     Notes
     =====
 
     When mapping :class:`DataWidget`, *propertyName* argument of
     :meth:`addMapping` must not be passed.
     """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setSubmitPolicy(self.ManualSubmit)
 
     def addMapping(self, widget, section, propertyName=b""):
         super().addMapping(widget, section, propertyName)
