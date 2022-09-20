@@ -181,24 +181,24 @@ def test_DataclassDelegate_setModelData(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
     delegate.commitData.emit(dataWidget)
-    assert model.data(modelIndex) == dict()
+    assert model.data(modelIndex, role=delegate.DataRole) == dict()
 
     dataWidget.widget(0).setText("0")
     delegate.commitData.emit(dataWidget)
-    assert model.data(modelIndex) == dict(x=0)
+    assert model.data(modelIndex, role=delegate.DataRole) == dict(x=0)
 
     dataWidget.widget(0).setText("1")
     mapper.submit()
-    assert model.data(modelIndex) == dict(x=1)
+    assert model.data(modelIndex, role=delegate.DataRole) == dict(x=1)
 
     dataWidget.dataValueChanged.connect(mapper.submit)
     with qtbot.waitSignal(dataWidget.dataValueChanged):
         dataWidget.widget(0).setText("2")
         qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert model.data(modelIndex) == dict(x=2)
+    assert model.data(modelIndex, role=delegate.DataRole) == dict(x=2)
 
 
 def test_DataclassDelegate_setEditorData(qtbot):
@@ -220,11 +220,11 @@ def test_DataclassDelegate_setEditorData(qtbot):
     mapper.setItemDelegate(delegate)
 
     modelIndex0 = model.index(0, 0)
-    model.setData(modelIndex0, dict(x=0))
+    model.setData(modelIndex0, dict(x=0), role=delegate.DataRole)
     modelIndex1 = model.index(1, 0)
-    model.setData(modelIndex1, dict(x=1))
+    model.setData(modelIndex1, dict(x=1), role=delegate.DataRole)
     modelIndex2 = model.index(2, 0)
-    model.setData(modelIndex2, dict())
+    model.setData(modelIndex2, dict(), role=delegate.DataRole)
 
     assert dataWidget.dataValue() == dict(x=MISSING)
     assert dataWidget.widget(0).text() == ""
@@ -241,7 +241,7 @@ def test_DataclassDelegate_setEditorData(qtbot):
     assert dataWidget.dataValue() == dict(x=MISSING)
     assert dataWidget.widget(0).text() == ""
 
-    model.setData(modelIndex2, dict(x=10))
+    model.setData(modelIndex2, dict(x=10), role=delegate.DataRole)
     assert dataWidget.dataValue() == dict(x=10)
     assert dataWidget.widget(0).text() == "10"
 
@@ -266,14 +266,14 @@ def test_DataclassMapper_addMapping(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    # assert model.data(modelIndex) == dict(y=False)
+    assert model.data(modelIndex, role=delegate.DataRole) is None  # IMPORTANT!
 
     dataWidget.widget(0).setText("0")
     qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert model.data(modelIndex) == dict(x=0, y=False)
+    assert model.data(modelIndex, role=delegate.DataRole) == dict(x=0, y=False)
 
     dataWidget.widget(1).click()
-    assert model.data(modelIndex) == dict(x=0, y=True)
+    assert model.data(modelIndex, role=delegate.DataRole) == dict(x=0, y=True)
 
 
 def test_DataclassMapper_removeMapping(qtbot):
@@ -297,14 +297,14 @@ def test_DataclassMapper_removeMapping(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
     dataWidget.widget(0).setText("0")
     qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
     dataWidget.widget(1).click()
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
 
 def test_DataclassMapper_clearMapping(qtbot):
@@ -328,14 +328,14 @@ def test_DataclassMapper_clearMapping(qtbot):
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
     dataWidget.widget(0).setText("0")
     qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
     dataWidget.widget(1).click()
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
 
 
 def test_DataclassMapper_Tuple_setCurrentIndex_crash(qtbot):
@@ -380,5 +380,5 @@ def test_DataclassMapper_default(qtbot):
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
 
-    assert model.data(modelIndex) is None
+    assert model.data(modelIndex, role=delegate.DataRole) is None
     assert dataWidget.dataValue() == dict(x=MISSING)
