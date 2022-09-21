@@ -112,16 +112,22 @@ Now we define a delegate for ``myWidget`` and ``model`` to update the data.
             def setModelData(self, editor, model, index):
                 if isinstance(editor, MyWidget):
                     dcls = editor.comboBox.currentData()
+                    self.setDataclassType(dcls)
                     model.setData(index, dcls, role=self.TypeRole)
+                    dataWidget = editor.stackedWidget.currentWidget()
+                    self.setModelData(dataWidget, model, index)
                 else:
                     super().setModelData(editor, model, index)
 
             def setEditorData(self, editor, index):
                 if isinstance(editor, MyWidget):
                     dcls = index.data(role=self.TypeRole)
+                    self.setDataclassType(dcls)
                     comboBoxIdx = editor.comboBox.findData(dcls)
                     editor.comboBox.setCurrentIndex(comboBoxIdx)
                     editor.stackedWidget.setCurrentIndex(comboBoxIdx + 1)
+                    dataWidget = editor.stackedWidget.currentWidget()
+                    self.setEditorData(dataWidget, index)
                 else:
                     super().setEditorData(editor, index)
 
@@ -132,7 +138,7 @@ Map the model and widget
 
 .. code-block:: python
 
-    from dawiq import DataclassMapper
+    from dawiq import DataclassMapper, DataWidget
 
     mapper = DataclassMapper()
     mapper.setItemDelegate(delegate)
@@ -142,6 +148,11 @@ Map the model and widget
 
     mapper.addMapping(myWidget, 0)
     myWidget.comboBox.currentIndexChanged.connect(mapper.submit)
+    for i in range(myWidget.stackedWidget.count()):
+        widget = myWidget.stackedWidget.widget(i)
+        if isinstance(widget, DataWidget):
+            widget.dataValueChanged.connect(mapper.submit)
+
     mapper.setCurrentIndex(0)
 
 Display
