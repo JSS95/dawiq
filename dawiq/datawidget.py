@@ -155,7 +155,10 @@ class DataWidget(QtWidgets.QGroupBox):
             if w is None:
                 break
             val = data.get(w.fieldName(), MISSING)  # type: ignore[union-attr]
-            w.setDataValue(val)
+            try:
+                w.setDataValue(val)
+            except TypeError:
+                w.setDataValue(MISSING)
         self._block_dataValueChanged = False
 
     def emitDataValueChanged(self):
