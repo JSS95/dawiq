@@ -99,39 +99,46 @@ Defining a delegate
 
 Now we define a delegate for ``myWidget`` and ``model`` to update the data.
 
-.. tabs::
+.. code-block:: python
 
-    .. code-tab:: python
-        :caption: PySide6
+    from dawiq import DataclassDelegate
 
-        from dawiq import DataclassDelegate
+    class MyDelegate(DataclassDelegate):
+        TypeRole = DataclassDelegate.DataRole + 1
 
-        class MyDelegate(DataclassDelegate):
-            TypeRole = DataclassDelegate.DataRole + 1
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self.freeze_model = False
 
-            def setModelData(self, editor, model, index):
-                if isinstance(editor, MyWidget):
-                    dcls = editor.comboBox.currentData()
+        def setModelData(self, editor, model, index):
+            if isinstance(editor, MyWidget) and not self.freeze_model:
+                dcls = editor.comboBox.currentData()
+                if dcls is not model.data(index, role=self.TypeRole):
                     self.setDataclassType(dcls)
                     model.setData(index, dcls, role=self.TypeRole)
+                else:
                     dataWidget = editor.stackedWidget.currentWidget()
                     self.setModelData(dataWidget, model, index)
-                else:
-                    super().setModelData(editor, model, index)
+            else:
+                super().setModelData(editor, model, index)
 
-            def setEditorData(self, editor, index):
-                if isinstance(editor, MyWidget):
-                    dcls = index.data(role=self.TypeRole)
+        def setEditorData(self, editor, index):
+            if isinstance(editor, MyWidget):
+                dcls = index.data(role=self.TypeRole)
+                comboBoxIdx = editor.comboBox.findData(dcls)
+                if comboBoxIdx != editor.comboBox.currentIndex():
+                    self.freeze_model = True
                     self.setDataclassType(dcls)
-                    comboBoxIdx = editor.comboBox.findData(dcls)
                     editor.comboBox.setCurrentIndex(comboBoxIdx)
+                    self.freeze_model = False
+                if (comboBoxIdx + 1) != editor.stackedWidget.currentIndex():
                     editor.stackedWidget.setCurrentIndex(comboBoxIdx + 1)
-                    dataWidget = editor.stackedWidget.currentWidget()
-                    self.setEditorData(dataWidget, index)
-                else:
-                    super().setEditorData(editor, index)
+                dataWidget = editor.stackedWidget.currentWidget()
+                self.setEditorData(dataWidget, index)
+            else:
+                super().setEditorData(editor, index)
 
-        delegate = MyDelegate()
+    delegate = MyDelegate()
 
 Map the model and widget
 ------------------------
