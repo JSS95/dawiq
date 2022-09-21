@@ -74,7 +74,6 @@ The first widget of the stacked widget is an empty widget.
         myWidget = MyWidget()
 
         myWidget.stackedWidget.addWidget(QWidget())
-
         for cls in [DataClass1, DataClass2]:
             myWidget.comboBox.addItem(cls.__name__, cls)
             myWidget.stackedWidget.addWidget(dataclass2Widget(cls))
@@ -82,8 +81,7 @@ The first widget of the stacked widget is an empty widget.
 Constructing the model
 ----------------------
 
-We construct a model with three rows and two columns.
-The first column stores the dataclass type and the second column stores the dataclass data.
+We construct a model with three rows which stores the dataclass type and data.
 
 .. tabs::
 
@@ -94,24 +92,38 @@ The first column stores the dataclass type and the second column stores the data
 
         model = QStandardItemModel()
         for _ in range(3):
-            model.appendRow([QStandardItem(), QStandardItem()])
+            model.appendRow(QStandardItem())
 
 Defining a delegate
 -------------------
 
-Now we define a delegate for ``MyWidget`` and ``model`` to update data.
+Now we define a delegate for ``myWidget`` and ``model`` to update the data.
 
 .. tabs::
 
     .. code-tab:: python
         :caption: PySide6
 
-        from PySide6.QtCore import Qt
         from dawiq import DataclassDelegate
 
         class MyDelegate(DataclassDelegate):
-            ClassRole = Qt.UserRole
-            ...
+            TypeRole = DataclassDelegate.DataRole + 1
+
+            def setModelData(self, editor, model, index):
+                if isinstance(editor, MyWidget):
+                    dcls = editor.comboBox.currentData()
+                    model.setData(index, dcls, role=self.TypeRole)
+                else:
+                    super().setModelData(editor, model, index)
+
+            def setEditorData(self, editor, index):
+                if isinstance(editor, MyWidget):
+                    dcls = index.data(role=self.TypeRole)
+                    comboBoxIdx = editor.comboBox.findData(dcls)
+                    editor.comboBox.setCurrentIndex(comboBoxIdx)
+                    editor.stackedWidget.setCurrentIndex(comboBoxIdx + 1)
+                else:
+                    super().setEditorData(editor, index)
 
         delegate = MyDelegate()
 
@@ -125,8 +137,11 @@ Map the model and widget
     mapper = DataclassMapper()
     mapper.setItemDelegate(delegate)
     mapper.setModel(model)
-    mapper.addMapping(myWidget.comboBox, 0)
-    mapper.addMapping(myWidget.stackedWidget, 1)
+    myWidget.btn1.clicked.connect(mapper.toPrevious)
+    myWidget.btn2.clicked.connect(mapper.toNext)
+
+    mapper.addMapping(myWidget, 0)
+    myWidget.comboBox.currentIndexChanged.connect(mapper.submit)
     mapper.setCurrentIndex(0)
 
 Display
