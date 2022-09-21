@@ -158,9 +158,9 @@ def test_FloatLineEdit(qtbot):
     assert not widget.text()
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(1)
+        widget.setDataValue(1.0)
     assert widget.dataValue() == float(1)
-    assert widget.text() == "1"
+    assert widget.text() == "1.0"
 
     widget.clear()
 

@@ -33,7 +33,7 @@ First, let's define a dataclass, a delegate and a mapper.
 
     @dataclass
     class DataClass:
-        x: int
+        x: float
         y: bool
 
     delegate = DataclassDelegate()

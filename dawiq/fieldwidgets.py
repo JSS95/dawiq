@@ -84,8 +84,12 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = QtCore.Qt.CheckState.Checked
         elif value is False:
             state = QtCore.Qt.CheckState.Unchecked
-        else:
+        elif value is None:
             state = QtCore.Qt.CheckState.PartiallyChecked
+        else:
+            raise TypeError(
+                f"BoolCheckBox data must be True, False or None, not {type(state)}"
+            )
 
         self._block_dataValueChanged = True
         self.setCheckState(state)
@@ -162,8 +166,10 @@ class IntLineEdit(QtWidgets.QLineEdit):
     def setDataValue(self, val: Union[int, _MISSING]):
         if val is MISSING:
             txt = ""
+        elif isinstance(val, int):
+            txt = str(int(val))
         else:
-            txt = str(val)
+            raise TypeError(f"IntLineEdit data must be int, not {type(val)}")
         self.setText(txt)
 
     def emitDataValueChanged(self):
@@ -228,8 +234,10 @@ class FloatLineEdit(QtWidgets.QLineEdit):
     def setDataValue(self, val: Union[float, _MISSING]):
         if val is MISSING:
             txt = ""
+        elif isinstance(val, float):
+            txt = str(float(val))
         else:
-            txt = str(val)
+            raise TypeError(f"FloatLineEdit data must be float, not {type(val)}")
         self.setText(txt)
 
     def emitDataValueChanged(self):
@@ -273,8 +281,10 @@ class StrLineEdit(QtWidgets.QLineEdit):
     def setDataValue(self, val: Union[str, _MISSING]):
         if val is MISSING:
             txt = ""
+        elif isinstance(val, str):
+            txt = str(val)  # type: ignore[assignment]
         else:
-            txt = val  # type: ignore[assignment]
+            raise TypeError(f"StrLineEdit data must be str, not {type(val)}")
         self.setText(txt)
 
     def emitDataValueChanged(self):
@@ -338,8 +348,10 @@ class EnumComboBox(QtWidgets.QComboBox):
     def setDataValue(self, value: Union[Enum, _MISSING]):
         if value is MISSING:
             index = -1
-        else:
+        elif isinstance(value, Enum):
             index = self.findData(value)
+        else:
+            raise TypeError(f"EnumComboBox data must be Enum, not {type(value)}")
         self._block_dataValueChanged = True
         self.setCurrentIndex(index)
         self._block_dataValueChanged = False
@@ -474,12 +486,14 @@ class TupleGroupBox(QtWidgets.QGroupBox):
                 if widget is None:
                     break
                 widget.setDataValue(MISSING)
-        else:
+        elif isinstance(value, tuple):
             for i in range(self.count()):
                 widget = self.widget(i)
                 if widget is None:
                     break
                 widget.setDataValue(value[i])  # type: ignore[index]
+        else:
+            raise TypeError(f"TupleGroupBox data must be tuple, not {type(value)}")
         self._block_dataValueChanged = False
 
     def emitDataValueChanged(self):
