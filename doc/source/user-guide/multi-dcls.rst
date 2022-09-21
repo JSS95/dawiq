@@ -4,15 +4,16 @@ How to use multiple dataclass types
 
 .. currentmodule:: dawiq
 
-Sometimes the items in your model may need to store data from different dataclasses.
+Sometimes the items in your model may need to store the data from different dataclasses - not only the data but the dataclass type should be modifiable.
+This requires complicated delegate to update both the widget and the model.
 
 Basic example
 =============
 
 As an example, we create a widget which consists of:
 
-* Combo box to display dataclass types of the model. Change of index submits data.
-* Stacked widget which contains data widgets.
+* Combo box to choose the dataclass type.
+* Stacked widget which contains the data widgets.
 * Buttons to change the model index.
 
 Creating the dataclasses
@@ -28,18 +29,23 @@ First, let's define the dataclasses.
     class DataClass1:
         x: int
         y: bool
+        z: bool
 
     @dataclass
     class DataClass2:
         x: int
         y: float
         z: bool
+        t: int
+
+Note that the two dataclasses partially share their fields.
+When the dataclass type is altered and data widget is changed, values of the common fields will be updated to the new widget.
 
 Creating the widget
 -------------------
 
-We create the widget, add the dataclass types to the combo box and data widget to the stacked widget.
-The first widget of the stacked widget is an empty widget.
+We create the widget, add the dataclass types to the combo box and the data widget to the stacked widget.
+The first widget of the stacked widget is an empty widget to represent invalid dataclass type.
 
 .. tabs::
 
@@ -81,7 +87,7 @@ The first widget of the stacked widget is an empty widget.
 Constructing the model
 ----------------------
 
-We construct a model with three rows which stores the dataclass type and data.
+We construct a model with three items, each storing the dataclass type and the data.
 
 .. tabs::
 
@@ -98,6 +104,7 @@ Defining a delegate
 -------------------
 
 Now we define a delegate for ``myWidget`` and ``model`` to update the data.
+Caution must be made to prevent the model from being updated multiple times.
 
 .. code-block:: python
 
@@ -143,6 +150,9 @@ Now we define a delegate for ``myWidget`` and ``model`` to update the data.
 Map the model and widget
 ------------------------
 
+The last step is to map the model and the widget.
+Mapper submits the data when the dataclass type is changed by combo box, or when the data value is changed by the data widget.
+
 .. code-block:: python
 
     from dawiq import DataclassMapper, DataWidget
@@ -162,8 +172,10 @@ Map the model and widget
 
     mapper.setCurrentIndex(0)
 
-Display
--------
+Result
+------
+
+We finally display the widget.
 
 .. tabs::
 
