@@ -88,7 +88,7 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = QtCore.Qt.CheckState.PartiallyChecked
         else:
             raise TypeError(
-                f"BoolCheckBox data must be True, False or None, not {type(state)}"
+                f"BoolCheckBox data must be True, False or None, not {type(value)}"
             )
 
         self._block_dataValueChanged = True
