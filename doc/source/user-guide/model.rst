@@ -7,24 +7,23 @@ How to use item model
 .. currentmodule:: dawiq
 
 :class:`.DataWidget` can be synced with item model by using :class:`.DataclassDelegate` and :class:`.DataclassMapper`.
-The data are stored as :obj:`dict`, and converting them to dataclass instances must be done by user.
+The data are stored as :obj:`dict`, and user can convert it to dataclass instance if required.
 
 .. note::
-   Nested dataclasses are stored as nested dictionaries.
-   `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package provides easy reconstruction from this structure.
+   Nested dataclasses are stored as nested dictionaries, which can be easily reconstructed by using `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package.
 
 As explained in :ref:`widget`, field type can be different from widget data type.
 In this case we need to define the converters between them by setting two metadata to the field:
 
-* ``toQt_converter``: converts field data to widget data
-* ``fromQt_converter``: converts widget data to field data
-
-Value of these metadata must be a unary callable. 
+* ``toQt_converter``: unary callable which converts field data to widget data
+* ``fromQt_converter``: unary callable which converts widget data to field data
 
 Basic example
 =============
 
-First, let's define a dataclass, a delegate and a mapper.
+This is the basic example without data converter.
+
+First we define a dataclass, and construct a delegate and a mapper.
 
 .. code-block:: python
 
@@ -37,11 +36,15 @@ First, let's define a dataclass, a delegate and a mapper.
         y: bool
 
     delegate = DataclassDelegate()
-    delegate.setDataclassType(DataClass)
     mapper = DataclassMapper()
     mapper.setItemDelegate(delegate)
 
-Then we construct a model with two rows and set it to the mapper.
+Then we construct a model with two items and set it to the mapper.
+Each item stores the dataclass type which will be read by the delegate.
+
+.. note::
+   Dataclass type in the model is read-only with default :class:`DataclassDelegate`.
+   To make it writable, refer to :ref:`multi-dcls` example.
 
 .. tabs::
 
@@ -52,7 +55,9 @@ Then we construct a model with two rows and set it to the mapper.
 
         model = QStandardItemModel()
         for _ in range(2):
-            model.appendRow(QStandardItem())
+            item = QStandardItem()
+            item.setData(DataClass, role=delegate.TypeRole)
+            model.appendRow(item)
         mapper.setModel(model)
 
     .. code-tab:: python
@@ -62,7 +67,9 @@ Then we construct a model with two rows and set it to the mapper.
 
         model = QStandardItemModel()
         for _ in range(2):
-            model.appendRow(QStandardItem())
+            item = QStandardItem()
+            item.setData(DataClass, role=delegate.TypeRole)
+            model.appendRow(item)
         mapper.setModel(model)
 
     .. code-tab:: python
@@ -72,7 +79,9 @@ Then we construct a model with two rows and set it to the mapper.
 
         model = QStandardItemModel()
         for _ in range(2):
-            model.appendRow(QStandardItem())
+            item = QStandardItem()
+            item.setData(DataClass, role=delegate.TypeRole)
+            model.appendRow(item)
         mapper.setModel(model)
 
     .. code-tab:: python
@@ -82,10 +91,14 @@ Then we construct a model with two rows and set it to the mapper.
 
         model = QStandardItemModel()
         for _ in range(2):
-            model.appendRow(QStandardItem())
+            item = QStandardItem()
+            item.setData(DataClass, role=delegate.TypeRole)
+            model.appendRow(item)
         mapper.setModel(model)
 
-Now, we create a widget with data widget from ``DataClass`` and buttons to change the model index.
+Now, we create a widget which consists of:
+* Data widget from ``DataClass``
+* Buttons to change the model index
 
 .. tabs::
 
@@ -235,7 +248,6 @@ In this example, we define the data converters for ``CustomClass`` from :ref:`Sp
         ))
 
     delegate = DataclassDelegate()
-    delegate.setDataclassType(DataClass)
     mapper = DataclassMapper()
     mapper.setItemDelegate(delegate)
 

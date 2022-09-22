@@ -1,3 +1,5 @@
+.. _multi-dcls:
+
 ===================================
 How to use multiple dataclass types
 ===================================
@@ -12,9 +14,9 @@ Basic example
 
 As an example, we create a widget which consists of:
 
-* Combo box to choose the dataclass type.
-* Stacked widget which contains the data widgets.
-* Buttons to change the model index.
+* Combo box to choose the dataclass type
+* Stacked widget which contains the data widgets
+* Buttons to change the model index
 
 Creating the dataclasses
 ------------------------
