@@ -4,7 +4,7 @@ How to use multiple dataclass types
 
 .. currentmodule:: dawiq
 
-Sometimes the items in your model may need to store the data from different dataclasses - not only the data but the dataclass type should be modifiable.
+Sometimes the items in your model may need to store the data from different dataclasses, and you want to modify not only the data but the dataclass type as well.
 This requires complicated delegate to update both the widget and the model.
 
 Basic example
@@ -39,12 +39,12 @@ First, let's define the dataclasses.
         t: int
 
 Note that the two dataclasses partially share their fields.
-When the dataclass type is altered and data widget is changed, values of the common fields will be updated to the new widget.
+When the the data widget is changed by selecting different dataclass type, values of the common fields in the model data will be updated to the new widget.
 
 Creating the widget
 -------------------
 
-We create the widget, add the dataclass types to the combo box and the data widget to the stacked widget.
+We create the widget, add the dataclass types to the combo box and the data widgets to the stacked widget.
 The first widget of the stacked widget is an empty widget to represent invalid dataclass type.
 
 .. tabs::
@@ -87,7 +87,8 @@ The first widget of the stacked widget is an empty widget to represent invalid d
 Constructing the model
 ----------------------
 
-We construct a model with three items, each storing the dataclass type and the data.
+We construct a model with three items.
+Each item will store the dataclass type and the data with different data role.
 
 .. tabs::
 
@@ -104,7 +105,7 @@ Defining a delegate
 -------------------
 
 Now we define a delegate for ``myWidget`` and ``model`` to update the data.
-Caution must be made to prevent the model from being updated multiple times.
+Caution should be made to prevent the model from being updated multiple times.
 
 .. code-block:: python
 
@@ -134,8 +135,8 @@ Caution must be made to prevent the model from being updated multiple times.
                 dcls = index.data(role=self.TypeRole)
                 comboBoxIdx = editor.comboBox.findData(dcls)
                 if comboBoxIdx != editor.comboBox.currentIndex():
-                    self.freeze_model = True
                     self.setDataclassType(dcls)
+                    self.freeze_model = True
                     editor.comboBox.setCurrentIndex(comboBoxIdx)
                     self.freeze_model = False
                 if (comboBoxIdx + 1) != editor.stackedWidget.currentIndex():
@@ -175,13 +176,23 @@ Mapper submits the data when the dataclass type is changed by combo box, or when
 Result
 ------
 
-We finally display the widget.
+Now let's set the model data and display the widget.
 
 .. tabs::
 
     .. code-tab:: python
         :caption: PySide6
 
+        model.setData(model.index(0, 0), DataClass1, MyDelegate.TypeRole)
+        model.setData(model.index(0, 0), dict(z=True), MyDelegate.DataRole)
+
         myWidget.show()
         app.exec()
         app.quit()
+
+.. figure:: ../_images/multi-dcls-example.jpg
+   :align: center
+
+   Widget with multiple dataclasses
+
+Try change the dataclass type, set the data and switch the model index.
