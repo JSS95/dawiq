@@ -7,16 +7,22 @@ How to use item model
 .. currentmodule:: dawiq
 
 :class:`.DataWidget` can be synced with item model by using :class:`.DataclassDelegate` and :class:`.DataclassMapper`.
-The data are stored as :obj:`dict`, and user can convert it to dataclass instance if required.
+
+:class:`.DataclassDelegate` defines two types of data:
+
+* Dataclass type: stored with :attr:`DataclassDelegate.TypeRole`
+* Dataclass data: stored with :attr:`DataclassDelegate.DataRole` as :obj:`dict`
+
+User can retrieve these data from the model and manually construct the dataclass instance.
 
 .. note::
    Nested dataclasses are stored as nested dictionaries, which can be easily reconstructed by using `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package.
 
 As explained in :ref:`widget`, field type can be different from widget data type.
-In this case we need to define the converters between them by setting two metadata to the field:
+In this case we need to define the converters as the metadata of the field.
 
-* ``toQt_converter``: unary callable which converts field data to widget data
-* ``fromQt_converter``: unary callable which converts widget data to field data
+* ``toQt_converter``: field data -> widget data
+* ``fromQt_converter``: widget data -> field data
 
 Basic example
 =============
