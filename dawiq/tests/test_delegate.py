@@ -163,17 +163,19 @@ def test_convertToQt_defaultvalue():
 
 
 def test_DataclassDelegate_setModelData(qtbot):
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
-
     @dataclasses.dataclass
     class Dcls:
         x: int
 
+    delegate = DataclassDelegate()
+    model = QtGui.QStandardItemModel()
+
+    item = QtGui.QStandardItem()
+    item.setData(Dcls, role=delegate.TypeRole)
+    model.appendRow(item)
+
     dataWidget = dataclass2Widget(Dcls)
     mapper = QtWidgets.QDataWidgetMapper()
-    delegate = DataclassDelegate()
-    delegate.setDataclassType(Dcls)
 
     mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
@@ -202,18 +204,20 @@ def test_DataclassDelegate_setModelData(qtbot):
 
 
 def test_DataclassDelegate_setEditorData(qtbot):
-    model = QtGui.QStandardItemModel()
-    for i in range(3):
-        model.appendRow(QtGui.QStandardItem())
-
     @dataclasses.dataclass
     class Dcls:
         x: int
 
+    delegate = DataclassDelegate()
+    model = QtGui.QStandardItemModel()
+
+    for i in range(3):
+        item = QtGui.QStandardItem()
+        item.setData(Dcls, role=delegate.TypeRole)
+        model.appendRow(item)
+
     dataWidget = dataclass2Widget(Dcls)
     mapper = QtWidgets.QDataWidgetMapper()
-    delegate = DataclassDelegate()
-    delegate.setDataclassType(Dcls)
 
     mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
@@ -247,18 +251,20 @@ def test_DataclassDelegate_setEditorData(qtbot):
 
 
 def test_DataclassMapper_addMapping(qtbot):
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
-
     @dataclasses.dataclass
     class Dcls:
         x: int
         y: bool
 
+    delegate = DataclassDelegate()
+    model = QtGui.QStandardItemModel()
+
+    item = QtGui.QStandardItem()
+    item.setData(Dcls, role=delegate.TypeRole)
+    model.appendRow(item)
+
     dataWidget = dataclass2Widget(Dcls)
     mapper = DataclassMapper()
-    delegate = DataclassDelegate()
-    delegate.setDataclassType(Dcls)
 
     mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
@@ -282,12 +288,15 @@ def test_DataclassMapper_removeMapping(qtbot):
         x: int
         y: bool
 
-    dataWidget = dataclass2Widget(Dcls)
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
-    mapper = DataclassMapper()
     delegate = DataclassDelegate()
-    delegate.setDataclassType(Dcls)
+    model = QtGui.QStandardItemModel()
+
+    item = QtGui.QStandardItem()
+    item.setData(Dcls, role=delegate.TypeRole)
+    model.appendRow(item)
+
+    dataWidget = dataclass2Widget(Dcls)
+    mapper = DataclassMapper()
 
     mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
@@ -313,12 +322,15 @@ def test_DataclassMapper_clearMapping(qtbot):
         x: int
         y: bool
 
-    dataWidget = dataclass2Widget(Dcls)
-    model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
-    mapper = DataclassMapper()
     delegate = DataclassDelegate()
-    delegate.setDataclassType(Dcls)
+    model = QtGui.QStandardItemModel()
+
+    item = QtGui.QStandardItem()
+    item.setData(Dcls, role=delegate.TypeRole)
+    model.appendRow(item)
+
+    dataWidget = dataclass2Widget(Dcls)
+    mapper = DataclassMapper()
 
     mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
@@ -346,16 +358,19 @@ def test_DataclassMapper_Tuple_setCurrentIndex_crash(qtbot):
         x: Tuple[int]
 
     delegate = DataclassDelegate()
-    delegate.setDataclassType(DataClass)
-    mapper = DataclassMapper()
-    mapper.setItemDelegate(delegate)
-
     model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
-    mapper.setModel(model)
+
+    item = QtGui.QStandardItem()
+    item.setData(DataClass, role=delegate.TypeRole)
+    model.appendRow(item)
 
     dataWidget = dataclass2Widget(DataClass)
+    mapper = DataclassMapper()
+
+    mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
     mapper.setCurrentIndex(0)  # must not crash
 
 
@@ -367,16 +382,19 @@ def test_DataclassMapper_default(qtbot):
         x: int = 3
 
     delegate = DataclassDelegate()
-    delegate.setDataclassType(DataClass)
-    mapper = DataclassMapper()
-    mapper.setItemDelegate(delegate)
-
     model = QtGui.QStandardItemModel()
-    model.appendRow(QtGui.QStandardItem())
-    mapper.setModel(model)
+
+    item = QtGui.QStandardItem()
+    item.setData(DataClass, role=delegate.TypeRole)
+    model.appendRow(item)
 
     dataWidget = dataclass2Widget(DataClass)
+    mapper = DataclassMapper()
+
+    mapper.setModel(model)
     mapper.addMapping(dataWidget, 0)
+    mapper.setItemDelegate(delegate)
+
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
 

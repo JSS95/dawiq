@@ -9,7 +9,7 @@ from .qt_compat import QtWidgets, QtCore
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .typing import DataclassProtocol
-from typing import Optional, Type, Dict, Any
+from typing import Type, Dict, Any
 
 
 __all__ = [
@@ -114,48 +114,33 @@ def convertToQt(
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """
-    Delegate to update the model and editor with structured dictionary.
+    Delegate to update the model and the :class:`DataWidget`.
 
-    By setting :meth:`dataclassType`, this delegate can convert the widget data
-    to field data and vice versa. If :meth:`dataclassType` is :obj:`None`,
-    data value from :class:`DataWidget` is directly stored to the model.
+    :attr:`TypeRole` and :attr:`DataRole` are ``Qt.ItemDataRole`` for the model
+    to store the dataclass type and the dataclass data. Dataclass instance can be
+    constructed by these values.
 
-    Item data role for the model to store data value for dataclass is
-    :attr:`DataRole`. By default, this is ``Qt.UserRole``.
+    Default values of the dataclass fields are not applied to the widget and to
+    the model. This is to make sure that empty input by user is distinguished.
 
-    Even if the fields of :meth:`dataclassType` has default value, it is not
-    applied to the widget and the model. This is to make sure that empty input
-    by user is distinguished.
-
+    This class can read and write the data with :attr:`DataRole`, but the
+    dataclass type with :attr:`TypeRole` is read-only. Writing :attr:`TypeRole`
+    to the model can be implemented in the subclass.
     """
 
-    DataRole = QtCore.Qt.ItemDataRole.UserRole
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self._dataclass_type = None
-
-    def dataclassType(self) -> Optional[Type[DataclassProtocol]]:
-        """
-        Dataclass type whose fields are used to convert the data.
-
-        ``None`` indicates that the dataclass type is not set, and data will
-        not be converted.
-        """
-        return self._dataclass_type
-
-    def setDataclassType(self, dcls: Optional[Type[DataclassProtocol]]):
-        self._dataclass_type = dcls
+    TypeRole = QtCore.Qt.ItemDataRole.UserRole
+    DataRole = QtCore.Qt.ItemDataRole.UserRole + 1
 
     def setModelData(self, editor, model, index):
         """
         Set the data from *editor* to the item of *model* at *index*.
 
-        If *editor* is :class:`DataWidget` and :meth:`dataclassType` is set, its
-        data is converted by :func:`convertFromQt` before being set to the model.
+        If *editor* is :class:`DataWidget` and the model contains dataclass type,
+        the data from the editor is converted by :func:`convertFromQt` before
+        being set to the model.
         """
         if isinstance(editor, DataWidget):
-            dcls = self.dataclassType()
+            dcls = model.data(index, role=self.TypeRole)
             data = editor.dataValue()
             if dcls is not None:
                 data = convertFromQt(dcls, data)
@@ -167,11 +152,12 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         """
         Set the data from *index* to *editor*.
 
-        If *editor* is :class:`DataWidget` and :meth:`dataclassType` is set, the
-        data is converted by :func:`convertToQt` before being set to the editor.
+        If *editor* is :class:`DataWidget` and the model contains dataclass type,
+        the data from the editor is converted by :func:`convertToQt` before
+        being set to the editor.
         """
         if isinstance(editor, DataWidget):
-            dcls = self.dataclassType()
+            dcls = index.data(role=self.TypeRole)
             data = index.data(role=self.DataRole)
             if data is None:
                 data = {}
@@ -184,7 +170,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
     """
-    Mapper between :class:`DataWidget` and model.
+    Mapper between the :class:`DataWidget` and the model.
 
     Default submit policy is ``SubmitPolicy.ManualSubmit``.
 
