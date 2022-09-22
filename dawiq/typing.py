@@ -54,7 +54,8 @@ class FieldWidgetProtocol(Protocol):
         this method converts the check state to :class:`bool` and returns.
 
         This method must specially treat :obj:`dawiq.MISSING` as empty data by
-        clearing the widget.
+        clearing the widget. Else, type of *value* must be strictly checked and
+        :obj:`TypeError` must be raised on invalid input.
 
         This method MUST NOT emit :attr:`dataValueChanged` signal, as doing so
         can cause infinite loop.

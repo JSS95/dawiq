@@ -5,7 +5,7 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets
+from .qt_compat import QtWidgets, QtCore
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .typing import DataclassProtocol
@@ -117,13 +117,19 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     Delegate to update the model and editor with structured dictionary.
 
     By setting :meth:`dataclassType`, this delegate can convert the widget data
-    to field data and vice versa.
+    to field data and vice versa. If :meth:`dataclassType` is :obj:`None`,
+    data value from :class:`DataWidget` is directly stored to the model.
+
+    Item data role for the model to store data value for dataclass is
+    :attr:`DataRole`. By default, this is ``Qt.UserRole``.
 
     Even if the fields of :meth:`dataclassType` has default value, it is not
     applied to the widget and the model. This is to make sure that empty input
     by user is distinguished.
 
     """
+
+    DataRole = QtCore.Qt.ItemDataRole.UserRole
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -153,7 +159,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             data = editor.dataValue()
             if dcls is not None:
                 data = convertFromQt(dcls, data)
-            model.setData(index, data)
+            model.setData(index, data, role=self.DataRole)
         else:
             super().setModelData(editor, model, index)
 
@@ -166,7 +172,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         """
         if isinstance(editor, DataWidget):
             dcls = self.dataclassType()
-            data = index.data()
+            data = index.data(role=self.DataRole)
             if data is None:
                 data = {}
             if dcls is not None:
@@ -180,12 +186,18 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
     """
     Mapper between :class:`DataWidget` and model.
 
+    Default submit policy is ``SubmitPolicy.ManualSubmit``.
+
     Notes
     =====
 
     When mapping :class:`DataWidget`, *propertyName* argument of
     :meth:`addMapping` must not be passed.
     """
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setSubmitPolicy(self.SubmitPolicy.ManualSubmit)
 
     def addMapping(self, widget, section, propertyName=b""):
         super().addMapping(widget, section, propertyName)

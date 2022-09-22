@@ -33,7 +33,7 @@ First, let's define a dataclass, a delegate and a mapper.
 
     @dataclass
     class DataClass:
-        x: int
+        x: float
         y: bool
 
     delegate = DataclassDelegate()
@@ -51,7 +51,7 @@ Then we construct a model with two rows and set it to the mapper.
         from PySide6.QtGui import QStandardItemModel, QStandardItem
 
         model = QStandardItemModel()
-        for i in range(2):
+        for _ in range(2):
             model.appendRow(QStandardItem())
         mapper.setModel(model)
 
@@ -61,7 +61,7 @@ Then we construct a model with two rows and set it to the mapper.
         from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
         model = QStandardItemModel()
-        for i in range(2):
+        for _ in range(2):
             model.appendRow(QStandardItem())
         mapper.setModel(model)
 
@@ -71,7 +71,7 @@ Then we construct a model with two rows and set it to the mapper.
         from PySide2.QtGui import QStandardItemModel, QStandardItem
 
         model = QStandardItemModel()
-        for i in range(2):
+        for _ in range(2):
             model.appendRow(QStandardItem())
         mapper.setModel(model)
 
@@ -81,7 +81,7 @@ Then we construct a model with two rows and set it to the mapper.
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
         model = QStandardItemModel()
-        for i in range(2):
+        for _ in range(2):
             model.appendRow(QStandardItem())
         mapper.setModel(model)
 
