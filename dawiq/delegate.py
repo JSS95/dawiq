@@ -5,7 +5,7 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets, QtCore, TypeRole, DataRole
+from .qt_compat import QtWidgets, TypeRole, DataRole
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .typing import DataclassProtocol
