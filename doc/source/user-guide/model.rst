@@ -10,16 +10,16 @@ How to use item model
 
 :class:`.DataclassDelegate` defines two types of data:
 
-* Dataclass type: stored with :attr:`DataclassDelegate.TypeRole`
-* Dataclass data: stored with :attr:`DataclassDelegate.DataRole` as :obj:`dict`
+* Dataclass **type**: stored with :attr:`.DataclassDelegate.TypeRole`
+* Dataclass **data**: stored with :attr:`.DataclassDelegate.DataRole` as :class:`dict`
 
-User can retrieve these data from the model and manually construct the dataclass instance.
+To get the dataclass instance, user can retrieve these values from the model item and construct it.
 
 .. note::
-   Nested dataclasses are stored as nested dictionaries, which can be easily reconstructed by using `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package.
+   To reconstruct complicated dataclass, `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package is recommended.
 
-As explained in :ref:`widget`, field type can be different from widget data type.
-In this case we need to define the converters as the metadata of the field.
+As explained in :ref:`widget`, the field type can be different from the widget data type.
+In this case we need to define the unary callable converters as the metadata of the field.
 
 * ``toQt_converter``: field data -> widget data
 * ``fromQt_converter``: widget data -> field data
@@ -28,28 +28,21 @@ Basic example
 =============
 
 This is the basic example without data converter.
-
-First we define a dataclass, and construct a delegate and a mapper.
+First we define a simple dataclass.
 
 .. code-block:: python
 
     from dataclasses import dataclass
-    from dawiq import DataclassDelegate, DataclassMapper
 
     @dataclass
     class DataClass:
         x: float
         y: bool
 
-    delegate = DataclassDelegate()
-    mapper = DataclassMapper()
-    mapper.setItemDelegate(delegate)
-
-Then we construct a model with two items and set it to the mapper.
-Each item stores the dataclass type which will be read by the delegate.
+Then we construct a model with two items, each storing the dataclass type which will be detected by the delegate.
 
 .. note::
-   Dataclass type in the model is read-only with default :class:`DataclassDelegate`.
+   The dataclass type in the model is read-only for the default :class:`.DataclassDelegate`.
    To make it writable, refer to :ref:`multi-dcls` example.
 
 .. tabs::
@@ -58,51 +51,64 @@ Each item stores the dataclass type which will be read by the delegate.
         :caption: PySide6
 
         from PySide6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
         model = QStandardItemModel()
         for _ in range(2):
             item = QStandardItem()
-            item.setData(DataClass, role=delegate.TypeRole)
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
-        mapper.setModel(model)
 
     .. code-tab:: python
         :caption: PyQt6
 
         from PyQt6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
         model = QStandardItemModel()
         for _ in range(2):
             item = QStandardItem()
-            item.setData(DataClass, role=delegate.TypeRole)
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
-        mapper.setModel(model)
 
     .. code-tab:: python
         :caption: PySide2
 
         from PySide2.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
         model = QStandardItemModel()
         for _ in range(2):
             item = QStandardItem()
-            item.setData(DataClass, role=delegate.TypeRole)
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
-        mapper.setModel(model)
 
     .. code-tab:: python
         :caption: PyQt5
 
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
         model = QStandardItemModel()
         for _ in range(2):
             item = QStandardItem()
-            item.setData(DataClass, role=delegate.TypeRole)
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
-        mapper.setModel(model)
 
-Now, we create a widget which consists of:
+Now we construct the delegate and the mapper.
+
+.. code-block:: python
+
+    from dawiq import DataclassMapper
+
+    delegate = DataclassDelegate()
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+    mapper.setModel(model)
+
+Finally we create a widget, map it to the mapper and display it.
+The widget consists of:
+
 * Data widget from ``DataClass``
 * Buttons to change the model index
 
@@ -220,8 +226,8 @@ Now, we create a widget which consists of:
         app.exec()
         app.quit()
 
-
-Now, the widget and the model are synchronized. Try change the index and the editor data.
+Below is the image of the resulting widget.
+Try change the model index and the editor data, and see if the data is stored and read correctly.
 
 .. figure:: ../_images/model-example.jpg
    :align: center
@@ -231,13 +237,12 @@ Now, the widget and the model are synchronized. Try change the index and the edi
 Data converter example
 ======================
 
-In this example, we define the data converters for ``CustomClass`` from :ref:`Specifying type hint <type-hint>`.
+In this example, we define the data converters for ``CustomClass``, which we used in :ref:`Specifying type hint <type-hint>`.
 
 .. code-block:: python
 
     from dataclasses import dataclass, field
     from typing import Tuple
-    from dawiq import DataclassDelegate, DataclassMapper
 
     class CustomClass:
         def __init__(self, x: int, y: int):
@@ -253,14 +258,10 @@ In this example, we define the data converters for ``CustomClass`` from :ref:`Sp
             fromQt_converter=lambda args: CustomClass(*args),
         ))
 
-    delegate = DataclassDelegate()
-    mapper = DataclassMapper()
-    mapper.setItemDelegate(delegate)
-
 .. figure:: ../_images/model-converter-example.jpg
    :align: center
 
    Widget with model compatible to custom type
 
 Note that the dataclass defines default value, but the widget is still empty.
-Default value is not updated to model and to empty widget, in order to distinguish the intensional empty input by the user.
+Default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
