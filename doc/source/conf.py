@@ -14,12 +14,7 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-import sys
-from unittest.mock import MagicMock
-
-qt_mock = MagicMock()
-qt_mock.QtCore.Qt.ItemDataRole.UserRole = 0
-sys.modules["dawiq.qt_compat"] = qt_mock
+autodoc_mock_imports = ["dawiq.qt_compat"]
 
 # -- Project information -----------------------------------------------------
 

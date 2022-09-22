@@ -145,3 +145,7 @@ qt_api = QtAPI()
 QtCore = qt_api.QtCore
 QtWidgets = qt_api.QtWidgets
 QtGui = qt_api.QtGui
+
+# define roles for delegate here to mock them in document build
+TypeRole = QtCore.Qt.ItemDataRole.UserRole
+DataRole = QtCore.Qt.ItemDataRole.UserRole + 1

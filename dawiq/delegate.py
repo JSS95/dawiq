@@ -5,7 +5,7 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets, QtCore
+from .qt_compat import QtWidgets, QtCore, TypeRole, DataRole
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .typing import DataclassProtocol
@@ -128,8 +128,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     to the model can be implemented in the subclass.
     """
 
-    TypeRole = QtCore.Qt.ItemDataRole.UserRole
-    DataRole = QtCore.Qt.ItemDataRole.UserRole + 1
+    TypeRole = TypeRole
+    DataRole = DataRole
 
     def setModelData(self, editor, model, index):
         """
