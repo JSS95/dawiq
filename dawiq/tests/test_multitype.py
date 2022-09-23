@@ -4,26 +4,39 @@ import dataclasses
 import pytest
 
 
+@dataclasses.dataclass
+class DataClass1:
+    x: bool
+
+
+@dataclasses.dataclass
+class DataClass2:
+    a: bool
+    b: bool
+    c: bool
+    d: bool
+    e: bool
+
+
+@dataclasses.dataclass
+class DataClass3:
+    x: bool
+
+
 @pytest.fixture
 def dataWidgetStack(qtbot):
-    @dataclasses.dataclass
-    class DataClass1:
-        x: bool
-
-    @dataclasses.dataclass
-    class DataClass2:
-        a: bool
-        b: bool
-        c: bool
-        d: bool
-        e: bool
-
     widget = DataWidgetStack()
     widget.addWidget(QtWidgets.QWidget())
-    widget.addWidget(dataclass2Widget(DataClass1))
-    widget.addWidget(dataclass2Widget(DataClass2))
+    for dcls in [DataClass1, DataClass2]:
+        widget.addDataWidget(dataclass2Widget(dcls), dcls)
 
     return widget
+
+
+def test_DataWidgetStack_indexOfDataclass(qtbot, dataWidgetStack):
+    assert dataWidgetStack.indexOfDataclass(DataClass1) == 1
+    assert dataWidgetStack.indexOfDataclass(DataClass2) == 2
+    assert dataWidgetStack.indexOfDataclass(DataClass3) == -1
 
 
 def test_DataWidgetStack_currentDataValueChanged(qtbot, dataWidgetStack):
@@ -68,6 +81,7 @@ def test_DataWidgetStack_removeWidget(qtbot, dataWidgetStack):
     dataWidgetStack.setCurrentIndex(2)
     oldWidget = dataWidgetStack.currentWidget()
     dataWidgetStack.removeWidget(oldWidget)
+    assert dataWidgetStack.indexOfDataclass(DataClass2) == -1
     assert dataWidgetStack.currentIndex() == 1
     with qtbot.waitSignal(dataWidgetStack.currentDataValueChanged):
         dataWidgetStack.widget(1).widget(0).click()
@@ -76,6 +90,7 @@ def test_DataWidgetStack_removeWidget(qtbot, dataWidgetStack):
 
     oldWidget = dataWidgetStack.currentWidget()
     dataWidgetStack.removeWidget(oldWidget)
+    assert dataWidgetStack.indexOfDataclass(DataClass1) == -1
     assert dataWidgetStack.currentIndex() == 0
     with qtbot.assertNotEmitted(dataWidgetStack.currentDataValueChanged):
         oldWidget.widget(0).click()
@@ -87,18 +102,6 @@ def test_DataWidgetStack_removeWidget(qtbot, dataWidgetStack):
 
 @pytest.fixture
 def dataWidgetTab(qtbot):
-    @dataclasses.dataclass
-    class DataClass1:
-        x: bool
-
-    @dataclasses.dataclass
-    class DataClass2:
-        a: bool
-        b: bool
-        c: bool
-        d: bool
-        e: bool
-
     widget = DataWidgetTab()
     widget.addTab(QtWidgets.QWidget(), "EmptyTab")
     widget.addTab(dataclass2Widget(DataClass1), DataClass1.__name__)

@@ -8,6 +8,7 @@ import dataclasses
 from .qt_compat import QtWidgets, TypeRole, DataRole
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
+from .multitype import DataWidgetStack
 from .typing import DataclassProtocol
 from typing import Type, Dict, Any
 
@@ -139,7 +140,9 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         the data from the editor is converted by :func:`convertFromQt` before
         being set to the model.
         """
-        if isinstance(editor, DataWidget):
+        if isinstance(editor, DataWidgetStack):
+            self.setModelData(editor.currentWidget(), model, index)
+        elif isinstance(editor, DataWidget):
             dcls = model.data(index, role=self.TypeRole)
             data = editor.dataValue()
             if dcls is not None:
@@ -156,7 +159,15 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         the data from the editor is converted by :func:`convertToQt` before
         being set to the editor.
         """
-        if isinstance(editor, DataWidget):
+        if isinstance(editor, DataWidgetStack):
+            dcls = index.data(role=self.TypeRole)
+            if dcls is not None:
+                widgetIndex = editor.indexOfDataclass(dcls)
+            else:
+                widgetIndex = -1
+            editor.setCurrentIndex(widgetIndex)
+            self.setEditorData(editor.currentWidget(), index)
+        elif isinstance(editor, DataWidget):
             dcls = index.data(role=self.TypeRole)
             data = index.data(role=self.DataRole)
             if data is None:
@@ -187,10 +198,14 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
 
     def addMapping(self, widget, section, propertyName=b""):
         super().addMapping(widget, section, propertyName)
-        if isinstance(widget, DataWidget):
+        if isinstance(widget, DataWidgetStack):
+            widget.currentDataValueChanged.connect(self.submit)
+        elif isinstance(widget, DataWidget):
             widget.dataValueChanged.connect(self.submit)
 
     def removeMapping(self, widget):
         super().removeMapping(widget)
-        if isinstance(widget, DataWidget):
+        if isinstance(widget, DataWidgetStack):
+            widget.currentDataValueChanged.disconnect(self.submit)
+        elif isinstance(widget, DataWidget):
             widget.dataValueChanged.disconnect(self.submit)
