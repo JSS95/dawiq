@@ -275,6 +275,14 @@ def test_DataclassDelegate_setModelData_dataWidgetStack(qtbot, dataWidgetStack):
         dataWidgetStack.currentWidget().widget(0).click()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
 
+    # data type change
+    dataWidgetStack.setCurrentIndex(0)
+    mapper.submit()
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
+    dataWidgetStack.setCurrentIndex(2)
+    mapper.submit()
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
+
 
 def test_DataclassDelegate_setModelData_dataWidgetTab(qtbot, dataWidgetTab):
     model = QtGui.QStandardItemModel()
@@ -307,6 +315,14 @@ def test_DataclassDelegate_setModelData_dataWidgetTab(qtbot, dataWidgetTab):
     with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
         dataWidgetTab.currentWidget().widget(0).click()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
+
+    # data type change
+    dataWidgetTab.setCurrentIndex(0)
+    mapper.submit()
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
+    dataWidgetTab.setCurrentIndex(2)
+    mapper.submit()
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
 
 
 def test_DataclassDelegate_setEditorData(qtbot):
@@ -475,6 +491,12 @@ def test_DataclassMapper_addMapping_dataWidgetStack(qtbot, dataWidgetStack):
     dataWidgetStack.currentWidget().widget(0).click()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
 
+    # data type change
+    dataWidgetStack.setCurrentIndex(0)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
+    dataWidgetStack.setCurrentIndex(2)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
+
 
 def test_DataclassMapper_addMapping_dataWidgetTab(qtbot, dataWidgetTab):
     model = QtGui.QStandardItemModel()
@@ -494,6 +516,12 @@ def test_DataclassMapper_addMapping_dataWidgetTab(qtbot, dataWidgetTab):
 
     dataWidgetTab.currentWidget().widget(0).click()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
+
+    # data type change
+    dataWidgetTab.setCurrentIndex(0)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
+    dataWidgetTab.setCurrentIndex(2)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
 
 
 def test_DataclassMapper_removeMapping_dataWidget(qtbot):
@@ -546,8 +574,15 @@ def test_DataclassMapper_removeMapping_dataWidgetStack(qtbot, dataWidgetStack):
     mapper.setCurrentModelIndex(modelIndex)
 
     mapper.removeMapping(dataWidgetStack)
+
     dataWidgetStack.currentWidget().widget(0).click()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) is None
+
+    # data type change
+    dataWidgetStack.setCurrentIndex(0)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass1
+    dataWidgetStack.setCurrentIndex(2)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass1
 
 
 def test_DataclassMapper_removeMapping_dataWidgetTab(qtbot, dataWidgetTab):
@@ -566,8 +601,15 @@ def test_DataclassMapper_removeMapping_dataWidgetTab(qtbot, dataWidgetTab):
     mapper.setCurrentModelIndex(modelIndex)
 
     mapper.removeMapping(dataWidgetTab)
+
     dataWidgetTab.currentWidget().widget(0).click()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) is None
+
+    # data type change
+    dataWidgetTab.setCurrentIndex(0)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass1
+    dataWidgetTab.setCurrentIndex(2)
+    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass1
 
 
 def test_DataclassMapper_Tuple_setCurrentIndex_crash(qtbot):
