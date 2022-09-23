@@ -42,6 +42,11 @@ class DataWidgetStack(QtWidgets.QStackedWidget):
             new.dataValueChanged.connect(self.currentDataValueChanged)
         self._previousIndex = index
 
+    def removeWidget(self, widget: QtWidgets.QWidget):
+        if widget == self.currentWidget() and isinstance(widget, DataWidget):
+            widget.dataValueChanged.disconnect(self.currentDataValueChanged)
+        super().removeWidget(widget)
+
 
 class DataWidgetTab(QtWidgets.QTabWidget):
     """
@@ -68,3 +73,9 @@ class DataWidgetTab(QtWidgets.QTabWidget):
         if isinstance(new, DataWidget):
             new.dataValueChanged.connect(self.currentDataValueChanged)
         self._previousIndex = index
+
+    def removeTab(self, index: int):
+        widget = self.widget(index)
+        if widget == self.currentWidget() and isinstance(widget, DataWidget):
+            widget.dataValueChanged.disconnect(self.currentDataValueChanged)
+        super().removeTab(index)

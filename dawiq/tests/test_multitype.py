@@ -52,6 +52,23 @@ def test_DataWidgetStack_currentDataValueChanged(qtbot, dataWidgetStack):
         dataWidgetStack.widget(1).widget(0).click()
 
 
+def test_DataWidgetStack_removeWidget(qtbot, dataWidgetStack):
+    dataWidgetStack.setCurrentIndex(1)
+    oldWidget = dataWidgetStack.currentWidget()
+    dataWidgetStack.removeWidget(oldWidget)
+    assert dataWidgetStack.currentIndex() == 0
+    with qtbot.waitSignal(dataWidgetStack.currentDataValueChanged):
+        dataWidgetStack.widget(0).widget(0).click()
+    with qtbot.assertNotEmitted(dataWidgetStack.currentDataValueChanged):
+        oldWidget.widget(0).click()
+
+    oldWidget = dataWidgetStack.currentWidget()
+    dataWidgetStack.removeWidget(oldWidget)
+    assert dataWidgetStack.currentIndex() == -1
+    with qtbot.assertNotEmitted(dataWidgetStack.currentDataValueChanged):
+        oldWidget.widget(0).click()
+
+
 @pytest.fixture
 def dataWidgetTab(qtbot):
     @dataclasses.dataclass
@@ -99,3 +116,20 @@ def test_DataWidgetTab_currentDataValueChanged(qtbot, dataWidgetTab):
         dataWidgetTab.widget(0).widget(0).click()
     with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
         dataWidgetTab.widget(1).widget(0).click()
+
+
+def test_DataWidgetTab_removeTab(qtbot, dataWidgetTab):
+    dataWidgetTab.setCurrentIndex(1)
+    oldTab = dataWidgetTab.currentWidget()
+    dataWidgetTab.removeTab(1)
+    assert dataWidgetTab.currentIndex() == 0
+    with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
+        dataWidgetTab.widget(0).widget(0).click()
+    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
+        oldTab.widget(0).click()
+
+    oldTab = dataWidgetTab.currentWidget()
+    dataWidgetTab.removeTab(0)
+    assert dataWidgetTab.currentIndex() == -1
+    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
+        oldTab.widget(0).click()
