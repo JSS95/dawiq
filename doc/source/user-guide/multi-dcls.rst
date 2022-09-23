@@ -1,3 +1,5 @@
+.. _multi-dcls:
+
 ===================================
 How to use multiple dataclass types
 ===================================
@@ -12,9 +14,9 @@ Basic example
 
 As an example, we create a widget which consists of:
 
-* Combo box to choose the dataclass type.
-* Stacked widget which contains the data widgets.
-* Buttons to change the model index.
+* Combo box to choose the dataclass type
+* Stacked widget which contains the data widgets
+* Buttons to change the model index
 
 Creating the dataclasses
 ------------------------
@@ -122,7 +124,6 @@ Caution should be made to prevent the model from being updated multiple times.
             if isinstance(editor, MyWidget) and not self.freeze_model:
                 dcls = editor.comboBox.currentData()
                 if dcls is not model.data(index, role=self.TypeRole):
-                    self.setDataclassType(dcls)
                     model.setData(index, dcls, role=self.TypeRole)
                 else:
                     dataWidget = editor.stackedWidget.currentWidget()
@@ -135,7 +136,6 @@ Caution should be made to prevent the model from being updated multiple times.
                 dcls = index.data(role=self.TypeRole)
                 comboBoxIdx = editor.comboBox.findData(dcls)
                 if comboBoxIdx != editor.comboBox.currentIndex():
-                    self.setDataclassType(dcls)
                     self.freeze_model = True
                     editor.comboBox.setCurrentIndex(comboBoxIdx)
                     self.freeze_model = False

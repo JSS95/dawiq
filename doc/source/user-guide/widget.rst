@@ -119,7 +119,7 @@ Type hint example
 
 This example shows how to specify the alternative type hint using ``Qt_typehint`` metadata.
 
-On the first example, the type hint is ``Union[int, float]`` but :func:`.dataclass2Widget` treats the field as :class:`float`.
+In this first example, the type hint is ``Union[int, float]`` but :func:`.dataclass2Widget` treats the field as :class:`float`.
 
 .. code-block:: python
 
