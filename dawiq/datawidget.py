@@ -37,7 +37,7 @@ class DataWidget(QtWidgets.QGroupBox):
     This is the group box which contains field widgets as subwidgets. Data value
     is constructed from the data of subwidgets as dict.
 
-    :meth:`dataValue` returns the current dict value. When data value of any
+    :meth:`dataValue` returns the current dict value. When the data value of any
     subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
