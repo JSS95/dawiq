@@ -6,8 +6,101 @@ How to use multiple dataclass types
 
 .. currentmodule:: dawiq
 
-Sometimes the items in your model may need to store the data from different dataclasses, and you want to modify not only the data but the dataclass type as well.
-This requires complicated delegate to update both the widget and the model.
+Very basic example
+==================
+
+.. code-block:: python
+
+    from dataclasses import dataclass
+
+    @dataclass
+    class DataClass1:
+        x: float
+        y: bool
+
+    @dataclass
+    class DataClass2:
+        x: bool
+        y: int
+
+.. tabs::
+
+    .. code-tab:: python
+        :caption: PySide6
+
+        from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from PySide6.QtCore import Signal
+        from dawiq import DataWidgetStack, dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        class MyWidget(QWidget):
+
+            toPrevious = Signal()
+            toNext = Signal()
+
+            def __init__(self, parent=None):
+                super().__init__(parent)
+
+                self.setLayout(QVBoxLayout())
+
+                self.stackedWidget = DataWidgetStack()
+                self.layout().addWidget(self.stackedWidget)
+
+                self.btn1 = QPushButton("Previous")
+                self.btn2 = QPushButton("Next")
+                self.layout().addWidget(self.btn1)
+                self.layout().addWidget(self.btn2)
+
+                self.btn1.clicked.connect(self.toPrevious)
+                self.btn2.clicked.connect(self.toNext)
+
+            def addDataclass(self, dcls):
+                self.stackedWidget.addDataWidget(dataclass2Widget(dcls), dcls)
+
+        myWidget = MyWidget()
+
+        for cls in [DataClass1, DataClass2]:
+            myWidget.addDataclass(cls)
+
+.. tabs::
+
+    .. code-tab:: python
+        :caption: PySide6
+
+        from PySide6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
+
+        model = QStandardItemModel()
+        for cls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(cls, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
+
+.. code-block:: python
+
+    from dawiq import DataclassDelegate, DataclassMapper, DataWidget
+
+    delegate = DataclassDelegate()
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+    mapper.setModel(model)
+    myWidget.toPrevious.connect(mapper.toPrevious)
+    myWidget.toNext.connect(mapper.toNext)
+
+    mapper.addMapping(myWidget.stackedWidget, 0)
+    mapper.setCurrentIndex(0)
+
+.. tabs::
+
+    .. code-tab:: python
+        :caption: PySide6
+
+        myWidget.show()
+        app.exec()
+        app.quit()
+
 
 Basic example
 =============
@@ -114,7 +207,6 @@ Caution should be made to prevent the model from being updated multiple times.
     from dawiq import DataclassDelegate
 
     class MyDelegate(DataclassDelegate):
-        TypeRole = DataclassDelegate.DataRole + 1
 
         def __init__(self, parent=None):
             super().__init__(parent)
