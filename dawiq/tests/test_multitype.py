@@ -33,6 +33,15 @@ def dataWidgetStack(qtbot):
     return widget
 
 
+def test_DataWidgetStack_currentDataclass(qtbot, dataWidgetStack):
+    dataWidgetStack.setCurrentIndex(0)
+    assert dataWidgetStack.currentDataclass() is None
+    dataWidgetStack.setCurrentIndex(1)
+    assert dataWidgetStack.currentDataclass() == DataClass1
+    dataWidgetStack.setCurrentIndex(2)
+    assert dataWidgetStack.currentDataclass() == DataClass2
+
+
 def test_DataWidgetStack_indexOfDataclass(qtbot, dataWidgetStack):
     assert dataWidgetStack.indexOfDataclass(DataClass1) == 1
     assert dataWidgetStack.indexOfDataclass(DataClass2) == 2
@@ -104,10 +113,25 @@ def test_DataWidgetStack_removeWidget(qtbot, dataWidgetStack):
 def dataWidgetTab(qtbot):
     widget = DataWidgetTab()
     widget.addTab(QtWidgets.QWidget(), "EmptyTab")
-    widget.addTab(dataclass2Widget(DataClass1), DataClass1.__name__)
-    widget.addTab(dataclass2Widget(DataClass2), DataClass2.__name__)
+    for dcls in [DataClass1, DataClass2]:
+        widget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
 
     return widget
+
+
+def test_DataWidgetTab_currentDataclass(qtbot, dataWidgetTab):
+    dataWidgetTab.setCurrentIndex(0)
+    assert dataWidgetTab.currentDataclass() is None
+    dataWidgetTab.setCurrentIndex(1)
+    assert dataWidgetTab.currentDataclass() == DataClass1
+    dataWidgetTab.setCurrentIndex(2)
+    assert dataWidgetTab.currentDataclass() == DataClass2
+
+
+def test_DataWidgetTab_indexOfDataclass(qtbot, dataWidgetTab):
+    assert dataWidgetTab.indexOfDataclass(DataClass1) == 1
+    assert dataWidgetTab.indexOfDataclass(DataClass2) == 2
+    assert dataWidgetTab.indexOfDataclass(DataClass3) == -1
 
 
 def test_DataWidgetTab_currentDataValueChanged(qtbot, dataWidgetTab):
