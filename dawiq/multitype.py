@@ -27,28 +27,20 @@ class DataWidgetStack(QtWidgets.QStackedWidget):
 
     currentDataValueChanged = QtCore.Signal(dict)
 
-    def addWidget(self, widget: QtWidgets.QWidget):
-        super().addWidget(widget)
-        if self.currentWidget() == widget:
-            widget.dataValueChanged.connect(self.currentDataValueChanged)
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._previousIndex = -1
+        self.currentChanged.connect(self.handleDataValueSignal)
 
-    def setCurrentIndex(self, index: int):
-        old = self.currentWidget()
+    @QtCore.Slot(int)
+    def handleDataValueSignal(self, index: int):
+        old = self.widget(self._previousIndex)
         if isinstance(old, DataWidget):
             old.dataValueChanged.disconnect(self.currentDataValueChanged)
         new = self.widget(index)
         if isinstance(new, DataWidget):
             new.dataValueChanged.connect(self.currentDataValueChanged)
-        super().setCurrentIndex(index)
-
-    def setCurrentWidget(self, widget: QtWidgets.QWidget):
-        old = self.currentWidget()
-        if isinstance(old, DataWidget):
-            old.dataValueChanged.disconnect(self.currentDataValueChanged)
-        new = widget
-        if isinstance(new, DataWidget):
-            new.dataValueChanged.connect(self.currentDataValueChanged)
-        super().setCurrentWidget(widget)
+        self._previousIndex = index
 
 
 class DataWidgetTab(QtWidgets.QTabWidget):
