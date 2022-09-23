@@ -1,0 +1,2 @@
+.. automodule:: dawiq.multitype
+   :members:
