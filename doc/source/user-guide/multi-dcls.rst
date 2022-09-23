@@ -82,6 +82,124 @@ Then we construct the widget with basic API, and add the dataclass types.
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
+    .. code-tab:: python
+        :caption: PyQt6
+
+        from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from PyQt6.QtCore import pyqtSignal
+        from dawiq import DataWidgetTab, dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        class MyWidget(QWidget):
+
+            toPrevious = pyqtSignal()
+            toNext = pyqtSignal()
+
+            def __init__(self, parent=None):
+                super().__init__(parent)
+
+                self.setLayout(QVBoxLayout())
+
+                self.tabWidget = DataWidgetTab()
+                self.layout().addWidget(self.tabWidget)
+
+                self.btn1 = QPushButton("Previous")
+                self.btn2 = QPushButton("Next")
+                self.layout().addWidget(self.btn1)
+                self.layout().addWidget(self.btn2)
+
+                self.btn1.clicked.connect(self.toPrevious)
+                self.btn2.clicked.connect(self.toNext)
+
+            def addDataclass(self, dcls):
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+
+        myWidget = MyWidget()
+
+        for dcls in [DataClass1, DataClass2]:
+            myWidget.addDataclass(dcls)
+
+    .. code-tab:: python
+        :caption: PySide2
+
+        from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from PySide2.QtCore import Signal
+        from dawiq import DataWidgetTab, dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        class MyWidget(QWidget):
+
+            toPrevious = Signal()
+            toNext = Signal()
+
+            def __init__(self, parent=None):
+                super().__init__(parent)
+
+                self.setLayout(QVBoxLayout())
+
+                self.tabWidget = DataWidgetTab()
+                self.layout().addWidget(self.tabWidget)
+
+                self.btn1 = QPushButton("Previous")
+                self.btn2 = QPushButton("Next")
+                self.layout().addWidget(self.btn1)
+                self.layout().addWidget(self.btn2)
+
+                self.btn1.clicked.connect(self.toPrevious)
+                self.btn2.clicked.connect(self.toNext)
+
+            def addDataclass(self, dcls):
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+
+        myWidget = MyWidget()
+
+        for dcls in [DataClass1, DataClass2]:
+            myWidget.addDataclass(dcls)
+
+    .. code-tab:: python
+        :caption: PyQt5
+
+        from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from PyQt5.QtCore import pyqtSignal
+        from dawiq import DataWidgetTab, dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        class MyWidget(QWidget):
+
+            toPrevious = pyqtSignal()
+            toNext = pyqtSignal()
+
+            def __init__(self, parent=None):
+                super().__init__(parent)
+
+                self.setLayout(QVBoxLayout())
+
+                self.tabWidget = DataWidgetTab()
+                self.layout().addWidget(self.tabWidget)
+
+                self.btn1 = QPushButton("Previous")
+                self.btn2 = QPushButton("Next")
+                self.layout().addWidget(self.btn1)
+                self.layout().addWidget(self.btn2)
+
+                self.btn1.clicked.connect(self.toPrevious)
+                self.btn2.clicked.connect(self.toNext)
+
+            def addDataclass(self, dcls):
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+
+        myWidget = MyWidget()
+
+        for dcls in [DataClass1, DataClass2]:
+            myWidget.addDataclass(dcls)
+
+
 Now we construct a model with two items, each having different data types.
 
 .. tabs::
@@ -90,6 +208,42 @@ Now we construct a model with two items, each having different data types.
         :caption: PySide6
 
         from PySide6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
+
+    .. code-tab:: python
+        :caption: PyQt6
+
+        from PyQt6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
+
+    .. code-tab:: python
+        :caption: PySide2
+
+        from PySide2.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
+
+    .. code-tab:: python
+        :caption: PyQt5
+
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
 
         model = QStandardItemModel()
@@ -120,6 +274,36 @@ Now let's set the data and display the widget.
 
     .. code-tab:: python
         :caption: PySide6
+
+        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+
+        myWidget.show()
+        app.exec()
+        app.quit()
+
+    .. code-tab:: python
+        :caption: PyQt6
+
+        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+
+        myWidget.show()
+        app.exec()
+        app.quit()
+
+    .. code-tab:: python
+        :caption: PySide2
+
+        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+
+        myWidget.show()
+        app.exec_()
+        app.quit()
+
+    .. code-tab:: python
+        :caption: PyQt5
 
         model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
