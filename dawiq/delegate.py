@@ -146,7 +146,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
         if isinstance(editor, (DataWidgetStack, DataWidgetTab)):
             dcls = editor.currentDataclass()
-            if dcls is not model.data(index, role=self.TypeRole):
+            if dcls != model.data(index, role=self.TypeRole):
                 model.setData(index, dcls, role=self.TypeRole)
             self.setModelData(editor.currentWidget(), model, index)
         elif isinstance(editor, DataWidget):
@@ -178,6 +178,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             self._freeze_model = False
 
             self.setEditorData(editor.currentWidget(), index)
+
         elif isinstance(editor, DataWidget):
             dcls = index.data(role=self.TypeRole)
             data = index.data(role=self.DataRole)

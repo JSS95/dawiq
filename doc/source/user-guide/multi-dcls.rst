@@ -20,7 +20,7 @@ Very basic example
 
     @dataclass
     class DataClass2:
-        x: bool
+        x: float
         y: int
 
 .. tabs::
@@ -30,7 +30,7 @@ Very basic example
 
         from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PySide6.QtCore import Signal
-        from dawiq import DataWidgetStack, dataclass2Widget
+        from dawiq import DataWidgetTab, dataclass2Widget
         import sys
 
         app = QApplication(sys.argv)
@@ -45,8 +45,8 @@ Very basic example
 
                 self.setLayout(QVBoxLayout())
 
-                self.stackedWidget = DataWidgetStack()
-                self.layout().addWidget(self.stackedWidget)
+                self.tabWidget = DataWidgetTab()
+                self.layout().addWidget(self.tabWidget)
 
                 self.btn1 = QPushButton("Previous")
                 self.btn2 = QPushButton("Next")
@@ -57,7 +57,7 @@ Very basic example
                 self.btn2.clicked.connect(self.toNext)
 
             def addDataclass(self, dcls):
-                self.stackedWidget.addDataWidget(dataclass2Widget(dcls), dcls)
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
 
         myWidget = MyWidget()
 
@@ -89,7 +89,7 @@ Very basic example
     myWidget.toPrevious.connect(mapper.toPrevious)
     myWidget.toNext.connect(mapper.toNext)
 
-    mapper.addMapping(myWidget.stackedWidget, 0)
+    mapper.addMapping(myWidget.tabWidget, 0)
     mapper.setCurrentIndex(0)
 
 .. tabs::
