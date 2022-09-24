@@ -8,6 +8,7 @@ import dataclasses
 from .qt_compat import QtWidgets, TypeRole, DataRole
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
+from .multitype import DataWidgetStack, DataWidgetTab
 from .typing import DataclassProtocol
 from typing import Type, Dict, Any
 
@@ -123,13 +124,14 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     Default values of the dataclass fields are not applied to the widget and to
     the model. This is to make sure that empty input by user is distinguished.
 
-    This class can read and write the data with :attr:`DataRole`, but the
-    dataclass type with :attr:`TypeRole` is read-only. Writing :attr:`TypeRole`
-    to the model can be implemented in the subclass.
     """
 
     TypeRole = TypeRole
     DataRole = DataRole
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self._freeze_model = False
 
     def setModelData(self, editor, model, index):
         """
@@ -139,7 +141,15 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         the data from the editor is converted by :func:`convertFromQt` before
         being set to the model.
         """
-        if isinstance(editor, DataWidget):
+        if self._freeze_model:
+            return
+
+        if isinstance(editor, (DataWidgetStack, DataWidgetTab)):
+            dcls = editor.currentDataclass()
+            if dcls != model.data(index, role=self.TypeRole):
+                model.setData(index, dcls, role=self.TypeRole)
+            self.setModelData(editor.currentWidget(), model, index)
+        elif isinstance(editor, DataWidget):
             dcls = model.data(index, role=self.TypeRole)
             data = editor.dataValue()
             if dcls is not None:
@@ -156,7 +166,20 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         the data from the editor is converted by :func:`convertToQt` before
         being set to the editor.
         """
-        if isinstance(editor, DataWidget):
+        if isinstance(editor, (DataWidgetStack, DataWidgetTab)):
+            dcls = index.data(role=self.TypeRole)
+            if dcls is not None:
+                widgetIndex = editor.indexOfDataclass(dcls)
+            else:
+                widgetIndex = -1
+
+            self._freeze_model = True
+            editor.setCurrentIndex(widgetIndex)
+            self._freeze_model = False
+
+            self.setEditorData(editor.currentWidget(), index)
+
+        elif isinstance(editor, DataWidget):
             dcls = index.data(role=self.TypeRole)
             data = index.data(role=self.DataRole)
             if data is None:
@@ -187,10 +210,16 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
 
     def addMapping(self, widget, section, propertyName=b""):
         super().addMapping(widget, section, propertyName)
-        if isinstance(widget, DataWidget):
+        if isinstance(widget, (DataWidgetStack, DataWidgetTab)):
+            widget.currentChanged.connect(self.submit)
+            widget.currentDataValueChanged.connect(self.submit)
+        elif isinstance(widget, DataWidget):
             widget.dataValueChanged.connect(self.submit)
 
     def removeMapping(self, widget):
         super().removeMapping(widget)
-        if isinstance(widget, DataWidget):
+        if isinstance(widget, (DataWidgetStack, DataWidgetTab)):
+            widget.currentChanged.disconnect(self.submit)
+            widget.currentDataValueChanged.disconnect(self.submit)
+        elif isinstance(widget, DataWidget):
             widget.dataValueChanged.disconnect(self.submit)

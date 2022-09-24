@@ -41,10 +41,6 @@ First we define a simple dataclass.
 
 Then we construct a model with two items, each storing the dataclass type which will be detected by the delegate.
 
-.. note::
-   The dataclass type in the model is read-only for the default :class:`.DataclassDelegate`.
-   To make it writable, refer to :ref:`multi-dcls` example.
-
 .. tabs::
 
     .. code-tab:: python
