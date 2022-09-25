@@ -46,6 +46,13 @@ class DataWidget(QtWidgets.QGroupBox):
     :meth:`setDataValue` sets the subwidget data. If :obj:`MISSING` is passed,
     it is propagated to all subwidget.
 
+    Notes
+    =====
+
+    This class can be constructed from :func:`dataclass2Widget`, but the widget
+    does not store the dataclass type. To associate the data widget to the
+    dataclass, use :class:`DataclassDelegate`.
+
     """
 
     dataValueChanged = QtCore.Signal(dict)

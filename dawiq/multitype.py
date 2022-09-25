@@ -13,14 +13,14 @@ from .typing import DataclassProtocol
 
 
 __all__ = [
-    "DataWidgetStack",
-    "DataWidgetTab",
+    "DataclassStackWidget",
+    "DataclassTabWidget",
 ]
 
 
-class DataWidgetStack(QtWidgets.QStackedWidget):
+class DataclassStackWidget(QtWidgets.QStackedWidget):
     """
-    Stacked widget containing multiple :class:`DataWidget`.
+    Stacked widget containing multiple :class:`DataWidget` and dataclasses.
 
     To add :class:`DataWidget`, pass the widget and the dataclass from which
     the widget was constructed to :meth:`addDataWidget`.
@@ -77,9 +77,9 @@ class DataWidgetStack(QtWidgets.QStackedWidget):
         super().removeWidget(widget)
 
 
-class DataWidgetTab(QtWidgets.QTabWidget):
+class DataclassTabWidget(QtWidgets.QTabWidget):
     """
-    Tab widget containing multiple :class:`DataWidget`.
+    Tab widget containing multiple :class:`DataWidget` and dataclasses.
 
     To add :class:`DataWidget`, pass the widget and the dataclass from which
     the widget was constructed to :meth:`addDataWidget`.
