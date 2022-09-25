@@ -10,14 +10,14 @@ In :ref:`data-model` example, every item of the model had the same dataclass typ
 In this guide, we will go further to modify the dataclass type as well.
 
 When the dataclass type changes, data widget for the item must also change.
-:class:`.DataclassDelegate` and :class:`.DataclassMapper` can be combined with :class:`.DataclassStackWidget` or :class:`.DataWidgetTab` to synchronize the widget with the data type.
+:class:`.DataclassDelegate` and :class:`.DataclassMapper` can be combined with :class:`.DataclassStackWidget` or :class:`.DataclassTabWidget` to synchronize the widget with the data type.
 
 Basic example
 =============
 
 In this example, we create a widget which consists of:
 
-* :class:`.DataWidgetTab` to display and choose the dataclass type
+* :class:`.DataclassTabWidget` to display and choose the dataclass type
 * Buttons to change the model index
 
 We first define the dataclasses.
@@ -48,7 +48,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
         from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PySide6.QtCore import Signal
-        from dawiq import DataWidgetTab, dataclass2Widget
+        from dawiq import DataclassTabWidget, dataclass2Widget
         import sys
 
         app = QApplication(sys.argv)
@@ -63,7 +63,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
                 self.setLayout(QVBoxLayout())
 
-                self.tabWidget = DataWidgetTab()
+                self.tabWidget = DataclassTabWidget()
                 self.layout().addWidget(self.tabWidget)
 
                 self.btn1 = QPushButton("Previous")
@@ -87,7 +87,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
         from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PyQt6.QtCore import pyqtSignal
-        from dawiq import DataWidgetTab, dataclass2Widget
+        from dawiq import DataclassTabWidget, dataclass2Widget
         import sys
 
         app = QApplication(sys.argv)
@@ -102,7 +102,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
                 self.setLayout(QVBoxLayout())
 
-                self.tabWidget = DataWidgetTab()
+                self.tabWidget = DataclassTabWidget()
                 self.layout().addWidget(self.tabWidget)
 
                 self.btn1 = QPushButton("Previous")
@@ -126,7 +126,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
         from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PySide2.QtCore import Signal
-        from dawiq import DataWidgetTab, dataclass2Widget
+        from dawiq import DataclassTabWidget, dataclass2Widget
         import sys
 
         app = QApplication(sys.argv)
@@ -141,7 +141,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
                 self.setLayout(QVBoxLayout())
 
-                self.tabWidget = DataWidgetTab()
+                self.tabWidget = DataclassTabWidget()
                 self.layout().addWidget(self.tabWidget)
 
                 self.btn1 = QPushButton("Previous")
@@ -165,7 +165,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
         from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PyQt5.QtCore import pyqtSignal
-        from dawiq import DataWidgetTab, dataclass2Widget
+        from dawiq import DataclassTabWidget, dataclass2Widget
         import sys
 
         app = QApplication(sys.argv)
@@ -180,7 +180,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
                 self.setLayout(QVBoxLayout())
 
-                self.tabWidget = DataWidgetTab()
+                self.tabWidget = DataclassTabWidget()
                 self.layout().addWidget(self.tabWidget)
 
                 self.btn1 = QPushButton("Previous")

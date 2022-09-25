@@ -14,7 +14,7 @@ from .typing import DataclassProtocol
 
 __all__ = [
     "DataclassStackWidget",
-    "DataWidgetTab",
+    "DataclassTabWidget",
 ]
 
 
@@ -78,7 +78,7 @@ class DataclassStackWidget(QtWidgets.QStackedWidget):
         super().removeWidget(widget)
 
 
-class DataWidgetTab(QtWidgets.QTabWidget):
+class DataclassTabWidget(QtWidgets.QTabWidget):
     """
     Tab widget containing multiple :class:`DataWidget`.
 

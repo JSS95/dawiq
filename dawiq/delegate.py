@@ -8,7 +8,7 @@ import dataclasses
 from .qt_compat import QtWidgets, TypeRole, DataRole
 from .fieldwidgets import MISSING
 from .datawidget import DataWidget
-from .multitype import DataclassStackWidget, DataWidgetTab
+from .multitype import DataclassStackWidget, DataclassTabWidget
 from .typing import DataclassProtocol
 from typing import Type, Dict, Any
 
@@ -144,7 +144,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         if self._freeze_model:
             return
 
-        if isinstance(editor, (DataclassStackWidget, DataWidgetTab)):
+        if isinstance(editor, (DataclassStackWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
             if dcls != model.data(index, role=self.TypeRole):
                 model.setData(index, dcls, role=self.TypeRole)
@@ -166,7 +166,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         the data from the editor is converted by :func:`convertToQt` before
         being set to the editor.
         """
-        if isinstance(editor, (DataclassStackWidget, DataWidgetTab)):
+        if isinstance(editor, (DataclassStackWidget, DataclassTabWidget)):
             dcls = index.data(role=self.TypeRole)
             if dcls is not None:
                 widgetIndex = editor.indexOfDataclass(dcls)
@@ -210,7 +210,7 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
 
     def addMapping(self, widget, section, propertyName=b""):
         super().addMapping(widget, section, propertyName)
-        if isinstance(widget, (DataclassStackWidget, DataWidgetTab)):
+        if isinstance(widget, (DataclassStackWidget, DataclassTabWidget)):
             widget.currentChanged.connect(self.submit)
             widget.currentDataValueChanged.connect(self.submit)
         elif isinstance(widget, DataWidget):
@@ -218,7 +218,7 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
 
     def removeMapping(self, widget):
         super().removeMapping(widget)
-        if isinstance(widget, (DataclassStackWidget, DataWidgetTab)):
+        if isinstance(widget, (DataclassStackWidget, DataclassTabWidget)):
             widget.currentChanged.disconnect(self.submit)
             widget.currentDataValueChanged.disconnect(self.submit)
         elif isinstance(widget, DataWidget):

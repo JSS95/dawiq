@@ -1,4 +1,4 @@
-from dawiq import DataclassStackWidget, DataWidgetTab, dataclass2Widget
+from dawiq import DataclassStackWidget, DataclassTabWidget, dataclass2Widget
 from dawiq.qt_compat import QtWidgets
 import dataclasses
 import pytest
@@ -110,8 +110,8 @@ def test_DataclassStackWidget_removeWidget(qtbot, dataclassStackWidget):
 
 
 @pytest.fixture
-def dataWidgetTab(qtbot):
-    widget = DataWidgetTab()
+def dataclassTabWidget(qtbot):
+    widget = DataclassTabWidget()
     widget.addTab(QtWidgets.QWidget(), "EmptyTab")
     for dcls in [DataClass1, DataClass2]:
         widget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
@@ -119,75 +119,75 @@ def dataWidgetTab(qtbot):
     return widget
 
 
-def test_DataWidgetTab_currentDataclass(qtbot, dataWidgetTab):
-    dataWidgetTab.setCurrentIndex(0)
-    assert dataWidgetTab.currentDataclass() is None
-    dataWidgetTab.setCurrentIndex(1)
-    assert dataWidgetTab.currentDataclass() == DataClass1
-    dataWidgetTab.setCurrentIndex(2)
-    assert dataWidgetTab.currentDataclass() == DataClass2
+def test_DataclassTabWidget_currentDataclass(qtbot, dataclassTabWidget):
+    dataclassTabWidget.setCurrentIndex(0)
+    assert dataclassTabWidget.currentDataclass() is None
+    dataclassTabWidget.setCurrentIndex(1)
+    assert dataclassTabWidget.currentDataclass() == DataClass1
+    dataclassTabWidget.setCurrentIndex(2)
+    assert dataclassTabWidget.currentDataclass() == DataClass2
 
 
-def test_DataWidgetTab_indexOfDataclass(qtbot, dataWidgetTab):
-    assert dataWidgetTab.indexOfDataclass(DataClass1) == 1
-    assert dataWidgetTab.indexOfDataclass(DataClass2) == 2
-    assert dataWidgetTab.indexOfDataclass(DataClass3) == -1
+def test_DataclassTabWidget_indexOfDataclass(qtbot, dataclassTabWidget):
+    assert dataclassTabWidget.indexOfDataclass(DataClass1) == 1
+    assert dataclassTabWidget.indexOfDataclass(DataClass2) == 2
+    assert dataclassTabWidget.indexOfDataclass(DataClass3) == -1
 
 
-def test_DataWidgetTab_currentDataValueChanged(qtbot, dataWidgetTab):
-    dataWidgetTab.setCurrentIndex(0)
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(2).widget(0).click()
+def test_DataclassTabWidget_currentDataValueChanged(qtbot, dataclassTabWidget):
+    dataclassTabWidget.setCurrentIndex(0)
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(2).widget(0).click()
 
-    dataWidgetTab.setCurrentIndex(1)
-    with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(2).widget(0).click()
+    dataclassTabWidget.setCurrentIndex(1)
+    with qtbot.waitSignal(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(2).widget(0).click()
 
-    dataWidgetTab.setCurrentIndex(2)
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(2).widget(0).click()
+    dataclassTabWidget.setCurrentIndex(2)
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.waitSignal(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(2).widget(0).click()
 
-    dataWidgetTab.setCurrentWidget(dataWidgetTab.widget(0))
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(2).widget(0).click()
+    dataclassTabWidget.setCurrentWidget(dataclassTabWidget.widget(0))
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(2).widget(0).click()
 
-    dataWidgetTab.setCurrentWidget(dataWidgetTab.widget(1))
-    with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(2).widget(0).click()
+    dataclassTabWidget.setCurrentWidget(dataclassTabWidget.widget(1))
+    with qtbot.waitSignal(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(2).widget(0).click()
 
-    dataWidgetTab.setCurrentWidget(dataWidgetTab.widget(2))
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(2).widget(0).click()
+    dataclassTabWidget.setCurrentWidget(dataclassTabWidget.widget(2))
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.waitSignal(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(2).widget(0).click()
 
 
-def test_DataWidgetTab_removeTab(qtbot, dataWidgetTab):
-    dataWidgetTab.setCurrentIndex(2)
-    oldTab = dataWidgetTab.currentWidget()
-    dataWidgetTab.removeTab(dataWidgetTab.indexOf(oldTab))
-    assert dataWidgetTab.currentIndex() == 1
-    with qtbot.waitSignal(dataWidgetTab.currentDataValueChanged):
-        dataWidgetTab.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
+def test_DataclassTabWidget_removeTab(qtbot, dataclassTabWidget):
+    dataclassTabWidget.setCurrentIndex(2)
+    oldTab = dataclassTabWidget.currentWidget()
+    dataclassTabWidget.removeTab(dataclassTabWidget.indexOf(oldTab))
+    assert dataclassTabWidget.currentIndex() == 1
+    with qtbot.waitSignal(dataclassTabWidget.currentDataValueChanged):
+        dataclassTabWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
         oldTab.widget(0).click()
 
-    oldTab = dataWidgetTab.currentWidget()
-    dataWidgetTab.removeTab(dataWidgetTab.indexOf(oldTab))
-    assert dataWidgetTab.currentIndex() == 0
-    with qtbot.assertNotEmitted(dataWidgetTab.currentDataValueChanged):
+    oldTab = dataclassTabWidget.currentWidget()
+    dataclassTabWidget.removeTab(dataclassTabWidget.indexOf(oldTab))
+    assert dataclassTabWidget.currentIndex() == 0
+    with qtbot.assertNotEmitted(dataclassTabWidget.currentDataValueChanged):
         oldTab.widget(0).click()
 
-    oldTab = dataWidgetTab.currentWidget()
-    dataWidgetTab.removeTab(dataWidgetTab.indexOf(oldTab))
-    assert dataWidgetTab.currentIndex() == -1
+    oldTab = dataclassTabWidget.currentWidget()
+    dataclassTabWidget.removeTab(dataclassTabWidget.indexOf(oldTab))
+    assert dataclassTabWidget.currentIndex() == -1

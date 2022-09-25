@@ -27,7 +27,7 @@ from .datawidget import (
 )
 from .multitype import (
     DataclassStackWidget,
-    DataWidgetTab,
+    DataclassTabWidget,
 )
 from .delegate import (
     DataclassDelegate,
@@ -49,7 +49,7 @@ __all__ = [
     "type2Widget",
     "dataclass2Widget",
     "DataclassStackWidget",
-    "DataWidgetTab",
+    "DataclassTabWidget",
     "DataclassDelegate",
     "DataclassMapper",
 ]
