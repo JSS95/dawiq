@@ -20,8 +20,7 @@ __all__ = [
 
 class DataclassStackWidget(QtWidgets.QStackedWidget):
     """
-    Stacked widget containing multiple :class:`DataWidget` with relating them to
-    dataclass.
+    Stacked widget containing multiple :class:`DataWidget` and dataclasses.
 
     To add :class:`DataWidget`, pass the widget and the dataclass from which
     the widget was constructed to :meth:`addDataWidget`.
@@ -80,7 +79,7 @@ class DataclassStackWidget(QtWidgets.QStackedWidget):
 
 class DataclassTabWidget(QtWidgets.QTabWidget):
     """
-    Tab widget containing multiple :class:`DataWidget`.
+    Tab widget containing multiple :class:`DataWidget` and dataclasses.
 
     To add :class:`DataWidget`, pass the widget and the dataclass from which
     the widget was constructed to :meth:`addDataWidget`.
