@@ -58,7 +58,7 @@ class FieldWidgetProtocol(Protocol):
         :obj:`TypeError` must be raised on invalid input.
 
         This method MUST NOT emit :attr:`dataValueChanged` signal, as doing so
-        can cause infinite loop.
+        can cause infinite loop in nested widgets.
         """
         ...
 
