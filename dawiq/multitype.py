@@ -13,14 +13,15 @@ from .typing import DataclassProtocol
 
 
 __all__ = [
-    "DataWidgetStack",
+    "DataclassStackWidget",
     "DataWidgetTab",
 ]
 
 
-class DataWidgetStack(QtWidgets.QStackedWidget):
+class DataclassStackWidget(QtWidgets.QStackedWidget):
     """
-    Stacked widget containing multiple :class:`DataWidget`.
+    Stacked widget containing multiple :class:`DataWidget` with relating them to
+    dataclass.
 
     To add :class:`DataWidget`, pass the widget and the dataclass from which
     the widget was constructed to :meth:`addDataWidget`.
