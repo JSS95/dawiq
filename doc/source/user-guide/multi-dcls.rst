@@ -12,6 +12,8 @@ In this guide, we will go further to modify the dataclass type as well.
 When the dataclass type changes, data widget for the item must also change.
 :class:`.DataclassDelegate` and :class:`.DataclassMapper` can be combined with :class:`.DataclassStackedWidget` or :class:`.DataclassTabWidget` to synchronize the widget with the data type.
 
+.. _multi-dcls-basic:
+
 Basic example
 =============
 
@@ -275,8 +277,8 @@ Now let's set the data and display the widget.
     .. code-tab:: python
         :caption: PySide6
 
-        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
-        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+        model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
         myWidget.show()
         app.exec()
@@ -285,8 +287,8 @@ Now let's set the data and display the widget.
     .. code-tab:: python
         :caption: PyQt6
 
-        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
-        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+        model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
         myWidget.show()
         app.exec()
@@ -295,8 +297,8 @@ Now let's set the data and display the widget.
     .. code-tab:: python
         :caption: PySide2
 
-        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
-        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+        model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
         myWidget.show()
         app.exec_()
@@ -305,8 +307,8 @@ Now let's set the data and display the widget.
     .. code-tab:: python
         :caption: PyQt5
 
-        model.setData(model.index(0, 0), dict(x=1.0), DataclassDelegate.DataRole)
-        model.setData(model.index(1, 0), dict(y=2), DataclassDelegate.DataRole)
+        model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
         myWidget.show()
         app.exec()
@@ -318,3 +320,187 @@ Now let's set the data and display the widget.
    Widget with dataclass tab widget
 
 Try change the dataclass type, set the data and switch the model index.
+
+Custom class example
+====================
+
+In this example, we will define a custom widget to select the dataclass instead of using :class:`.DataclassTabWidget`.
+The widget consists of:
+
+* :class:`QComboBox` to select the dataclass type
+* :class:`.DataclassStackedWidget` to display the dataclass data
+* Buttons to change the model index
+
+Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget construction.
+
+.. tabs::
+
+    .. code-tab:: python
+        :caption: PySide6
+
+        from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
+        from PySide6.QtCore import Signal
+        from dawiq import DataclassStackedWidget, dataclass2Widget
+        import sys
+
+        app = QApplication(sys.argv)
+
+        class MyWidget(QWidget):
+
+            toPrevious = Signal()
+            toNext = Signal()
+
+            def __init__(self, parent=None):
+                super().__init__(parent)
+
+                self.setLayout(QVBoxLayout())
+
+                self.comboBox = QComboBox()
+                self.comboBox.setPlaceholderText("Select dataclass type")
+                self.layout().addWidget(self.comboBox)
+
+                self.stackedWidget = DataclassStackedWidget()
+                self.layout().addWidget(self.stackedWidget)
+
+                self.btn1 = QPushButton("Previous")
+                self.btn2 = QPushButton("Next")
+                self.layout().addWidget(self.btn1)
+                self.layout().addWidget(self.btn2)
+
+                self.btn1.clicked.connect(self.toPrevious)
+                self.btn2.clicked.connect(self.toNext)
+
+            def addDataclass(self, dcls):
+                self.comboBox.addItem(dcls.__name__, dcls)
+                self.stackedWidget.addDataWidget(dataclass2Widget(dcls), dcls)
+
+        myWidget = MyWidget()
+
+        for dcls in [DataClass1, DataClass2]:
+            myWidget.addDataclass(dcls)
+
+We need to define a delegate so that it can synchronize the stacked widget and the combo box.
+Caution should be made to prevent the model from being updated multiple times.
+
+.. code-block:: python
+
+    from dawiq import DataclassDelegate
+
+    class MyDelegate(DataclassDelegate):
+
+        def __init__(self, parent=None):
+            super().__init__(parent)
+            self._freeze_model = False
+
+        def setModelData(self, editor, model, index):
+            if self._freeze_model:
+                return
+            if isinstance(editor, MyWidget):
+                dcls = editor.comboBox.currentData()
+                if dcls != model.data(index, role=self.TypeRole):
+                    model.setData(index, dcls, role=self.TypeRole)
+                self.setModelData(editor.currentWidget(), model, index)
+            else:
+                super().setModelData(editor, model, index)
+
+        def setEditorData(self, editor, index):
+            if isinstance(editor, MyWidget):
+                modeldata = index.data(role=self.TypeRole)
+                self._freeze_model = True
+                editor.comboBox.setCurrentIndex(editor.comboBox.findData(modeldata))
+                self.setEditorData(editor.stackedWidget, index)
+                self._freeze_model = False
+            else:
+                super().setEditorData(editor, index)
+
+    delegate = MyDelegate()
+
+Now we construct a model with two items, each having different data types.
+
+.. tabs::
+
+    .. code-tab:: python
+        :caption: PySide6
+
+        from PySide6.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=delegate.TypeRole)
+            model.appendRow(item)
+
+    .. code-tab:: python
+        :caption: PyQt6
+
+        from PyQt6.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=delegate.TypeRole)
+            model.appendRow(item)
+
+    .. code-tab:: python
+        :caption: PySide2
+
+        from PySide2.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=delegate.TypeRole)
+            model.appendRow(item)
+
+    .. code-tab:: python
+        :caption: PyQt5
+
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
+
+        model = QStandardItemModel()
+        for dcls in [DataClass1, DataClass2]:
+            item = QStandardItem()
+            item.setData(dcls, role=delegate.TypeRole)
+            model.appendRow(item)
+
+We also need to define a mapper so that whenever the combo box index changes the model will get updated too.
+
+.. code-block:: python
+
+    from dawiq import DataclassMapper
+
+    class MyMapper(DataclassMapper):
+        def addMapping(self, widget, section, propertyname=b""):
+            if isinstance(widget, MyWidget):
+                widget.comboBox.currentIndexChanged.connect(self.submit)
+                self.addMapping(widget.stackedWidget, section, propertyname)
+            else:
+                super().addMapping(widget, section, propertyname)
+
+    mapper = MyMapper()
+
+Finally we set up the system.
+
+.. code-block:: python
+
+    mapper.setItemDelegate(delegate)
+    mapper.setModel(model)
+    myWidget.toPrevious.connect(mapper.toPrevious)
+    myWidget.toNext.connect(mapper.toNext)
+
+    mapper.addMapping(myWidget, 0)
+    mapper.setCurrentIndex(0)
+
+Now let's set the data and display the widget.
+
+.. tabs::
+
+    .. code-tab:: python
+        :caption: PySide6
+
+        model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
+        model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
+
+        myWidget.show()
+        app.exec()
+        app.quit()
