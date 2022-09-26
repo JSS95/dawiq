@@ -10,7 +10,7 @@ In :ref:`data-model` example, every item of the model had the same dataclass typ
 In this guide, we will go further to modify the dataclass type as well.
 
 When the dataclass type changes, data widget for the item must also change.
-:class:`.DataclassDelegate` and :class:`.DataclassMapper` can be combined with :class:`.DataclassStackWidget` or :class:`.DataclassTabWidget` to synchronize the widget with the data type.
+:class:`.DataclassDelegate` and :class:`.DataclassMapper` can be combined with :class:`.DataclassStackedWidget` or :class:`.DataclassTabWidget` to synchronize the widget with the data type.
 
 Basic example
 =============

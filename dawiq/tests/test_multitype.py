@@ -1,4 +1,4 @@
-from dawiq import DataclassStackWidget, DataclassTabWidget, dataclass2Widget
+from dawiq import DataclassStackedWidget, DataclassTabWidget, dataclass2Widget
 from dawiq.qt_compat import QtWidgets
 import dataclasses
 import pytest
@@ -24,8 +24,8 @@ class DataClass3:
 
 
 @pytest.fixture
-def dataclassStackWidget(qtbot):
-    widget = DataclassStackWidget()
+def dataclassStackedWidget(qtbot):
+    widget = DataclassStackedWidget()
     widget.addWidget(QtWidgets.QWidget())
     for dcls in [DataClass1, DataClass2]:
         widget.addDataWidget(dataclass2Widget(dcls), dcls)
@@ -33,80 +33,80 @@ def dataclassStackWidget(qtbot):
     return widget
 
 
-def test_DataclassStackWidget_currentDataclass(qtbot, dataclassStackWidget):
-    dataclassStackWidget.setCurrentIndex(0)
-    assert dataclassStackWidget.currentDataclass() is None
-    dataclassStackWidget.setCurrentIndex(1)
-    assert dataclassStackWidget.currentDataclass() == DataClass1
-    dataclassStackWidget.setCurrentIndex(2)
-    assert dataclassStackWidget.currentDataclass() == DataClass2
+def test_DataclassStackedWidget_currentDataclass(qtbot, dataclassStackedWidget):
+    dataclassStackedWidget.setCurrentIndex(0)
+    assert dataclassStackedWidget.currentDataclass() is None
+    dataclassStackedWidget.setCurrentIndex(1)
+    assert dataclassStackedWidget.currentDataclass() == DataClass1
+    dataclassStackedWidget.setCurrentIndex(2)
+    assert dataclassStackedWidget.currentDataclass() == DataClass2
 
 
-def test_DataclassStackWidget_indexOfDataclass(qtbot, dataclassStackWidget):
-    assert dataclassStackWidget.indexOfDataclass(DataClass1) == 1
-    assert dataclassStackWidget.indexOfDataclass(DataClass2) == 2
-    assert dataclassStackWidget.indexOfDataclass(DataClass3) == -1
+def test_DataclassStackedWidget_indexOfDataclass(qtbot, dataclassStackedWidget):
+    assert dataclassStackedWidget.indexOfDataclass(DataClass1) == 1
+    assert dataclassStackedWidget.indexOfDataclass(DataClass2) == 2
+    assert dataclassStackedWidget.indexOfDataclass(DataClass3) == -1
 
 
-def test_DataclassStackWidget_currentDataValueChanged(qtbot, dataclassStackWidget):
-    dataclassStackWidget.setCurrentIndex(0)
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(2).widget(0).click()
+def test_DataclassStackedWidget_currentDataValueChanged(qtbot, dataclassStackedWidget):
+    dataclassStackedWidget.setCurrentIndex(0)
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(2).widget(0).click()
 
-    dataclassStackWidget.setCurrentIndex(1)
-    with qtbot.waitSignal(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(2).widget(0).click()
+    dataclassStackedWidget.setCurrentIndex(1)
+    with qtbot.waitSignal(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(2).widget(0).click()
 
-    dataclassStackWidget.setCurrentIndex(2)
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.waitSignal(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(2).widget(0).click()
+    dataclassStackedWidget.setCurrentIndex(2)
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.waitSignal(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(2).widget(0).click()
 
-    dataclassStackWidget.setCurrentWidget(dataclassStackWidget.widget(0))
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(2).widget(0).click()
+    dataclassStackedWidget.setCurrentWidget(dataclassStackedWidget.widget(0))
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(2).widget(0).click()
 
-    dataclassStackWidget.setCurrentWidget(dataclassStackWidget.widget(1))
-    with qtbot.waitSignal(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(2).widget(0).click()
+    dataclassStackedWidget.setCurrentWidget(dataclassStackedWidget.widget(1))
+    with qtbot.waitSignal(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(2).widget(0).click()
 
-    dataclassStackWidget.setCurrentWidget(dataclassStackWidget.widget(2))
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.waitSignal(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(2).widget(0).click()
+    dataclassStackedWidget.setCurrentWidget(dataclassStackedWidget.widget(2))
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.waitSignal(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(2).widget(0).click()
 
 
-def test_DataclassStackWidget_removeWidget(qtbot, dataclassStackWidget):
-    dataclassStackWidget.setCurrentIndex(2)
-    oldWidget = dataclassStackWidget.currentWidget()
-    dataclassStackWidget.removeWidget(oldWidget)
-    assert dataclassStackWidget.indexOfDataclass(DataClass2) == -1
-    assert dataclassStackWidget.currentIndex() == 1
-    with qtbot.waitSignal(dataclassStackWidget.currentDataValueChanged):
-        dataclassStackWidget.widget(1).widget(0).click()
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
+def test_DataclassStackedWidget_removeWidget(qtbot, dataclassStackedWidget):
+    dataclassStackedWidget.setCurrentIndex(2)
+    oldWidget = dataclassStackedWidget.currentWidget()
+    dataclassStackedWidget.removeWidget(oldWidget)
+    assert dataclassStackedWidget.indexOfDataclass(DataClass2) == -1
+    assert dataclassStackedWidget.currentIndex() == 1
+    with qtbot.waitSignal(dataclassStackedWidget.currentDataValueChanged):
+        dataclassStackedWidget.widget(1).widget(0).click()
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
         oldWidget.widget(0).click()
 
-    oldWidget = dataclassStackWidget.currentWidget()
-    dataclassStackWidget.removeWidget(oldWidget)
-    assert dataclassStackWidget.indexOfDataclass(DataClass1) == -1
-    assert dataclassStackWidget.currentIndex() == 0
-    with qtbot.assertNotEmitted(dataclassStackWidget.currentDataValueChanged):
+    oldWidget = dataclassStackedWidget.currentWidget()
+    dataclassStackedWidget.removeWidget(oldWidget)
+    assert dataclassStackedWidget.indexOfDataclass(DataClass1) == -1
+    assert dataclassStackedWidget.currentIndex() == 0
+    with qtbot.assertNotEmitted(dataclassStackedWidget.currentDataValueChanged):
         oldWidget.widget(0).click()
 
-    oldWidget = dataclassStackWidget.currentWidget()
-    dataclassStackWidget.removeWidget(oldWidget)
-    assert dataclassStackWidget.currentIndex() == -1
+    oldWidget = dataclassStackedWidget.currentWidget()
+    dataclassStackedWidget.removeWidget(oldWidget)
+    assert dataclassStackedWidget.currentIndex() == -1
 
 
 @pytest.fixture

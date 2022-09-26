@@ -13,12 +13,12 @@ from .typing import DataclassProtocol
 
 
 __all__ = [
-    "DataclassStackWidget",
+    "DataclassStackedWidget",
     "DataclassTabWidget",
 ]
 
 
-class DataclassStackWidget(QtWidgets.QStackedWidget):
+class DataclassStackedWidget(QtWidgets.QStackedWidget):
     """
     Stacked widget containing multiple :class:`DataWidget` and dataclasses.
 
