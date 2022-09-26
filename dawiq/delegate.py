@@ -209,17 +209,17 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
         self.setSubmitPolicy(self.SubmitPolicy.ManualSubmit)
 
     def addMapping(self, widget, section, propertyName=b""):
-        super().addMapping(widget, section, propertyName)
         if isinstance(widget, (DataclassStackedWidget, DataclassTabWidget)):
             widget.currentChanged.connect(self.submit)
             widget.currentDataValueChanged.connect(self.submit)
         elif isinstance(widget, DataWidget):
             widget.dataValueChanged.connect(self.submit)
+        super().addMapping(widget, section, propertyName)
 
     def removeMapping(self, widget):
-        super().removeMapping(widget)
         if isinstance(widget, (DataclassStackedWidget, DataclassTabWidget)):
             widget.currentChanged.disconnect(self.submit)
             widget.currentDataValueChanged.disconnect(self.submit)
         elif isinstance(widget, DataWidget):
             widget.dataValueChanged.disconnect(self.submit)
+        super().removeMapping(widget)
