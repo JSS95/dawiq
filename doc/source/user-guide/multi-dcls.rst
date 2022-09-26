@@ -398,8 +398,9 @@ Caution should be made to prevent the model from being updated multiple times.
             if isinstance(editor, MyWidget):
                 dcls = editor.comboBox.currentData()
                 if dcls != model.data(index, role=self.TypeRole):
+                    # stackedWidget index will be changed by the model data change
                     model.setData(index, dcls, role=self.TypeRole)
-                self.setModelData(editor.currentWidget(), model, index)
+                self.setModelData(editor.stackedWidget, model, index)
             else:
                 super().setModelData(editor, model, index)
 
@@ -473,9 +474,8 @@ We also need to define a mapper so that whenever the combo box index changes the
         def addMapping(self, widget, section, propertyname=b""):
             if isinstance(widget, MyWidget):
                 widget.comboBox.currentIndexChanged.connect(self.submit)
-                self.addMapping(widget.stackedWidget, section, propertyname)
-            else:
-                super().addMapping(widget, section, propertyname)
+                widget.stackedWidget.currentDataValueChanged.connect(self.submit)
+            super().addMapping(widget, section, propertyname)
 
     mapper = MyMapper()
 
@@ -504,3 +504,8 @@ Now let's set the data and display the widget.
         myWidget.show()
         app.exec()
         app.quit()
+
+.. figure:: ../_images/dcls-custom-example.jpg
+   :align: center
+
+   Custom widget with dataclass selection
