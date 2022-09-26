@@ -321,8 +321,8 @@ Now let's set the data and display the widget.
 
 Try change the dataclass type, set the data and switch the model index.
 
-Custom class example
-====================
+Custom widget example
+=====================
 
 In this example, we will define a custom widget to select the dataclass instead of using :class:`.DataclassTabWidget`.
 The widget consists of:
