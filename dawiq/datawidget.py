@@ -51,7 +51,7 @@ class DataWidget(QtWidgets.QGroupBox):
 
     This class can be constructed from :func:`dataclass2Widget`, but the widget
     does not store the dataclass type. To associate the data widget to the
-    dataclass, use :class:`DataclassDelegate`.
+    dataclass use :class:`DataclassDelegate`.
 
     """
 

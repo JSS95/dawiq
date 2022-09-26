@@ -36,10 +36,11 @@ class DataclassStackedWidget(QtWidgets.QStackedWidget):
         super().__init__(parent)
         self._dataWidgets = {}
         self._previousIndex = -1
-        self.currentChanged.connect(self.handleDataValueSignal)
+        self.currentChanged.connect(self.onCurrentChange)
 
     @QtCore.Slot(int)
-    def handleDataValueSignal(self, index: int):
+    def onCurrentChange(self, index: int):
+        """Handle the signals of old widget and current widget."""
         old = self.widget(self._previousIndex)
         if isinstance(old, DataWidget):
             old.dataValueChanged.disconnect(self.currentDataValueChanged)
@@ -95,10 +96,11 @@ class DataclassTabWidget(QtWidgets.QTabWidget):
         super().__init__(parent)
         self._dataWidgets = {}
         self._previousIndex = -1
-        self.currentChanged.connect(self.handleDataValueSignal)
+        self.currentChanged.connect(self.onCurrentChange)
 
     @QtCore.Slot(int)
-    def handleDataValueSignal(self, index: int):
+    def onCurrentChange(self, index: int):
+        """Handle the signals of old widget and current widget."""
         old = self.widget(self._previousIndex)
         if isinstance(old, DataWidget):
             old.dataValueChanged.disconnect(self.currentDataValueChanged)
