@@ -187,6 +187,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             if dcls is not None:
                 data = convertToQt(dcls, data)
             editor.setDataValue(data)
+
         else:
             super().setEditorData(editor, index)
 
