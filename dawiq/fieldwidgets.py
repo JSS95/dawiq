@@ -108,7 +108,7 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         self.dataValueChanged.emit(state)
 
-    def highlightEmpty(self, required: bool):
+    def setRequired(self, required: bool):
         pass
 
 
@@ -179,12 +179,14 @@ class IntLineEdit(QtWidgets.QLineEdit):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
-    def highlightEmpty(self, required: bool):
+    def setRequired(self, required: bool):
         if required and self.dataValue() is MISSING:
-            stylesheet = "border: 1px solid red"
+            requires = True
         else:
-            stylesheet = ""
-        self.setStyleSheet(stylesheet)
+            requires = False
+        self.setProperty("requiresFieldData", requires)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
 
 class EmptyFloatValidator(QtGui.QDoubleValidator):
@@ -254,12 +256,14 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
-    def highlightEmpty(self, required: bool):
+    def setRequired(self, required: bool):
         if required and self.dataValue() is MISSING:
-            stylesheet = "border: 1px solid red"
+            requires = True
         else:
-            stylesheet = ""
-        self.setStyleSheet(stylesheet)
+            requires = False
+        self.setProperty("requiresFieldData", requires)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
 
 class StrLineEdit(QtWidgets.QLineEdit):
@@ -308,12 +312,14 @@ class StrLineEdit(QtWidgets.QLineEdit):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
-    def highlightEmpty(self, required: bool):
+    def setRequired(self, required: bool):
         if required and self.dataValue() is MISSING:
-            stylesheet = "border: 1px solid red"
+            requires = True
         else:
-            stylesheet = ""
-        self.setStyleSheet(stylesheet)
+            requires = False
+        self.setProperty("requiresFieldData", requires)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
 
 T = TypeVar("T", bound="EnumComboBox")
@@ -386,7 +392,7 @@ class EnumComboBox(QtWidgets.QComboBox):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
-    def highlightEmpty(self, required: bool):
+    def setRequired(self, required: bool):
         pass
 
 
@@ -529,5 +535,5 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
-    def highlightEmpty(self, required: bool):
+    def setRequired(self, required: bool):
         pass

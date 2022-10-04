@@ -134,7 +134,7 @@ def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtoco
                 continue
             # TODO: add recursion for dataclass field
             required = f.default is dataclasses.MISSING
-            widget.highlightEmpty(required)
+            widget.setRequired(required)
 
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
