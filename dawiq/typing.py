@@ -76,3 +76,11 @@ class FieldWidgetProtocol(Protocol):
     def setFieldName(self, name: str):
         """Set the name of the field."""
         ...
+
+    def highlightEmpty(self, required: bool):
+        """
+        If reimplemented, this method should check :meth:`dataValue` to highlight
+        *self* if *required* is True. Make sure that highlight is turned off if
+        *required* is False.
+        """
+        ...

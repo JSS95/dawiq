@@ -108,6 +108,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         self.dataValueChanged.emit(state)
 
+    def highlightEmpty(self, required: bool):
+        pass
+
 
 class EmptyIntValidator(QtGui.QIntValidator):
     """Validator which accpets integer and empty string"""
@@ -175,6 +178,13 @@ class IntLineEdit(QtWidgets.QLineEdit):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def highlightEmpty(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            stylesheet = "border: 1px solid red"
+        else:
+            stylesheet = ""
+        self.setStyleSheet(stylesheet)
 
 
 class EmptyFloatValidator(QtGui.QDoubleValidator):
@@ -244,6 +254,13 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
+    def highlightEmpty(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            stylesheet = "border: 1px solid red"
+        else:
+            stylesheet = ""
+        self.setStyleSheet(stylesheet)
+
 
 class StrLineEdit(QtWidgets.QLineEdit):
     """
@@ -290,6 +307,13 @@ class StrLineEdit(QtWidgets.QLineEdit):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def highlightEmpty(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            stylesheet = "border: 1px solid red"
+        else:
+            stylesheet = ""
+        self.setStyleSheet(stylesheet)
 
 
 T = TypeVar("T", bound="EnumComboBox")
@@ -361,6 +385,9 @@ class EnumComboBox(QtWidgets.QComboBox):
             return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def highlightEmpty(self, required: bool):
+        pass
 
 
 V = TypeVar("V", bound="TupleGroupBox")
@@ -501,3 +528,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def highlightEmpty(self, required: bool):
+        pass
