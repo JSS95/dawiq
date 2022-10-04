@@ -78,7 +78,7 @@ def convertToQt(
     Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
     If the data does not have the value for a field, :obj:`MISSING` is passed as
-    its value instead.
+    its value instead to clear the widget.
 
     Field may define `toQt_converter` metadata to convert the field data to
     widget data. It is a unary callable which takes the field data and returns
