@@ -362,6 +362,7 @@ def test_EnumComboBox_setRequired(qtbot):
         x = 1
         y = 2
         z = 3
+
     widget = EnumComboBox.fromEnum(MyEnum)
 
     widget.setRequired(True)

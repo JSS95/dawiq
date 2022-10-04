@@ -3,6 +3,7 @@ from dawiq import dataclass2Widget, MISSING, DataclassStackedWidget, DataclassTa
 from dawiq.delegate import (
     convertFromQt,
     convertToQt,
+    highlightEmptyField,
     DataclassDelegate,
     DataclassMapper,
 )
@@ -163,6 +164,21 @@ def test_convertToQt_defaultvalue():
     )
 
 
+def test_highlightEmptyField(qtbot):
+    @dataclasses.dataclass
+    class DataClass1:
+        x: int
+
+    editor = dataclass2Widget(DataClass1)
+
+    highlightEmptyField(editor, DataClass1)
+    assert editor.widget(0).property("requiresFieldData")
+
+    editor.setDataValue(dict(x=10))
+    highlightEmptyField(editor, DataClass1)
+    assert not editor.widget(0).property("requiresFieldData")
+
+
 @dataclasses.dataclass
 class DataClass1:
     x: bool
@@ -200,6 +216,9 @@ def dataclassTabWidget(qtbot):
         widget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
 
     return widget
+
+
+# test DataclassDelegate
 
 
 def test_DataclassDelegate_setModelData(qtbot):
@@ -442,6 +461,9 @@ def test_DataclassDelegate_setEditorData_dataclassTabWidget(qtbot, dataclassTabW
     assert dataclassTabWidget.currentWidget().dataValue() == dict(
         a=True, b=False, c=False, d=False, e=False
     )
+
+
+# test DataclassMapper
 
 
 def test_DataclassMapper_addMapping_dataWidget(qtbot):

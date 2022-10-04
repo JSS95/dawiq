@@ -127,7 +127,7 @@ def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtoco
                 continue
             field_widgets[widget.fieldName()] = widget
 
-        # if the field does not have default value, it is required.
+        # if the field does not have default value, the field is required.
         for f in dataclasses.fields(dcls):
             widget = field_widgets.pop(f.name, None)
             if widget is None:  # no widget for field
