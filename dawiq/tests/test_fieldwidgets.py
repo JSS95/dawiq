@@ -68,6 +68,23 @@ def test_BoolCheckBox(qtbot):
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
 
+def test_BoolCheckBox_setRequired(qtbot):
+    """Check box is always occupied with data."""
+    widget = BoolCheckBox()
+
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+    widget.click()
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
+    widget.click()
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
+
+
 def test_EmptyIntValidator(qtbot):
     widget = QtWidgets.QLineEdit()
     widget.setValidator(EmptyIntValidator(widget))
@@ -121,6 +138,22 @@ def test_IntLineEdit(qtbot):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
     assert widget.dataValue() == -1
+
+
+def test_IntLineEdit_setRequired(qtbot):
+    widget = IntLineEdit()
+
+    widget.setRequired(True)
+    assert widget.property("requiresFieldData")
+    widget.setDataValue(10)
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+
+    widget.clear()
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
+    widget.setRequired(True)
+    assert widget.property("requiresFieldData")
 
 
 def test_EmptyFloatValidator(qtbot):
@@ -186,6 +219,22 @@ def test_FloatLineEdit(qtbot):
     assert widget.dataValue() == float(-1)
 
 
+def test_FloatLineEdit_setRequired(qtbot):
+    widget = FloatLineEdit()
+
+    widget.setRequired(True)
+    assert widget.property("requiresFieldData")
+    widget.setDataValue(10.0)
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+
+    widget.clear()
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
+    widget.setRequired(True)
+    assert widget.property("requiresFieldData")
+
+
 def test_StrLineEdit(qtbot):
     widget = StrLineEdit()
 
@@ -222,6 +271,23 @@ def test_StrLineEdit(qtbot):
         qtbot.keyPress(widget, "x")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
     assert widget.dataValue() == "x"
+
+
+def test_StrLineEdit_setRequired(qtbot):
+    """String line edit is always occupied with data."""
+    widget = StrLineEdit()
+
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+    widget.setDataValue("spam")
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+
+    widget.clear()
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
 
 
 def test_EnumComboBox(qtbot):
@@ -289,6 +355,26 @@ def test_EnumComboBox(qtbot):
     ):
         widget.setCurrentIndex(-1)
     assert widget.dataValue() is MISSING
+
+
+def test_EnumComboBox_setRequired(qtbot):
+    class MyEnum(enum.Enum):
+        x = 1
+        y = 2
+        z = 3
+    widget = EnumComboBox.fromEnum(MyEnum)
+
+    widget.setRequired(True)
+    assert widget.property("requiresFieldData")
+    widget.setCurrentIndex(1)
+    widget.setRequired(True)
+    assert not widget.property("requiresFieldData")
+
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
+    widget.setCurrentIndex(-1)
+    widget.setRequired(False)
+    assert not widget.property("requiresFieldData")
 
 
 def test_TupleGroupBox_addWidget(qtbot):
@@ -410,3 +496,36 @@ def test_TupleGroupBox_subwidget(qtbot):
         qtbot.keyPress(widget.widget(1), "2")
         qtbot.keyPress(widget.widget(1), QtCore.Qt.Key.Key_Return)
     assert widget.dataValue() == (1, 2)
+
+
+def test_TupleGroupBox_setRequired(qtbot):
+    widget = TupleGroupBox()
+    widget.addWidget(IntLineEdit())
+    widget.addWidget(IntLineEdit())
+
+    widget.setRequired(True)
+    assert widget.widget(0).property("requiresFieldData")
+    assert widget.widget(1).property("requiresFieldData")
+    widget.setDataValue((MISSING, 1))
+    widget.setRequired(True)
+    assert widget.widget(0).property("requiresFieldData")
+    assert not widget.widget(1).property("requiresFieldData")
+    widget.setDataValue((0, 1))
+    widget.setRequired(True)
+    assert not widget.widget(0).property("requiresFieldData")
+    assert not widget.widget(1).property("requiresFieldData")
+
+    widget.widget(0).clear()
+    widget.widget(1).clear()
+
+    widget.setRequired(False)
+    assert not widget.widget(0).property("requiresFieldData")
+    assert not widget.widget(1).property("requiresFieldData")
+    widget.setDataValue((MISSING, 1))
+    widget.setRequired(False)
+    assert not widget.widget(0).property("requiresFieldData")
+    assert not widget.widget(1).property("requiresFieldData")
+    widget.setDataValue((0, 1))
+    widget.setRequired(False)
+    assert not widget.widget(0).property("requiresFieldData")
+    assert not widget.widget(1).property("requiresFieldData")

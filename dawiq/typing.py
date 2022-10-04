@@ -105,5 +105,11 @@ class FieldWidgetProtocol(Protocol):
                 "*[requiresFieldData=true]{border: 1px solid red}"
             )
 
+        Notes
+        =====
+
+        This method is designed to be called by the :class:`DataclassDelegate`,
+        not directly by the user.
+
         """
         ...
