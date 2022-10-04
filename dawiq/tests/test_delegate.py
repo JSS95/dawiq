@@ -169,14 +169,27 @@ def test_highlightEmptyField(qtbot):
     class DataClass1:
         x: int
 
-    editor = dataclass2Widget(DataClass1)
+    editor1 = dataclass2Widget(DataClass1)
 
-    highlightEmptyField(editor, DataClass1)
-    assert editor.widget(0).property("requiresFieldData")
+    highlightEmptyField(editor1, DataClass1)
+    assert editor1.widget(0).property("requiresFieldData")
 
-    editor.setDataValue(dict(x=10))
-    highlightEmptyField(editor, DataClass1)
-    assert not editor.widget(0).property("requiresFieldData")
+    editor1.setDataValue(dict(x=10))
+    highlightEmptyField(editor1, DataClass1)
+    assert not editor1.widget(0).property("requiresFieldData")
+
+    @dataclasses.dataclass
+    class DataClass2:
+        x: int = 1
+
+    editor2 = dataclass2Widget(DataClass2)
+
+    highlightEmptyField(editor2, DataClass2)
+    assert not editor2.widget(0).property("requiresFieldData")
+
+    editor2.setDataValue(dict(x=10))
+    highlightEmptyField(editor2, DataClass2)
+    assert not editor2.widget(0).property("requiresFieldData")
 
 
 @dataclasses.dataclass
