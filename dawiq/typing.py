@@ -83,7 +83,7 @@ class FieldWidgetProtocol(Protocol):
 
         If *required* is True, it indicates that the field is mandatory. On such
         case, this methods checks the :meth:`dataValue` of *self* and sets
-        `requiresFieldData` property of the editor widget. If the data value of
+        ``requiresFieldData`` property of the editor widget. If the data value of
         required field is missing, the property is set to be True.
 
         .. code-block:: python

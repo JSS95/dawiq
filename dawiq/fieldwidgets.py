@@ -109,7 +109,13 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         self.dataValueChanged.emit(state)
 
     def setRequired(self, required: bool):
-        pass
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        self.setProperty("requiresFieldData", requires)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
 
 class EmptyIntValidator(QtGui.QIntValidator):
@@ -393,7 +399,13 @@ class EnumComboBox(QtWidgets.QComboBox):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        pass
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        self.setProperty("requiresFieldData", requires)
+        self.style().unpolish(self)
+        self.style().polish(self)
 
 
 V = TypeVar("V", bound="TupleGroupBox")
@@ -536,4 +548,8 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        pass
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                continue
+            widget.setRequired(required)
