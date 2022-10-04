@@ -76,9 +76,3 @@ class FieldWidgetProtocol(Protocol):
     def setFieldName(self, name: str):
         """Set the name of the field."""
         ...
-
-    def isRequiredField(self) -> bool:
-        ...
-
-    def setRequiredField(self, required: bool):
-        ...

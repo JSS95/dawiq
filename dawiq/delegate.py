@@ -10,12 +10,13 @@ from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
-from typing import Type, Dict, Any
+from typing import Type, Dict, Any, Optional
 
 
 __all__ = [
     "convertFromQt",
     "convertToQt",
+    "highlightEmptyField",
     "DataclassDelegate",
     "DataclassMapper",
 ]
@@ -113,6 +114,30 @@ def convertToQt(
     return ret
 
 
+def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtocol]]):
+    """Recursively highlight the empty field whose data is required."""
+    if dcls is None:
+        ... # TODO: de-highlight all
+    else:
+        # get field widgets from *editor*
+        field_widgets = {}
+        for i in range(editor.count()):
+            widget = editor.widget(i)
+            field_widgets[widget.fieldName()] = widget
+
+        # if the field does not have default value, it is required.
+        for f in dataclasses.fields(dcls):
+            widget = field_widgets.pop(f.name, None)
+            if widget is None:  # no widget for field
+                continue
+            # TODO: add recursion for dataclass field
+            required = f.default is dataclasses.MISSING
+            if required and widget.dataValue() is MISSING:
+                ... # TODO: hightlight the widget
+            else:
+                ... # TODO: de-highlight the widget
+
+
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """
     Delegate to update the model and the :class:`DataWidget`.
@@ -187,6 +212,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             if dcls is not None:
                 data = convertToQt(dcls, data)
             editor.setDataValue(data)
+            highlightEmptyField(editor, dcls)
 
         else:
             super().setEditorData(editor, index)
