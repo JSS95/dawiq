@@ -1,5 +1,5 @@
 =================================
-How to highlight mandatory widget
+How to highlight mandatory fields
 =================================
 
 .. currentmodule:: dawiq
