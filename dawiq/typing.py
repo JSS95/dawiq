@@ -36,8 +36,10 @@ class FieldWidgetProtocol(Protocol):
         this method converts the current check state to :class:`bool` and
         returns.
 
-        If the data value is :obj:`dawiq.MISSING`, it indicates that the widget
-        is empty and the delegate should specially handle it.
+        If the data value is :obj:`None`, it typically indicates that the widget
+        is empty and the delegate should specially handle it. One of the few
+        exceptions is :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        where :obj:`None` indicates partially checked state.
 
         When the data value is changed by user input, :attr:`dataValueChanged`
         signal must emit the new value.
@@ -54,10 +56,10 @@ class FieldWidgetProtocol(Protocol):
         this method converts :class:`bool` to :obj:`Qt.CheckState` and sets to
         the widget.
 
-        :obj:`None` and :obj:`dawiq.MISSING` typically mean that the value is
+        If the data value is :obj:`None`, it typically means that the value is
         null and the widget should be cleared. One of the few exceptions is
-        :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>` where these
-        values indicate the partially checked state if the tristate is enabled.
+        :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>` where :obj:`None`
+        indicates fuzzy boolean value.
 
         For valid *value*, its type must be strictly checked and :obj:`TypeError`
         must be raised on invalid input.

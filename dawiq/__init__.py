@@ -10,7 +10,6 @@ from .version import __version__  # noqa
 
 
 from .fieldwidgets import (
-    MISSING,
     BoolCheckBox,
     EmptyIntValidator,
     IntLineEdit,
@@ -37,7 +36,6 @@ from .delegate import (
 
 __all__ = [
     "BoolCheckBox",
-    "MISSING",
     "EmptyIntValidator",
     "IntLineEdit",
     "EmptyFloatValidator",

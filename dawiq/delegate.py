@@ -6,11 +6,10 @@ Dataclass delegate
 
 import dataclasses
 from .qt_compat import QtWidgets, TypeRole, DataRole
-from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
-from typing import Type, Dict, Any, Union, Optional
+from typing import Type, Dict, Any, Optional
 
 
 __all__ = [
@@ -29,7 +28,7 @@ def convertFromQt(
     """
     Convert the dict from :class:`DataWidget` to structured dict for dataclass.
 
-    If the field value does not exist in *data* or is :obj:`MISSING`, the field
+    If the field value does not exist in *data* or is :obj:`None`, the field
     is not included in the resulting dictionary. Default value of the field is
     ignored.
 
@@ -41,7 +40,6 @@ def convertFromQt(
     ========
 
     >>> from dataclasses import dataclass, field
-    >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertFromQt
     >>> from typing import Optional
     >>> def conv(arg):
@@ -53,7 +51,7 @@ def convertFromQt(
     ...     z: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
     >>> convertFromQt(Cls, dict(z=10))
     {'z': (10,)}
-    >>> convertFromQt(Cls, dict(x=MISSING, y=MISSING))
+    >>> convertFromQt(Cls, dict(x=None, y=None))
     {}
 
     """
@@ -61,10 +59,10 @@ def convertFromQt(
     # be missing from the widget.
     ret = {}
     for f in dataclasses.fields(dcls):
-        val = data.get(f.name, MISSING)
+        val = data.get(f.name, None)
         t = f.type
 
-        if val is MISSING:
+        if val is None:
             continue
 
         if dataclasses.is_dataclass(t):
@@ -84,7 +82,7 @@ def convertToQt(
     """
     Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
-    If the data does not have the value for a field, :obj:`MISSING` is passed as
+    If the data does not have the value for a field, :obj:`None` is passed as
     its value instead to clear the widget.
 
     Field may define `toQt_converter` metadata to convert the field data to
@@ -95,7 +93,6 @@ def convertToQt(
     ========
 
     >>> from dataclasses import dataclass, field
-    >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertToQt
     >>> from typing import Optional
     >>> @dataclass
@@ -105,21 +102,19 @@ def convertToQt(
     ...     z: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
     >>> convertToQt(Cls, dict(x=1, y=2, z=(10,)))
     {'x': 1, 'y': 2, 'z': 10}
-    >>> convertToQt(Cls, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
-    True
-    >>> convertToQt(Cls, dict(y=None)) ==  dict(x=MISSING, y=None, z=MISSING)
+    >>> convertToQt(Cls, dict()) == dict(x=None, y=None, z=None)
     True
 
     """
     ret = {}
     for f in dataclasses.fields(dcls):
-        val = data.get(f.name, MISSING)
-        if val is MISSING:
+        val = data.get(f.name, None)
+        if val is None:
             pass
         elif dataclasses.is_dataclass(f.type):
             val = convertToQt(f.type, val)
         converter = f.metadata.get("toQt_converter", None)
-        if val is not MISSING and converter is not None:
+        if val is not None and converter is not None:
             val = converter(val)
         ret[f.name] = val
     return ret
