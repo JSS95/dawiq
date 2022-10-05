@@ -174,6 +174,14 @@ class DataWidget(QtWidgets.QGroupBox):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
+    def setRequired(self, required: bool):
+        """Recursively set *required* to all subwidgets."""
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                continue
+            widget.setRequired(required)
+
 
 def type2Widget(t: Any) -> FieldWidgetProtocol:
     """

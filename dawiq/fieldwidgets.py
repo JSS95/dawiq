@@ -553,6 +553,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
+        """Recursively set *required* to all subwidgets."""
         for i in range(self.count()):
             widget = self.widget(i)
             if widget is None:
