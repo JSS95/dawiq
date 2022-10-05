@@ -113,9 +113,10 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             requires = True
         else:
             requires = False
-        self.setProperty("requiresFieldData", requires)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 class EmptyIntValidator(QtGui.QIntValidator):
@@ -190,9 +191,10 @@ class IntLineEdit(QtWidgets.QLineEdit):
             requires = True
         else:
             requires = False
-        self.setProperty("requiresFieldData", requires)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 class EmptyFloatValidator(QtGui.QDoubleValidator):
@@ -267,9 +269,10 @@ class FloatLineEdit(QtWidgets.QLineEdit):
             requires = True
         else:
             requires = False
-        self.setProperty("requiresFieldData", requires)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 class StrLineEdit(QtWidgets.QLineEdit):
@@ -323,9 +326,10 @@ class StrLineEdit(QtWidgets.QLineEdit):
             requires = True
         else:
             requires = False
-        self.setProperty("requiresFieldData", requires)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 T = TypeVar("T", bound="EnumComboBox")
@@ -403,9 +407,10 @@ class EnumComboBox(QtWidgets.QComboBox):
             requires = True
         else:
             requires = False
-        self.setProperty("requiresFieldData", requires)
-        self.style().unpolish(self)
-        self.style().polish(self)
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 V = TypeVar("V", bound="TupleGroupBox")
