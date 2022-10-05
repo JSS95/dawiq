@@ -8,7 +8,6 @@ from dawiq import (
     StrLineEdit,
     EnumComboBox,
     TupleGroupBox,
-    MISSING,
 )
 from dawiq.qt_compat import QtCore
 import dataclasses
@@ -107,7 +106,7 @@ def test_DataWidget_dataValue(qtbot):
         b: Cls1
 
     dataWidget = dataclass2Widget(Cls2)
-    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=MISSING))
+    assert dataWidget.dataValue() == dict(a=None, b=dict(x=None))
 
     dataWidget.widget(0).setText("1")
     dataWidget.widget(1).widget(0).setText("2")
@@ -143,8 +142,8 @@ def test_DataWidget_setDataValue(qtbot):
     assert counter.i == 0
 
     with qtbot.assertNotEmitted(dataWidget.dataValueChanged):
-        dataWidget.setDataValue(MISSING)
-    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=False))
+        dataWidget.setDataValue(None)
+    assert dataWidget.dataValue() == dict(a=None, b=dict(x=False))
 
 
 def test_DataWidget_subwidget(qtbot):
@@ -161,10 +160,10 @@ def test_DataWidget_subwidget(qtbot):
 
     with qtbot.waitSignal(
         dataWidget.dataValueChanged,
-        check_params_cb=lambda val: val == dict(a=MISSING, b=dict(x=True)),
+        check_params_cb=lambda val: val == dict(a=None, b=dict(x=True)),
     ):
         dataWidget.widget(1).widget(0).click()
-    assert dataWidget.dataValue() == dict(a=MISSING, b=dict(x=True))
+    assert dataWidget.dataValue() == dict(a=None, b=dict(x=True))
 
     with qtbot.waitSignal(
         dataWidget.dataValueChanged,
@@ -182,15 +181,19 @@ def test_type2Widget(qtbot):
     assert type2Widget(Optional[bool]).isTristate()
 
     assert isinstance(type2Widget(int), IntLineEdit)
+    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
 
     assert isinstance(type2Widget(float), FloatLineEdit)
+    assert isinstance(type2Widget(Optional[float]), FloatLineEdit)
 
     assert isinstance(type2Widget(str), StrLineEdit)
+    assert isinstance(type2Widget(Optional[str]), StrLineEdit)
 
     class E(Enum):
         x = 1
 
     assert isinstance(type2Widget(E), EnumComboBox)
+    assert isinstance(type2Widget(Optional[E]), EnumComboBox)
 
     with pytest.raises(TypeError):
         type2Widget(Tuple)

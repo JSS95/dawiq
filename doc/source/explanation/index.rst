@@ -7,4 +7,5 @@ Advanced topics
 .. toctree::
    :maxdepth: 2
 
+   optional-vs-default
    dataclass-construction
