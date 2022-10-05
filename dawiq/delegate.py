@@ -30,9 +30,8 @@ def convertFromQt(
     Convert the dict from :class:`DataWidget` to structured dict for dataclass.
 
     If the field value does not exist in *data* or is :obj:`MISSING`, the field
-    type is checked. If the field type is ``Optional``, then :obj:`None` is used
-    as the value. Else, the field is not included in the resulting dictionary.
-    Default value of the field is ignored.
+    is not included in the resulting dictionary. Default value of the field is
+    ignored.
 
     Field may define `fromQt_converter` metadata to convert the widget data to
     field data. It is a unary callable which takes the widget data and returns
@@ -53,9 +52,9 @@ def convertFromQt(
     ...     y: Optional[int]
     ...     z: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
     >>> convertFromQt(Cls, dict(z=10))
-    {'y': None, 'z': (10,)}
+    {'z': (10,)}
     >>> convertFromQt(Cls, dict(x=MISSING, y=MISSING))
-    {'y': None}
+    {}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -66,13 +65,7 @@ def convertFromQt(
         t = f.type
 
         if val is MISSING:
-            origin = getattr(t, "__origin__", None)
-            args = [a for a in getattr(t, "__args__", ()) if not isinstance(None, a)]
-            if origin is Union and len(args) == 1:
-                # f.type is Optional[...]
-                val = None
-            else:
-                continue
+            continue
 
         if dataclasses.is_dataclass(t):
             val = convertFromQt(t, val)
