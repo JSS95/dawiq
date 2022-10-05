@@ -508,7 +508,7 @@ def test_TupleGroupBox_setRequired(qtbot):
     assert widget.widget(1).property("requiresFieldData")
     widget.setDataValue((None, 1))
     widget.setRequired(True)
-    assert widget.widget(0).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
     widget.setDataValue((0, 1))
     widget.setRequired(True)
