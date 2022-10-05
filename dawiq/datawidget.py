@@ -8,8 +8,6 @@ structure established by the dataclass.
 
 from .qt_compat import QtCore, QtWidgets
 from .fieldwidgets import (
-    _MISSING,
-    MISSING,
     BoolCheckBox,
     IntLineEdit,
     FloatLineEdit,
@@ -41,9 +39,9 @@ class DataWidget(QtWidgets.QGroupBox):
     subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
-    Data value is the dict containing subwidget data, and never :obj:`MISSING`.
+    Data value is the dict containing subwidget data, and never :obj:`None`.
 
-    :meth:`setDataValue` sets the subwidget data. If :obj:`MISSING` is passed,
+    :meth:`setDataValue` sets the subwidget data. If :obj:`None` is passed,
     it is propagated to all subwidget.
 
     Notes
@@ -152,8 +150,8 @@ class DataWidget(QtWidgets.QGroupBox):
             ret[w.fieldName()] = w.dataValue()
         return ret
 
-    def setDataValue(self, data: Union[Dict[str, Any], _MISSING]):
-        if data is MISSING:
+    def setDataValue(self, data: Optional[Dict[str, Any]]):
+        if data is None:
             data = {}
 
         self._block_dataValueChanged = True
@@ -161,11 +159,11 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            val = data.get(w.fieldName(), MISSING)  # type: ignore[union-attr]
+            val = data.get(w.fieldName(), None)  # type: ignore[union-attr]
             try:
                 w.setDataValue(val)
             except TypeError:
-                w.setDataValue(MISSING)
+                w.setDataValue(None)
         self._block_dataValueChanged = False
 
     def emitDataValueChanged(self):
@@ -193,17 +191,16 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
     * :class:`enum.Enum` -> :class:`.EnumComboBox`
     * :class:`bool` -> :class:`.BoolCheckBox`
     * :obj:`Optional[bool]` -> :class:`.BoolCheckBox` with tristate
-    * :class:`int` -> :class:`.IntLineEdit`
-    * :class:`float` -> :class:`.FloatLineEdit`
-    * :class:`str` -> :class:`.StrLineEdit`
+    * :class:`int` or :obj:`Optional[int]` -> :class:`.IntLineEdit`
+    * :class:`float` or :obj:`Optional[float]` -> :class:`.FloatLineEdit`
+    * :class:`str` or :obj:`Optional[str]` -> :class:`.StrLineEdit`
     * :obj:`Tuple` -> :class:`.TupleGroupBox` with nested field widgets
 
     For :obj:`Tuple`, its length must be finite (no :class:`Ellipsis` in args)
     and item types must be the supported type.
 
     """
-
-    # When new type is supported, update intro.rst
+    # When new type is supported, update intro.rst as well
 
     if isinstance(t, type) and issubclass(t, Enum):
         return EnumComboBox.fromEnum(t)
@@ -237,10 +234,11 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
         if len(args) > 1:
             msg = f"Cannot convert Union with multiple types: {t}"
             raise TypeError(msg)
+        # t is Optional[...]
         widget = type2Widget(args[0])
         if isinstance(widget, BoolCheckBox):
             widget.setTristate(True)
-            return widget
+        return widget
 
     raise TypeError("Unknown type or annotation: %s" % t)
 

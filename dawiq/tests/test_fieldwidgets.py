@@ -7,7 +7,6 @@ from dawiq import (
     StrLineEdit,
     EnumComboBox,
     TupleGroupBox,
-    MISSING,
 )
 import enum
 from dawiq.qt_compat import QtCore, QtWidgets
@@ -29,11 +28,11 @@ def test_BoolCheckBox(qtbot):
     assert widget.dataValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
-    widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test MISSING
+    widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test None
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MISSING)
-    assert widget.dataValue() is False
-    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+        widget.setDataValue(None)
+    assert widget.dataValue() is None
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(None)
@@ -107,8 +106,8 @@ def test_IntLineEdit(qtbot):
 
     # test value change by setDataValue
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MISSING)
-    assert widget.dataValue() is MISSING
+        widget.setDataValue(None)
+    assert widget.dataValue() is None
     assert not widget.text()
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
@@ -121,15 +120,15 @@ def test_IntLineEdit(qtbot):
     # test value change by keyboard
     with qtbot.waitSignal(
         widget.dataValueChanged,
-        check_params_cb=lambda val: val is MISSING,
+        check_params_cb=lambda val: val is None,
     ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
         qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
     with qtbot.waitSignal(
         widget.dataValueChanged,
@@ -186,8 +185,8 @@ def test_FloatLineEdit(qtbot):
 
     # test value change by setDataValue
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MISSING)
-    assert widget.dataValue() is MISSING
+        widget.setDataValue(None)
+    assert widget.dataValue() is None
     assert not widget.text()
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
@@ -200,15 +199,15 @@ def test_FloatLineEdit(qtbot):
     # test value change by keyboard
     with qtbot.waitSignal(
         widget.dataValueChanged,
-        check_params_cb=lambda val: val is MISSING,
+        check_params_cb=lambda val: val is None,
     ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
         qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
     with qtbot.waitSignal(
         widget.dataValueChanged,
@@ -240,7 +239,7 @@ def test_StrLineEdit(qtbot):
 
     # test value change by setDataValue
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MISSING)
+        widget.setDataValue(None)
     assert widget.dataValue() == ""
     assert not widget.text()
 
@@ -299,7 +298,7 @@ def test_EnumComboBox(qtbot):
     widget = EnumComboBox.fromEnum(MyEnum)
     assert widget.count() == 3
     assert widget.currentIndex() == -1
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
     # test with setDataValue
     with qtbot.assertNotEmitted(widget.dataValueChanged):
@@ -318,9 +317,9 @@ def test_EnumComboBox(qtbot):
     assert widget.dataValue() == MyEnum.z
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MISSING)
+        widget.setDataValue(None)
     assert widget.currentIndex() == -1
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
     # test with setCurrentIndex
 
@@ -351,10 +350,10 @@ def test_EnumComboBox(qtbot):
     with qtbot.waitSignal(
         widget.dataValueChanged,
         raising=True,
-        check_params_cb=lambda val: val is MISSING,
+        check_params_cb=lambda val: val is None,
     ):
         widget.setCurrentIndex(-1)
-    assert widget.dataValue() is MISSING
+    assert widget.dataValue() is None
 
 
 def test_EnumComboBox_setRequired(qtbot):
@@ -447,7 +446,7 @@ def test_TupleGroupBox_dataValue(qtbot):
     widget = TupleGroupBox()
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
-    assert widget.dataValue() == (MISSING, MISSING)
+    assert widget.dataValue() == (None, None)
 
     widget.widget(0).setText("1")
     widget.widget(1).setText("2")
@@ -475,8 +474,8 @@ def test_TupleGroupBox_setDataValue(qtbot):
     assert counter.i == 0
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MISSING)
-    assert widget.dataValue() == (MISSING, MISSING)
+        widget.setDataValue(None)
+    assert widget.dataValue() == (None, None)
 
 
 def test_TupleGroupBox_subwidget(qtbot):
@@ -485,11 +484,11 @@ def test_TupleGroupBox_subwidget(qtbot):
     widget.addWidget(IntLineEdit())
 
     with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, MISSING)
+        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, None)
     ):
         qtbot.keyPress(widget.widget(0), "1")
         qtbot.keyPress(widget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == (1, MISSING)
+    assert widget.dataValue() == (1, None)
 
     with qtbot.waitSignal(
         widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, 2)
@@ -507,7 +506,7 @@ def test_TupleGroupBox_setRequired(qtbot):
     widget.setRequired(True)
     assert widget.widget(0).property("requiresFieldData")
     assert widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((MISSING, 1))
+    widget.setDataValue((None, 1))
     widget.setRequired(True)
     assert widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
@@ -522,7 +521,7 @@ def test_TupleGroupBox_setRequired(qtbot):
     widget.setRequired(False)
     assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((MISSING, 1))
+    widget.setDataValue((None, 1))
     widget.setRequired(False)
     assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")

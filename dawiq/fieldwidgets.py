@@ -13,7 +13,6 @@ from .typing import FieldWidgetProtocol
 
 
 __all__ = [
-    "MISSING",
     "BoolCheckBox",
     "EmptyIntValidator",
     "IntLineEdit",
@@ -23,15 +22,6 @@ __all__ = [
     "EnumComboBox",
     "TupleGroupBox",
 ]
-
-
-class _MISSING:
-    """Sentinel object to indicate empty field."""
-
-    pass
-
-
-MISSING = _MISSING()
 
 
 class BoolCheckBox(QtWidgets.QCheckBox):
@@ -46,8 +36,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
 
     Because of the nature of check box, it is impossible to define empty state of
-    the widget. :meth:`dataValue` is always either True, False or None, and never
-    :obj:`MISSING`. :meth:`setDataValue` treats :obj:`MISSING` as False.
+    the widget. :meth:`dataValue` is always either True, False or None.
+
+    If Tristate is disabled, :meth:`setDataValue` treats :obj:`None` as False.
 
     """
 
@@ -76,8 +67,8 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         return state
 
-    def setDataValue(self, value: Union[Optional[bool], _MISSING]):
-        if value is MISSING:
+    def setDataValue(self, value: Optional[bool]):
+        if value is None and not self.isTristate():
             value = False
 
         if value is True:
@@ -109,14 +100,8 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         self.dataValueChanged.emit(state)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is MISSING:
-            requires = True
-        else:
-            requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
-            self.style().unpolish(self)
-            self.style().polish(self)
+        # Check box is always occupied
+        pass
 
 
 class EmptyIntValidator(QtGui.QIntValidator):
@@ -138,10 +123,10 @@ class IntLineEdit(QtWidgets.QLineEdit):
     text on the line edit.
 
     If the text is not empty, the data value is the integer that the string is
-    converted to. If the line edit is empty, :obj:`MISSING` is the data value.
+    converted to. If the line edit is empty, :obj:`None` is the data value.
 
-    :meth:`setDataValue` sets the line edit text. If :obj:`MISSING` is passed,
-    line edit is cleared.
+    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
+    edit is cleared.
 
     """
 
@@ -161,20 +146,20 @@ class IntLineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> Union[int, _MISSING]:
+    def dataValue(self) -> Optional[int]:
         text = self.text()
 
         if not text:
-            val: Union[int, _MISSING] = MISSING
+            val: Optional[int] = None
         else:
             try:
                 val = int(text)
             except ValueError:
-                val = MISSING
+                val = None
         return val
 
-    def setDataValue(self, val: Union[int, _MISSING]):
-        if val is MISSING:
+    def setDataValue(self, val: Optional[int]):
+        if val is None:
             txt = ""
         elif isinstance(val, int):
             txt = str(int(val))
@@ -187,7 +172,7 @@ class IntLineEdit(QtWidgets.QLineEdit):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is MISSING:
+        if required and self.dataValue() is None:
             requires = True
         else:
             requires = False
@@ -216,10 +201,10 @@ class FloatLineEdit(QtWidgets.QLineEdit):
     text on the line edit.
 
     If the text is not empty, the data value is the float that the string is
-    converted to. If the line edit is empty, :obj:`MISSING` is the data value.
+    converted to. If the line edit is empty, :obj:`None` is the data value.
 
-    :meth:`setDataValue` sets the line edit text. If :obj:`MISSING` is passed,
-    line edit is cleared.
+    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
+    edit is cleared.
 
     """
 
@@ -239,20 +224,20 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> Union[float, _MISSING]:
+    def dataValue(self) -> Optional[float]:
         text = self.text()
 
         if not text:
-            val: Union[float, _MISSING] = MISSING
+            val: Optional[float] = None
         else:
             try:
                 val = float(text)
             except ValueError:
-                val = MISSING
+                val = None
         return val
 
-    def setDataValue(self, val: Union[float, _MISSING]):
-        if val is MISSING:
+    def setDataValue(self, val: Optional[float]):
+        if val is None:
             txt = ""
         elif isinstance(val, float):
             txt = str(float(val))
@@ -265,7 +250,7 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is MISSING:
+        if required and self.dataValue() is None:
             requires = True
         else:
             requires = False
@@ -284,10 +269,10 @@ class StrLineEdit(QtWidgets.QLineEdit):
     text on the line edit.
 
     Data value is the text of line edit. If the line edit is empty, data value is
-    empty string. Thus, the data value is never :obj:`MISSING`.
+    empty string. Thus, the data value is never :obj:`None`.
 
-    :meth:`setDataValue` sets the line edit text. If :obj:`MISSING` is passed,
-    line edit is cleared.
+    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
+    edit is cleared.
 
     """
 
@@ -308,8 +293,8 @@ class StrLineEdit(QtWidgets.QLineEdit):
     def dataValue(self) -> str:
         return self.text()
 
-    def setDataValue(self, val: Union[str, _MISSING]):
-        if val is MISSING:
+    def setDataValue(self, val: Optional[str]):
+        if val is None:
             txt = ""
         elif isinstance(val, str):
             txt = str(val)  # type: ignore[assignment]
@@ -322,7 +307,7 @@ class StrLineEdit(QtWidgets.QLineEdit):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is MISSING:
+        if required and self.dataValue() is None:
             requires = True
         else:
             requires = False
@@ -347,9 +332,9 @@ class EnumComboBox(QtWidgets.QComboBox):
     changes the current index.
 
     Data value is the Enum member. If the current index is empty, data value is
-    :obj:`MISSING`
+    :obj:`None`
 
-    :meth:`setDataValue` sets the current index. If :obj:`MISSING` is passed,
+    :meth:`setDataValue` sets the current index. If :obj:`None` is passed,
     index is set to -1.
 
     """
@@ -377,16 +362,16 @@ class EnumComboBox(QtWidgets.QComboBox):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> Union[Enum, _MISSING]:
+    def dataValue(self) -> Optional[Enum]:
         index = self.currentIndex()
         if index == -1:
-            ret = MISSING
+            ret = None
         else:
             ret = self.itemData(index)
         return ret
 
-    def setDataValue(self, value: Union[Enum, _MISSING]):
-        if value is MISSING:
+    def setDataValue(self, value: Optional[Enum]):
+        if value is None:
             index = -1
         elif isinstance(value, Enum):
             index = self.findData(value)
@@ -403,7 +388,7 @@ class EnumComboBox(QtWidgets.QComboBox):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is MISSING:
+        if required and self.dataValue() is None:
             requires = True
         else:
             requires = False
@@ -427,9 +412,9 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
-    Data value is the tuple containing subwidget data, and never :obj:`MISSING`.
+    Data value is the tuple containing subwidget data, and never :obj:`None`.
 
-    :meth:`setDataValue` sets the subwidget data. If :obj:`MISSING` is passed,
+    :meth:`setDataValue` sets the subwidget data. If :obj:`None` is passed,
     it is propagated to all subwidget.
 
     """
@@ -528,14 +513,14 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             ret.append(widget.dataValue())
         return tuple(ret)
 
-    def setDataValue(self, value: Union[tuple, _MISSING]):
+    def setDataValue(self, value: Optional[tuple]):
         self._block_dataValueChanged = True
-        if value is MISSING:
+        if value is None:
             for i in range(self.count()):
                 widget = self.widget(i)
                 if widget is None:
                     break
-                widget.setDataValue(MISSING)
+                widget.setDataValue(None)
         elif isinstance(value, tuple):
             for i in range(self.count()):
                 widget = self.widget(i)

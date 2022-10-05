@@ -1,5 +1,5 @@
 import dataclasses
-from dawiq import dataclass2Widget, MISSING, DataclassStackedWidget, DataclassTabWidget
+from dawiq import dataclass2Widget, DataclassStackedWidget, DataclassTabWidget
 from dawiq.delegate import (
     convertFromQt,
     convertToQt,
@@ -37,7 +37,7 @@ def test_convertFromQt():
     assert convertFromQt(Cls1, dict(x=1, y=2, z=dict(a=3))) == dict(
         x=1, y=CustomField(2), z=dict(a=CustomField(3))
     )
-    assert convertFromQt(Cls1, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
+    assert convertFromQt(Cls1, dict(x=None, y=None, z=None)) == dict()
 
 
 def test_convertFromQt_defaultvalue():
@@ -65,7 +65,7 @@ def test_convertFromQt_defaultvalue():
         x=CustomField(3), y=CustomField(2), z=1
     )
     assert convertFromQt(Cls0, dict()) == dict()
-    assert convertFromQt(Cls0, dict(x=MISSING, y=MISSING, z=MISSING)) == dict()
+    assert convertFromQt(Cls0, dict(x=None, y=None, z=None)) == dict()
 
     @dataclasses.dataclass
     class Cls1:
@@ -79,10 +79,10 @@ def test_convertFromQt_defaultvalue():
         b=dict(x=CustomField(3), y=CustomField(2), z=1),
     )
     assert convertFromQt(Cls1, dict()) == dict()
-    assert convertFromQt(Cls1, dict(a=MISSING, b=MISSING)) == dict()
-    assert convertFromQt(
-        Cls1, dict(a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING))
-    ) == dict(b=dict())
+    assert convertFromQt(Cls1, dict(a=None, b=None)) == dict()
+    assert convertFromQt(Cls1, dict(a=None, b=dict(x=None, y=None, z=None))) == dict(
+        b=dict()
+    )
 
     @dataclasses.dataclass
     class Cls2:
@@ -117,7 +117,7 @@ def test_convertToQt():
     assert convertToQt(
         Cls1, dict(x=1, y=CustomField(2), z=dict(a=CustomField(3)))
     ) == dict(x=1, y=2, z=dict(a=3))
-    assert convertToQt(Cls1, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
+    assert convertToQt(Cls1, dict()) == dict(x=None, y=None, z=None)
 
 
 def test_convertToQt_defaultvalue():
@@ -141,16 +141,16 @@ def test_convertToQt_defaultvalue():
         )
         z: int = 3
 
-    assert convertToQt(Cls0, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
+    assert convertToQt(Cls0, dict()) == dict(x=None, y=None, z=None)
 
     @dataclasses.dataclass
     class Cls1:
         a: Cls0
         b: Cls0 = Cls0(x=CustomField(1))
 
-    assert convertToQt(Cls1, dict()) == dict(a=MISSING, b=MISSING)
+    assert convertToQt(Cls1, dict()) == dict(a=None, b=None)
     assert convertToQt(Cls1, dict(b=dict())) == dict(
-        a=MISSING, b=dict(x=MISSING, y=MISSING, z=MISSING)
+        a=None, b=dict(x=None, y=None, z=None)
     )
 
     @dataclasses.dataclass
@@ -158,10 +158,8 @@ def test_convertToQt_defaultvalue():
         c: Cls1
         d: Cls1 = Cls1(Cls0(CustomField(10)))
 
-    assert convertToQt(Cls2, dict()) == dict(c=MISSING, d=MISSING)
-    assert convertToQt(Cls2, dict(d=dict())) == dict(
-        c=MISSING, d=dict(a=MISSING, b=MISSING)
-    )
+    assert convertToQt(Cls2, dict()) == dict(c=None, d=None)
+    assert convertToQt(Cls2, dict(d=dict())) == dict(c=None, d=dict(a=None, b=None))
 
 
 def test_highlightEmptyField(qtbot):
@@ -421,7 +419,7 @@ def test_DataclassDelegate_setEditorData(qtbot):
     modelIndex2 = model.index(2, 0)
     model.setData(modelIndex2, dict(), role=DataclassDelegate.DataRole)
 
-    assert dataWidget.dataValue() == dict(x=MISSING)
+    assert dataWidget.dataValue() == dict(x=None)
     assert dataWidget.widget(0).text() == ""
 
     mapper.setCurrentModelIndex(modelIndex0)
@@ -433,7 +431,7 @@ def test_DataclassDelegate_setEditorData(qtbot):
     assert dataWidget.widget(0).text() == "1"
 
     mapper.setCurrentModelIndex(modelIndex2)
-    assert dataWidget.dataValue() == dict(x=MISSING)
+    assert dataWidget.dataValue() == dict(x=None)
     assert dataWidget.widget(0).text() == ""
 
     model.setData(modelIndex2, dict(x=10), role=DataclassDelegate.DataRole)
@@ -739,4 +737,4 @@ def test_DataclassMapper_default(qtbot):
     mapper.setCurrentModelIndex(modelIndex)
 
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) is None
-    assert dataWidget.dataValue() == dict(x=MISSING)
+    assert dataWidget.dataValue() == dict(x=None)
