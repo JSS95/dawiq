@@ -211,6 +211,22 @@ def test_highlightEmptyField_recursive(qtbot):
     assert not editor.widget(1).widget(1).property("requiresFieldData")
 
 
+def test_highlightEmptyField_noDataclass(qtbot):
+    @dataclasses.dataclass
+    class DataClass1:
+        x: int
+        y: int
+
+    @dataclasses.dataclass
+    class DataClass2:
+        a: DataClass1
+
+    editor = dataclass2Widget(DataClass2)
+    highlightEmptyField(editor, None)
+    assert not editor.widget(0).widget(0).property("requiresFieldData")
+    assert not editor.widget(0).widget(1).property("requiresFieldData")
+
+
 @dataclasses.dataclass
 class DataClass1:
     x: bool

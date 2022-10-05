@@ -117,7 +117,7 @@ def convertToQt(
 def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtocol]]):
     """Recursively highlight the empty field whose data is required."""
     if dcls is None:
-        ...  # TODO: de-highlight all
+        editor.setRequired(False)
     else:
         # get field widgets from *editor*
         field_widgets = {}
