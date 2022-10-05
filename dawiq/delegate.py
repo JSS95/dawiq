@@ -10,12 +10,13 @@ from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
-from typing import Type, Dict, Any
+from typing import Type, Dict, Any, Optional
 
 
 __all__ = [
     "convertFromQt",
     "convertToQt",
+    "highlightEmptyField",
     "DataclassDelegate",
     "DataclassMapper",
 ]
@@ -78,7 +79,7 @@ def convertToQt(
     Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
     If the data does not have the value for a field, :obj:`MISSING` is passed as
-    its value instead.
+    its value instead to clear the widget.
 
     Field may define `toQt_converter` metadata to convert the field data to
     widget data. It is a unary callable which takes the field data and returns
@@ -111,6 +112,34 @@ def convertToQt(
             val = converter(val)
         ret[f.name] = val
     return ret
+
+
+def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtocol]]):
+    """Recursively highlight the empty field whose data is required."""
+    if dcls is None:
+        editor.setRequired(False)
+    else:
+        # get field widgets from *editor*
+        field_widgets = {}
+        for i in range(editor.count()):
+            widget = editor.widget(i)
+            if widget is None:
+                continue
+            field_widgets[widget.fieldName()] = widget
+
+        # if the field does not have default value, the field is required.
+        for f in dataclasses.fields(dcls):
+            widget = field_widgets.pop(f.name, None)
+            if widget is None:  # no widget for field
+                continue
+            required = f.default is dataclasses.MISSING
+            if isinstance(widget, DataWidget):
+                if required and dataclasses.is_dataclass(f.type):
+                    highlightEmptyField(widget, f.type)
+                else:
+                    widget.setRequired(required)
+            else:
+                widget.setRequired(required)
 
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
@@ -187,6 +216,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             if dcls is not None:
                 data = convertToQt(dcls, data)
             editor.setDataValue(data)
+            highlightEmptyField(editor, dcls)
+
         else:
             super().setEditorData(editor, index)
 

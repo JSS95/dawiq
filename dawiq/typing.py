@@ -76,3 +76,40 @@ class FieldWidgetProtocol(Protocol):
     def setFieldName(self, name: str):
         """Set the name of the field."""
         ...
+
+    def setRequired(self, required: bool):
+        """
+        Set if *self* represents a required field.
+
+        If *required* is True, it indicates that the field is mandatory. On such
+        case, this methods checks the :meth:`dataValue` of *self* and sets
+        ``requiresFieldData`` property of the editor widget. If the data value of
+        required field is missing, the property is set to be True.
+
+        .. code-block:: python
+
+            widget.setProperty("requiresFieldData", True)
+            widget.style().unpolish(widget)
+            widget.style().polish(widget)
+
+        The editor widget is usually *self*, but there are exceptions such as
+        :class:`TupleGroupBox`. Note that the widget needs to be re-polished.
+
+        Style sheet can be set to highlight the required field with empty widget.
+        Common way is to set the style sheet of :class:`QApplication` before
+        starting the app.
+
+        .. code-block:: python
+
+            qApp.setStyleSheet(
+                "*[requiresFieldData=true]{border: 1px solid red}"
+            )
+
+        Notes
+        =====
+
+        This method is designed to be called by the :class:`DataclassDelegate`,
+        not directly by the user.
+
+        """
+        ...

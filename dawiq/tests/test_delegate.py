@@ -3,6 +3,7 @@ from dawiq import dataclass2Widget, MISSING, DataclassStackedWidget, DataclassTa
 from dawiq.delegate import (
     convertFromQt,
     convertToQt,
+    highlightEmptyField,
     DataclassDelegate,
     DataclassMapper,
 )
@@ -163,6 +164,69 @@ def test_convertToQt_defaultvalue():
     )
 
 
+def test_highlightEmptyField(qtbot):
+    @dataclasses.dataclass
+    class DataClass1:
+        x: int
+
+    editor1 = dataclass2Widget(DataClass1)
+
+    highlightEmptyField(editor1, DataClass1)
+    assert editor1.widget(0).property("requiresFieldData")
+
+    editor1.setDataValue(dict(x=10))
+    highlightEmptyField(editor1, DataClass1)
+    assert not editor1.widget(0).property("requiresFieldData")
+
+    @dataclasses.dataclass
+    class DataClass2:
+        x: int = 1
+
+    editor2 = dataclass2Widget(DataClass2)
+
+    highlightEmptyField(editor2, DataClass2)
+    assert not editor2.widget(0).property("requiresFieldData")
+
+    editor2.setDataValue(dict(x=10))
+    highlightEmptyField(editor2, DataClass2)
+    assert not editor2.widget(0).property("requiresFieldData")
+
+
+def test_highlightEmptyField_recursive(qtbot):
+    @dataclasses.dataclass
+    class DataClass1:
+        x: int
+        y: int = 3
+
+    @dataclasses.dataclass
+    class DataClass2:
+        a: DataClass1
+        b: DataClass1 = DataClass1(1, 2)
+
+    editor = dataclass2Widget(DataClass2)
+    highlightEmptyField(editor, DataClass2)
+    assert editor.widget(0).widget(0).property("requiresFieldData")
+    assert not editor.widget(0).widget(1).property("requiresFieldData")
+    assert not editor.widget(1).widget(0).property("requiresFieldData")
+    assert not editor.widget(1).widget(1).property("requiresFieldData")
+
+
+def test_highlightEmptyField_noDataclass(qtbot):
+    @dataclasses.dataclass
+    class DataClass1:
+        x: int
+        y: int
+
+    @dataclasses.dataclass
+    class DataClass2:
+        a: DataClass1
+
+    editor = dataclass2Widget(DataClass2)
+    highlightEmptyField(editor, None)
+    assert not editor.widget(0).widget(0).property("requiresFieldData")
+    assert not editor.widget(0).widget(1).property("requiresFieldData")
+
+
 @dataclasses.dataclass
 class DataClass1:
     x: bool
@@ -200,6 +264,9 @@ def dataclassTabWidget(qtbot):
         widget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
 
     return widget
+
+
+# test DataclassDelegate
 
 
 def test_DataclassDelegate_setModelData(qtbot):
@@ -442,6 +509,9 @@ def test_DataclassDelegate_setEditorData_dataclassTabWidget(qtbot, dataclassTabW
     assert dataclassTabWidget.currentWidget().dataValue() == dict(
         a=True, b=False, c=False, d=False, e=False
     )
+
+
+# test DataclassMapper
 
 
 def test_DataclassMapper_addMapping_dataWidget(qtbot):

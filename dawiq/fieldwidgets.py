@@ -108,6 +108,16 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         self.dataValueChanged.emit(state)
 
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
+
 
 class EmptyIntValidator(QtGui.QIntValidator):
     """Validator which accpets integer and empty string"""
@@ -175,6 +185,16 @@ class IntLineEdit(QtWidgets.QLineEdit):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 class EmptyFloatValidator(QtGui.QDoubleValidator):
@@ -244,6 +264,16 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
 
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
+
 
 class StrLineEdit(QtWidgets.QLineEdit):
     """
@@ -290,6 +320,16 @@ class StrLineEdit(QtWidgets.QLineEdit):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 T = TypeVar("T", bound="EnumComboBox")
@@ -361,6 +401,16 @@ class EnumComboBox(QtWidgets.QComboBox):
             return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is MISSING:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
 
 
 V = TypeVar("V", bound="TupleGroupBox")
@@ -501,3 +551,11 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
+
+    def setRequired(self, required: bool):
+        """Recursively set *required* to all subwidgets."""
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                continue
+            widget.setRequired(required)

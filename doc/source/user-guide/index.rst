@@ -10,4 +10,5 @@ User guide
    widget
    model
    multi-dcls
+   highlight-widget
    define-widget
