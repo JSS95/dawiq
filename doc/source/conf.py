@@ -52,6 +52,7 @@ exclude_patterns = []  # type: ignore[var-annotated]
 
 intersphinx_mapping = {
     "python": ("http://docs.python.org/", None),
+    "cattrs": ("https://cattrs.readthedocs.io/en/stable/", None),
 }
 
 numpydoc_show_class_members = False

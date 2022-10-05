@@ -14,9 +14,7 @@ How to use item model
 * Dataclass **data**: stored with :attr:`.DataclassDelegate.DataRole` as :class:`dict`
 
 To get the dataclass instance, user can retrieve these values from the model item and construct it.
-
-.. note::
-   To reconstruct complicated dataclass, `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package is recommended.
+:ref:`construct-dataclass` document covers that topic.
 
 As explained in :ref:`widget`, the field type can be different from the widget data type.
 In this case we need to define the unary callable converters as the metadata of the field.
