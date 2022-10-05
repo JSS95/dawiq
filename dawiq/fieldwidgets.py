@@ -409,20 +409,13 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     is constructed from the data of subwidgets as tuple.
 
     :meth:`dataValue` returns the current tuple value. When data value of any
-    subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
+    subwidget is changed by the user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
     Data value is the tuple containing subwidget data, and never :obj:`None`.
 
     :meth:`setDataValue` sets the subwidget data. If :obj:`None` is passed,
     it is propagated to all subwidget.
-
-    Notes
-    =====
-
-    The dataclass field might define other object, such as :obj:`None`, as
-    placeholder item instead of :obj:`MISSING`. Therefore widget data must be
-    refined before being used to construct the dataclass instance.
 
     """
 
