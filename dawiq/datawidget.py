@@ -193,17 +193,16 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
     * :class:`enum.Enum` -> :class:`.EnumComboBox`
     * :class:`bool` -> :class:`.BoolCheckBox`
     * :obj:`Optional[bool]` -> :class:`.BoolCheckBox` with tristate
-    * :class:`int` -> :class:`.IntLineEdit`
-    * :class:`float` -> :class:`.FloatLineEdit`
-    * :class:`str` -> :class:`.StrLineEdit`
+    * :class:`int` or :obj:`Optional[int]` -> :class:`.IntLineEdit`
+    * :class:`float` or :obj:`Optional[float]` -> :class:`.FloatLineEdit`
+    * :class:`str` or :obj:`Optional[str]` -> :class:`.StrLineEdit`
     * :obj:`Tuple` -> :class:`.TupleGroupBox` with nested field widgets
 
     For :obj:`Tuple`, its length must be finite (no :class:`Ellipsis` in args)
     and item types must be the supported type.
 
     """
-
-    # When new type is supported, update intro.rst
+    # When new type is supported, update intro.rst as well
 
     if isinstance(t, type) and issubclass(t, Enum):
         return EnumComboBox.fromEnum(t)
@@ -240,7 +239,7 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
         widget = type2Widget(args[0])
         if isinstance(widget, BoolCheckBox):
             widget.setTristate(True)
-            return widget
+        return widget
 
     raise TypeError("Unknown type or annotation: %s" % t)
 

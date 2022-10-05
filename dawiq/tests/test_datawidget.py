@@ -182,15 +182,19 @@ def test_type2Widget(qtbot):
     assert type2Widget(Optional[bool]).isTristate()
 
     assert isinstance(type2Widget(int), IntLineEdit)
+    assert isinstance(type2Widget(Optional[int]), IntLineEdit)
 
     assert isinstance(type2Widget(float), FloatLineEdit)
+    assert isinstance(type2Widget(Optional[float]), FloatLineEdit)
 
     assert isinstance(type2Widget(str), StrLineEdit)
+    assert isinstance(type2Widget(Optional[str]), StrLineEdit)
 
     class E(Enum):
         x = 1
 
     assert isinstance(type2Widget(E), EnumComboBox)
+    assert isinstance(type2Widget(Optional[E]), EnumComboBox)
 
     with pytest.raises(TypeError):
         type2Widget(Tuple)

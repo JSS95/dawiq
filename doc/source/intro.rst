@@ -44,9 +44,9 @@ By default, the following types are supported:
 * ``Enum`` -> :class:`.EnumComboBox`
 * ``bool`` -> :class:`.BoolCheckBox`
 * ``Optional[bool]`` -> :class:`.BoolCheckBox` with tristate
-* ``int`` -> :class:`.IntLineEdit`
-* ``float`` -> :class:`.FloatLineEdit`
-* ``str`` -> :class:`.StrLineEdit`
+* ``int`` or ``Optional[int]`` -> :class:`.IntLineEdit`
+* ``float`` or ``Optional[float]`` -> :class:`.FloatLineEdit`
+* ``str`` or ``Optional[str]`` -> :class:`.StrLineEdit`
 * ``Tuple`` -> :class:`.TupleGroupBox` with nested field widgets
 * ``dataclass`` -> Nested :class:`.DataWidget`
 
