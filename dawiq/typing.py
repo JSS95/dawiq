@@ -33,11 +33,11 @@ class FieldWidgetProtocol(Protocol):
 
         This is the API for the delegate to get the data from the widget.
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
-        this method converts :class:`bool` to :obj:`Qt.CheckState` and sets the
-        check state.
+        this method converts the current check state to :class:`bool` and
+        returns.
 
-        If the data value is :obj:`dawiq.MISSING`, it indicates that the field is
-        empty and delegate should handle it specially.
+        If the data value is :obj:`dawiq.MISSING`, it indicates that the widget
+        is empty and the delegate should specially handle it.
 
         When the data value is changed by user input, :attr:`dataValueChanged`
         signal must emit the new value.
@@ -51,11 +51,16 @@ class FieldWidgetProtocol(Protocol):
 
         This method is the API for the delegate to set the data to the widget.
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
-        this method converts the check state to :class:`bool` and returns.
+        this method converts :class:`bool` to :obj:`Qt.CheckState` and sets to
+        the widget.
 
-        This method must specially treat :obj:`dawiq.MISSING` as empty data by
-        clearing the widget. Else, type of *value* must be strictly checked and
-        :obj:`TypeError` must be raised on invalid input.
+        :obj:`None` and :obj:`dawiq.MISSING` typically mean that the value is
+        null and the widget should be cleared. One of the few exceptions is
+        :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>` where these
+        values indicate the partially checked state if the tristate is enabled.
+
+        For valid *value*, its type must be strictly checked and :obj:`TypeError`
+        must be raised on invalid input.
 
         This method MUST NOT emit :attr:`dataValueChanged` signal, as doing so
         can cause infinite loop in nested widgets.

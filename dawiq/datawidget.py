@@ -152,8 +152,8 @@ class DataWidget(QtWidgets.QGroupBox):
             ret[w.fieldName()] = w.dataValue()
         return ret
 
-    def setDataValue(self, data: Union[Dict[str, Any], _MISSING]):
-        if data is MISSING:
+    def setDataValue(self, data: Union[Dict[str, Any], None, _MISSING]):
+        if data is MISSING or data is None:
             data = {}
 
         self._block_dataValueChanged = True
@@ -236,6 +236,7 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
         if len(args) > 1:
             msg = f"Cannot convert Union with multiple types: {t}"
             raise TypeError(msg)
+        # t is Optional[...]
         widget = type2Widget(args[0])
         if isinstance(widget, BoolCheckBox):
             widget.setTristate(True)

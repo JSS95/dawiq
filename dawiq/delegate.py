@@ -10,7 +10,7 @@ from .fieldwidgets import MISSING
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
-from typing import Type, Dict, Any, Optional
+from typing import Type, Dict, Any, Union, Optional
 
 
 __all__ = [
@@ -27,10 +27,12 @@ def convertFromQt(
     data: Dict[str, Any],
 ) -> Dict[str, Any]:
     """
-    Convert dict from :class:`DataWidget` to structured dict for dataclass.
+    Convert the dict from :class:`DataWidget` to structured dict for dataclass.
 
-    If the field value does not exist or is :obj:`MISSING`, the field is not
-    included in the resulting dictionary. Default value of the field is ignored.
+    If the field value does not exist in *data* or is :obj:`MISSING`, the field
+    type is checked. If the field type is ``Optional``, then :obj:`None` is used
+    as the value. Else, the field is not included in the resulting dictionary.
+    Default value of the field is ignored.
 
     Field may define `fromQt_converter` metadata to convert the widget data to
     field data. It is a unary callable which takes the widget data and returns
@@ -42,15 +44,18 @@ def convertFromQt(
     >>> from dataclasses import dataclass, field
     >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertFromQt
+    >>> from typing import Optional
     >>> def conv(arg):
     ...     return (arg,)
     >>> @dataclass
     ... class Cls:
-    ...     x: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
-    >>> convertFromQt(Cls, dict(x=10))
-    {'x': (10,)}
-    >>> convertFromQt(Cls, dict(x=MISSING))
-    {}
+    ...     x: int
+    ...     y: Optional[int]
+    ...     z: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
+    >>> convertFromQt(Cls, dict(z=10))
+    {'y': None, 'z': (10,)}
+    >>> convertFromQt(Cls, dict(x=MISSING, y=MISSING))
+    {'y': None}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -58,11 +63,19 @@ def convertFromQt(
     ret = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, MISSING)
-        if val is MISSING:
-            continue
+        t = f.type
 
-        if dataclasses.is_dataclass(f.type):
-            val = convertFromQt(f.type, val)
+        if val is MISSING:
+            origin = getattr(t, "__origin__", None)
+            args = [a for a in getattr(t, "__args__", ()) if not isinstance(None, a)]
+            if origin is Union and len(args) == 1:
+                # f.type is Optional[...]
+                val = None
+            else:
+                continue
+
+        if dataclasses.is_dataclass(t):
+            val = convertFromQt(t, val)
 
         converter = f.metadata.get("fromQt_converter", None)
         if converter is not None:
@@ -91,12 +104,17 @@ def convertToQt(
     >>> from dataclasses import dataclass, field
     >>> from dawiq import MISSING
     >>> from dawiq.delegate import convertToQt
+    >>> from typing import Optional
     >>> @dataclass
     ... class Cls:
-    ...     x: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
-    >>> convertToQt(Cls, dict(x=(10,)))
-    {'x': 10}
-    >>> convertToQt(Cls, dict()) == dict(x=MISSING)
+    ...     x: int
+    ...     y: Optional[int]
+    ...     z: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
+    >>> convertToQt(Cls, dict(x=1, y=2, z=(10,)))
+    {'x': 1, 'y': 2, 'z': 10}
+    >>> convertToQt(Cls, dict()) == dict(x=MISSING, y=MISSING, z=MISSING)
+    True
+    >>> convertToQt(Cls, dict(y=None)) ==  dict(x=MISSING, y=None, z=MISSING)
     True
 
     """

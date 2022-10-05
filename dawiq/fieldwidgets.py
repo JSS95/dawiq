@@ -47,7 +47,10 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     Because of the nature of check box, it is impossible to define empty state of
     the widget. :meth:`dataValue` is always either True, False or None, and never
-    :obj:`MISSING`. :meth:`setDataValue` treats :obj:`MISSING` as False.
+    :obj:`MISSING`.
+
+    If Tristate is enabled, :meth:`setDataValue` treats :obj:`MISSING` as None.
+    Else, :obj:`MISSING` is treated as False.
 
     """
 
@@ -78,7 +81,10 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     def setDataValue(self, value: Union[Optional[bool], _MISSING]):
         if value is MISSING:
-            value = False
+            if self.isTristate():
+                value = None
+            else:
+                value = False
 
         if value is True:
             state = QtCore.Qt.CheckState.Checked
@@ -173,8 +179,8 @@ class IntLineEdit(QtWidgets.QLineEdit):
                 val = MISSING
         return val
 
-    def setDataValue(self, val: Union[int, _MISSING]):
-        if val is MISSING:
+    def setDataValue(self, val: Union[int, None, _MISSING]):
+        if val is MISSING or val is None:
             txt = ""
         elif isinstance(val, int):
             txt = str(int(val))
@@ -251,8 +257,8 @@ class FloatLineEdit(QtWidgets.QLineEdit):
                 val = MISSING
         return val
 
-    def setDataValue(self, val: Union[float, _MISSING]):
-        if val is MISSING:
+    def setDataValue(self, val: Union[float, None, _MISSING]):
+        if val is MISSING or val is None:
             txt = ""
         elif isinstance(val, float):
             txt = str(float(val))
@@ -308,8 +314,8 @@ class StrLineEdit(QtWidgets.QLineEdit):
     def dataValue(self) -> str:
         return self.text()
 
-    def setDataValue(self, val: Union[str, _MISSING]):
-        if val is MISSING:
+    def setDataValue(self, val: Union[str, None, _MISSING]):
+        if val is MISSING or val is None:
             txt = ""
         elif isinstance(val, str):
             txt = str(val)  # type: ignore[assignment]
@@ -385,8 +391,8 @@ class EnumComboBox(QtWidgets.QComboBox):
             ret = self.itemData(index)
         return ret
 
-    def setDataValue(self, value: Union[Enum, _MISSING]):
-        if value is MISSING:
+    def setDataValue(self, value: Union[Enum, None, _MISSING]):
+        if value is MISSING or value is None:
             index = -1
         elif isinstance(value, Enum):
             index = self.findData(value)
@@ -528,9 +534,9 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             ret.append(widget.dataValue())
         return tuple(ret)
 
-    def setDataValue(self, value: Union[tuple, _MISSING]):
+    def setDataValue(self, value: Union[tuple, None, _MISSING]):
         self._block_dataValueChanged = True
-        if value is MISSING:
+        if value is MISSING or value is None:
             for i in range(self.count()):
                 widget = self.widget(i)
                 if widget is None:

@@ -32,8 +32,8 @@ def test_BoolCheckBox(qtbot):
     widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test MISSING
     with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(MISSING)
-    assert widget.dataValue() is False
-    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+    assert widget.dataValue() is None
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
     with qtbot.assertNotEmitted(widget.dataValueChanged):
         widget.setDataValue(None)
