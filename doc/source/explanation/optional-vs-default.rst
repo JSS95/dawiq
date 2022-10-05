@@ -273,3 +273,62 @@ Setting the integer value is identical.
 >>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 >>> DataClass(**args)  # doctest: +SKIP
 DataClass(x=2)
+
+Nested widgets
+==============
+
+Fields with nested widget such as :class:`.TupleGroupBox` or :class:`.DataWidget` are always occupied.
+It is impossible to invoke the default value by not setting the data.
+
+>>> import dataclasses
+>>> from typing import Tuple
+>>> @dataclasses.dataclass
+... class Inner:
+...     a: int = 0
+>>> @dataclasses.dataclass
+... class DataClass:
+...     inner: Inner = Inner(10)
+...     x: Tuple[int, int] = (20, 30)
+>>> DataClass()
+DataClass(inner=Inner(a=10), x=(20, 30))
+
+If we construct the widget and model using this dataclass, this is what we get.
+
+>>> widget.dataValue()  # doctest: +SKIP
+{'inner': {'a': None}, 'x': (None, None)}
+>>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
+{'inner': {}, 'x': (None, None)}
+
+There is no direct workaround to resolve this.
+If you must use nested widgets with default data, try this approach to mitigate the issue.
+
+1. Use nested dataclass instead of ``Tuple``.
+2. Set the default argument to innermost fields.
+
+Here is the example.
+
+>>> @dataclasses.dataclass
+... class Inner1:
+...     a: int = 10
+>>> @dataclasses.dataclass
+... class Inner2:
+...     arg1: int = 20
+...     arg2: int = 30
+>>> @dataclasses.dataclass
+... class DataClass:
+...     inner: Inner1
+...     x: Inner2
+
+Although the value of ``DataClass.x`` is no longer a tuple, converting it to the tuple is not a problem.
+Here is the result:
+
+>>> widget.dataValue()  # doctest: +SKIP
+{'inner': {'a': None}, 'x': {'arg1': None, 'arg2': None}}
+>>> arg = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
+>>> arg  # doctest: +SKIP
+{'inner': {}, 'x': {}}
+>>> DataClass(Inner1(**arg["inner"]), Inner2(**arg["x"]))
+DataClass(inner=Inner1(a=10), x=Inner2(arg1=20, arg2=30))
+
+By using the model data, dataclass instance is constructed as we expect.
+For easier construction of nested widget like this, see :ref:`construct-dataclass`.
