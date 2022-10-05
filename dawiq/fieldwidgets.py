@@ -409,7 +409,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     is constructed from the data of subwidgets as tuple.
 
     :meth:`dataValue` returns the current tuple value. When data value of any
-    subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
+    subwidget is changed by the user, :attr:`dataValueChanged` signal is emitted.
     :meth:`setDataValue` changes the data of subwidgets.
 
     Data value is the tuple containing subwidget data, and never :obj:`None`.
@@ -538,9 +538,13 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        """Recursively set *required* to all subwidgets."""
+        """If any subwidget is occupied, do not highlight."""
+        if required and all(val is None for val in self.dataValue()):
+            requires = True
+        else:
+            requires = False
         for i in range(self.count()):
             widget = self.widget(i)
             if widget is None:
                 continue
-            widget.setRequired(required)
+            widget.setRequired(requires)

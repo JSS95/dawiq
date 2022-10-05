@@ -8,3 +8,4 @@ Advanced topics
    :maxdepth: 2
 
    optional-vs-default
+   dataclass-construction
