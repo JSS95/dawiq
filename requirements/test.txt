@@ -1,4 +1,5 @@
 black
+cattrs
 flake8
 mypy
 pytest
