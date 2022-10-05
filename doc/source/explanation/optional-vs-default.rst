@@ -215,7 +215,7 @@ But how can we set ``None`` to ``DataClass.b``?
 >>> widget.dataValue()  # doctest: +SKIP
 {'a': 3, 'b': None, 'c': None, 'd': None}
 >>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
->>> args
+>>> args  # doctest: +SKIP
 {'a': 3}
 >>> DataClass(**args)  # doctest: +SKIP
 Traceback (most recent call last):
