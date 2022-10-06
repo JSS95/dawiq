@@ -17,7 +17,7 @@ To get the dataclass instance, user can retrieve these values from the model ite
 :ref:`construct-dataclass` document covers that topic.
 
 As explained in :ref:`widget`, the field type can be different from the widget data type.
-In this case we need to define the unary callable converters as the metadata of the field.
+In this case we need to define the converters as the metadata of the field.
 
 * ``toQt_converter``: field data -> widget data
 * ``fromQt_converter``: widget data -> field data
@@ -233,6 +233,9 @@ Data converter example
 
 In this example, we define the data converters for ``CustomClass``, which we used in :ref:`Specifying type hint <type-hint>`.
 
+Converter is binary callable which takes the data and the field itself.
+Requiring the field may seem redundant, but it is helpful when accessing the data such as default field value.
+
 .. code-block:: python
 
     from dataclasses import dataclass, field
@@ -248,8 +251,8 @@ In this example, we define the data converters for ``CustomClass``, which we use
         custom: CustomClass = field(metadata=dict(
             default=CustomClass(1, 2),
             Qt_typehint=Tuple[int, int],
-            toQt_converter=lambda obj: (obj.x, obj.y),
-            fromQt_converter=lambda args: CustomClass(*args),
+            toQt_converter=lambda obj, _: (obj.x, obj.y),
+            fromQt_converter=lambda args, _: CustomClass(*args),
         ))
 
 .. figure:: ../_images/model-converter-example.jpg
