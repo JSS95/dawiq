@@ -56,8 +56,8 @@ How about other types?
 Any other type can be supported by defining special metadata to the dataclass field:
 
 * ``Qt_typehint``: type hint for widget construction
-* ``toQt_converter``: converts dataclass data to widget data
-* ``fromQt_converter``: converts widget data to dataclass data
+* ``toQt_converter``: converts custom object to widget data
+* ``fromQt_converter``: returns custom object from widget data
 
 For more information, see :ref:`widget` and :ref:`data-model`.
 
