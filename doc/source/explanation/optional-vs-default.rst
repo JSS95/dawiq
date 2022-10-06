@@ -298,7 +298,10 @@ If we construct the widget and model using this dataclass, this is what we get f
 DataClass(x=(None, None))
 
 ``(None, None)`` from the :class:`.TupleGroupBox` is updated to the model data, because only ``None`` is filtered from the field widget.
-We don't recursively check the subwidget values because doing so will cause tons of troubles.
+Therefore we cannot let ``DataClass`` use the default value.
+
+.. note::
+    We don't recursively check the subwidget values because doing so will cause tons of troubles.
 
 Workaround
 ----------
