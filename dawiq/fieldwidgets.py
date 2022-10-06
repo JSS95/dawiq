@@ -538,13 +538,9 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
-        """If any subwidget is occupied, do not highlight."""
-        if required and all(val is None for val in self.dataValue()):
-            requires = True
-        else:
-            requires = False
+        """Recursively set *required* to all subwidgets."""
         for i in range(self.count()):
             widget = self.widget(i)
             if widget is None:
                 continue
-            widget.setRequired(requires)
+            widget.setRequired(required)
