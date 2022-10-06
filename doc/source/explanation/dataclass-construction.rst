@@ -4,7 +4,7 @@
 Constructing dataclass instance
 ===============================
 
-.. currentmodule:: dawiq
+.. currentmodule:: cattrs
 
 In :ref:`data-model` document, we learned how to store the widget data into the model.
 Here, we will construct the dataclass instance from the model data.
@@ -43,3 +43,18 @@ Here, we use `cattrs <https://pypi.org/project/cattrs/1.5.0/>`_ package which su
 >>> import cattrs
 >>> cattrs.structure(args, DataClass)  # inner dataclass successfully reconstructed
 DataClass(a=(None, 2), b=Inner(x=3))
+
+Dataclass converter
+===================
+
+:mod:`cattrs` provides :class:`.Converter` where the hooks can be registered to structure and to unstructure the dataclass instance.
+
+This can be useful if you want to maintain the data as primitive types in the model, and structure it when necessary.
+With this design, you can serialize and deserialize the data directly from the model.
+
+.. figure:: ../_images/cattrs-workflow.jpg
+   :align: center
+
+   Workflow using :mod:`cattrs`
+
+For detailed information, refer to `cattrs documentation <https://cattrs.readthedocs.io/en/stable/index.html>`_.
