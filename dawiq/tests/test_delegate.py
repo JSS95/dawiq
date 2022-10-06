@@ -23,14 +23,14 @@ def test_convertFromQt():
     @dataclasses.dataclass
     class Cls0:
         a: CustomField = dataclasses.field(
-            metadata=dict(fromQt_converter=lambda arg, _: CustomField(arg))
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
         )
 
     @dataclasses.dataclass
     class Cls1:
         x: int
         y: CustomField = dataclasses.field(
-            metadata=dict(fromQt_converter=lambda arg, _: CustomField(arg))
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
         )
         z: Cls0
 
@@ -53,11 +53,11 @@ def test_convertFromQt_defaultvalue():
     @dataclasses.dataclass
     class Cls0:
         x: CustomField = dataclasses.field(
-            metadata=dict(fromQt_converter=lambda arg, _: CustomField(arg))
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
         )
         y: CustomField = dataclasses.field(
             default=CustomField(0),
-            metadata=dict(fromQt_converter=lambda arg, _: CustomField(arg)),
+            metadata=dict(fromQt_converter=lambda arg: CustomField(arg)),
         )
         z: int = 3
 
@@ -103,14 +103,14 @@ def test_convertToQt():
     @dataclasses.dataclass
     class Cls0:
         a: CustomField = dataclasses.field(
-            metadata=dict(toQt_converter=lambda val, _: val.x)
+            metadata=dict(toQt_converter=lambda val: val.x)
         )
 
     @dataclasses.dataclass
     class Cls1:
         x: int
         y: CustomField = dataclasses.field(
-            metadata=dict(toQt_converter=lambda val, _: val.x)
+            metadata=dict(toQt_converter=lambda val: val.x)
         )
         z: Cls0
 
@@ -133,11 +133,11 @@ def test_convertToQt_defaultvalue():
     @dataclasses.dataclass
     class Cls0:
         x: CustomField = dataclasses.field(
-            metadata=dict(toQt_converter=lambda val, _: val.x)
+            metadata=dict(toQt_converter=lambda val: val.x)
         )
         y: CustomField = dataclasses.field(
             default=CustomField(0),
-            metadata=dict(toQt_converter=lambda val, _: val.x),
+            metadata=dict(toQt_converter=lambda val: val.x),
         )
         z: int = 3
 

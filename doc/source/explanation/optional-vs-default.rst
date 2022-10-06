@@ -236,11 +236,13 @@ Let's redefine the dataclass as follows and run the GUI construction code in the
 
 >>> import dataclasses
 >>> from typing import Optional
->>> def fromQt_converter(string, _):
+>>> def fromQt_converter(string):
 ...     if not string:
 ...         return None
 ...     return int(string)
->>> def toQt_converter(obj, _):
+>>> def toQt_converter(obj):
+...     if obj is None:
+...         return ""
 ...     return str(obj)
 >>> @dataclasses.dataclass
 ... class DataClass:
