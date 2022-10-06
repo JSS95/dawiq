@@ -32,10 +32,10 @@ TypeError: __init__() missing 1 required positional argument: 'b'
 >>> DataClass(1, None)
 DataClass(a=1, b=None, c=0, d=None)
 
-``DataClass.b`` can have :obj:`None` value but the field is mandatory. On the other hand, ``DataClass.c`` is not mandatory but it should not be :obj:`None`.
+``DataClass.b`` can have ``None`` value but the field is mandatory. On the other hand, ``DataClass.c`` is not mandatory but it should not be ``None``.
 
 .. note::
-    In fact, Python does not perform type check and allows you to pass :obj:`None` to ``DataClass.c``.
+    In fact, Python does not perform type check and allows you to pass ``None`` to ``DataClass.c``.
     However this shouldn't be performed for robust typing.
 
 How will the data widget from ``DataClass`` be?
@@ -174,8 +174,8 @@ What about the widget data and the model data?
 >>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 {}
 
-Data values of all widgets are :obj:`None`, as :obj:`None` is designed to be.
-When setting the widget data to the model data, the delegate ignores the field with :obj:`None`.
+Data values of all widgets are ``None``, as ``None`` is designed to be.
+When setting the widget data to the model data, the delegate ignores the field with ``None``.
 Therefore the model data is an empty dictionary.
 
 Now let's change the widget data to update the model data.
@@ -197,7 +197,7 @@ DataClass(a=3, b=4, c=0, d=None)
 We can see that ``DataClass.c`` does not exist in the model data so the dataclass constructor used the default value instead.
 
 Limitation
-==========
+----------
 
 Now if we want to set ``None`` to ``DataClass.d``, we can just delete the field widget data.
 Then the field data in the model will be deleted and dataclass constructor will use the default value, which is ``None``.
@@ -227,11 +227,11 @@ It cannot be a valid value which is updated to the model data.
 
 This is the limitation of DaWiQ and in fact is an intended behavior.
 It is because defining a dedicated sentinel object makes things ugly when we serialize the data or construct nested dataclass.
-However a workaround is possible using the widget data converter explained in :ref:`data-model`.
 
 Workaround
-==========
+----------
 
+We can avoid this problem by using the widget data converter explained in :ref:`data-model`.
 Let's redefine the dataclass as follows and run the GUI construction code in the basic example section above.
 
 >>> import dataclasses
@@ -273,3 +273,56 @@ Setting the integer value is identical.
 >>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 >>> DataClass(**args)  # doctest: +SKIP
 DataClass(x=2)
+
+Nested widgets
+==============
+
+Nested field widgets such as :class:`.TupleGroupBox` never have ``None`` value.
+
+>>> import dataclasses
+>>> from typing import Tuple
+>>> @dataclasses.dataclass
+... class DataClass:
+...     x: Tuple[int, int] = (10, 20)
+>>> DataClass()
+DataClass(x=(10, 20))
+
+If we construct the widget and model using this dataclass, this is what we get from the empty editors.
+
+>>> widget.dataValue()  # doctest: +SKIP
+{'x': (None, None)}
+>>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
+>>> args  # doctest: +SKIP
+{'x': (None, None)}
+>>> DataClass(**args)  # doctest: +SKIP
+DataClass(x=(None, None))
+
+``(None, None)`` from the :class:`.TupleGroupBox` is updated to the model data, because only ``None`` is filtered from the field widget.
+We don't recursively check the subwidget values because doing so will cause tons of troubles.
+
+Workaround
+----------
+
+We can define ``__post_init__`` method of the dataclass to replace ``None`` with the items of default value.
+
+>>> import dataclasses
+>>> from typing import Tuple, Optional
+>>> @dataclasses.dataclass
+... class DataClass:
+...     x: Tuple[Optional[int], Optional[int]] = (10, 20)
+...     def __post_init__(self):
+...         default, = (f.default for f in dataclasses.fields(self))
+...         self.x = tuple(v if v is not None else default[i] for i, v in enumerate(self.x))
+
+.. note::
+    For frozen dataclass, do ``object.__setattr__(self, ...)`` in ``__post_init__``.
+
+The model data is still ``(None, None)``, but the dataclass is constructed as we desire.
+
+>>> widget.dataValue()  # doctest: +SKIP
+{'x': (None, None)}
+>>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
+>>> args  # doctest: +SKIP
+{'x': (None, None)}
+>>> DataClass(**args)  # doctest: +SKIP
+DataClass(x=(10, 20))
