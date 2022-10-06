@@ -1,4 +1,4 @@
-# DaWiQ - Dataclass Widget for Qt
+# DaWiQ - Dataclass Widget with Qt
 
 [![PyPI version](https://badge.fury.io/py/DaWiQ.svg)](https://badge.fury.io/py/DaWiQ)
 [![Python Version](https://img.shields.io/pypi/pyversions/dawiq)](https://pypi.org/project/dawiq/)
