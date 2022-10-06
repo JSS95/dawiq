@@ -301,7 +301,7 @@ DataClass(x=(None, None))
 Therefore we cannot let ``DataClass`` use the default value.
 
 .. note::
-    We don't recursively check the subwidget values because doing so will cause tons of troubles.
+    :mod:`dawiq` does not recursively check the subwidget values because doing so will cause tons of troubles.
 
 Workaround
 ----------
