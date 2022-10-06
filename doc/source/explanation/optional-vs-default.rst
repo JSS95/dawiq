@@ -222,8 +222,12 @@ Traceback (most recent call last):
 ...
 TypeError: __init__() missing 1 required positional argument: 'b'
 
-Sadly, we can't because ``None`` is reserved to indicate the empty widget value.
-It cannot be a valid value which is updated to the model data.
+Sadly, we can't because ``None`` is reserved to indicate the empty widget value so it is not updated to the model at all.
+
+.. note::
+    One way to introduce placeholder without encountering this issue is defining the dedicated sentinel (see :obj:`dataclasses.MISSING`).
+    However if we used it, user must import :mod:`dawiq` upon dataclass definition to filter the sentinel.
+    This is undesirable because we want to separate the core side and GUI side, so we bite the bullet and use ``None``.
 
 This is the limitation of DaWiQ and in fact is an intended behavior.
 It is because defining a dedicated sentinel object makes things ugly when we serialize the data or construct nested dataclass.
