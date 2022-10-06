@@ -277,7 +277,7 @@ DataClass(x=2)
 Nested widgets
 ==============
 
-Nested field widgets such as :class:`.TupleGroupBox` or :class:`.DataWidget` never have ``None`` value.
+Nested field widgets such as :class:`.TupleGroupBox` never have ``None`` value.
 
 >>> import dataclasses
 >>> from typing import Tuple
