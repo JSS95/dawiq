@@ -33,26 +33,32 @@ def convertFromQt(
     ignored.
 
     Field may define `fromQt_converter` metadata to convert the widget data to
-    field data. It is a unary callable which takes the widget data and returns
-    the field data.
+    field data. It is a binary callable which takes the widget data and the field
+    itself, and returns the field data.
 
     Examples
     ========
 
     >>> from dataclasses import dataclass, field
     >>> from dawiq.delegate import convertFromQt
-    >>> from typing import Optional
-    >>> def conv(arg):
+    >>> from typing import Optional, Tuple
+    >>> def conv(arg, f):
+    ...     if all(i is None for i in arg):
+    ...         return f.default
     ...     return (arg,)
     >>> @dataclass
     ... class Cls:
-    ...     x: int
-    ...     y: Optional[int]
-    ...     z: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
-    >>> convertFromQt(Cls, dict(z=10))
-    {'z': (10,)}
-    >>> convertFromQt(Cls, dict(x=None, y=None))
+    ...     x: int = 1
+    ...     y: Optional[int] = None
+    ...     z: Tuple[int] = field(
+    ...         default=(1,), metadata=dict(fromQt_converter=conv)
+    ...     )
+    >>> convertFromQt(Cls, dict())  # default value is not used
     {}
+    >>> convertFromQt(Cls, dict(x=None, y=None, z=None))  # None is removed
+    {}
+    >>> convertFromQt(Cls, dict(z=(None,)))  # data is converted
+    {'z': (1,)}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -60,17 +66,16 @@ def convertFromQt(
     ret = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, None)
-        t = f.type
 
         if val is None:
             continue
 
-        if dataclasses.is_dataclass(t):
-            val = convertFromQt(t, val)
+        if dataclasses.is_dataclass(f.type):
+            val = convertFromQt(f.type, val)
 
         converter = f.metadata.get("fromQt_converter", None)
         if converter is not None:
-            val = converter(val)
+            val = converter(val, f)
 
         ret[f.name] = val
     return ret
@@ -87,36 +92,40 @@ def convertToQt(
     its value instead to clear the widget.
 
     Field may define `toQt_converter` metadata to convert the field data to
-    widget data. It is a unary callable which takes the field data and returns
-    the widget data.
+    widget data. It is a binary callable which takes the field data and the field
+    itself, and returns the widget data.
 
     Examples
     ========
 
     >>> from dataclasses import dataclass, field
     >>> from dawiq.delegate import convertToQt
-    >>> from typing import Optional
+    >>> def conv(arg, f):
+    ...     return arg + 1
     >>> @dataclass
     ... class Cls:
-    ...     x: int
-    ...     y: Optional[int]
-    ...     z: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
-    >>> convertToQt(Cls, dict(x=1, y=2, z=(10,)))
-    {'x': 1, 'y': 2, 'z': 10}
-    >>> convertToQt(Cls, dict()) == dict(x=None, y=None, z=None)
-    True
+    ...     x: int = field(metadata=dict(toQt_converter=conv))
+    >>> convertToQt(Cls, dict(x=1))  # data converted
+    {'x': 2}
+    >>> convertToQt(Cls, dict())  # None is used for placeholder
+    {'x': None}
+    >>> convertToQt(Cls, dict(x=None))  # None is not passed to the converter
+    {'x': None}
 
     """
     ret = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, None)
+
         if val is None:
             pass
         elif dataclasses.is_dataclass(f.type):
             val = convertToQt(f.type, val)
+
         converter = f.metadata.get("toQt_converter", None)
         if val is not None and converter is not None:
-            val = converter(val)
+            val = converter(val, f)
+
         ret[f.name] = val
     return ret
 
