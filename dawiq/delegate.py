@@ -46,13 +46,15 @@ def convertFromQt(
     ...     return (arg,)
     >>> @dataclass
     ... class Cls:
-    ...     x: int
-    ...     y: Optional[int]
-    ...     z: tuple = field(metadata=dict(fromQt_converter=conv), default=(1,))
-    >>> convertFromQt(Cls, dict(z=10))
-    {'z': (10,)}
-    >>> convertFromQt(Cls, dict(x=None, y=None))
+    ...     x: int = 1
+    ...     y: Optional[int] = None
+    ...     z: tuple = field(default=(1,), metadata=dict(fromQt_converter=conv))
+    >>> convertFromQt(Cls, dict())  # empty dict (default value is not used)
     {}
+    >>> convertFromQt(Cls, dict(x=None, y=None, z=None))  # None is removed
+    {}
+    >>> convertFromQt(Cls, dict(z=1))  # data is converted
+    {'z': (1,)}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -94,16 +96,15 @@ def convertToQt(
 
     >>> from dataclasses import dataclass, field
     >>> from dawiq.delegate import convertToQt
-    >>> from typing import Optional
     >>> @dataclass
     ... class Cls:
-    ...     x: int
-    ...     y: Optional[int]
-    ...     z: tuple = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
-    >>> convertToQt(Cls, dict(x=1, y=2, z=(10,)))
-    {'x': 1, 'y': 2, 'z': 10}
-    >>> convertToQt(Cls, dict()) == dict(x=None, y=None, z=None)
-    True
+    ...     x: int = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
+    >>> convertToQt(Cls, dict(x=(1,)))  # data converted
+    {'x': 1}
+    >>> convertToQt(Cls, dict())  # None is used for placeholder
+    {'x': None}
+    >>> convertToQt(Cls, dict(x=None))  # None is not passed to the converter
+    {'x': None}
 
     """
     ret = {}
