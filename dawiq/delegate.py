@@ -71,6 +71,7 @@ def convertFromQt(
         converter = f.metadata.get("fromQt_converter", None)
         if converter is not None:
             val = converter(val)
+
         ret[f.name] = val
     return ret
 

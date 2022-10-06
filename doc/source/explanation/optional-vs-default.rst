@@ -32,10 +32,10 @@ TypeError: __init__() missing 1 required positional argument: 'b'
 >>> DataClass(1, None)
 DataClass(a=1, b=None, c=0, d=None)
 
-``DataClass.b`` can have :obj:`None` value but the field is mandatory. On the other hand, ``DataClass.c`` is not mandatory but it should not be :obj:`None`.
+``DataClass.b`` can have ``None`` value but the field is mandatory. On the other hand, ``DataClass.c`` is not mandatory but it should not be ``None``.
 
 .. note::
-    In fact, Python does not perform type check and allows you to pass :obj:`None` to ``DataClass.c``.
+    In fact, Python does not perform type check and allows you to pass ``None`` to ``DataClass.c``.
     However this shouldn't be performed for robust typing.
 
 How will the data widget from ``DataClass`` be?
@@ -174,8 +174,8 @@ What about the widget data and the model data?
 >>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 {}
 
-Data values of all widgets are :obj:`None`, as :obj:`None` is designed to be.
-When setting the widget data to the model data, the delegate ignores the field with :obj:`None`.
+Data values of all widgets are ``None``, as ``None`` is designed to be.
+When setting the widget data to the model data, the delegate ignores the field with ``None``.
 Therefore the model data is an empty dictionary.
 
 Now let's change the widget data to update the model data.
@@ -197,7 +197,7 @@ DataClass(a=3, b=4, c=0, d=None)
 We can see that ``DataClass.c`` does not exist in the model data so the dataclass constructor used the default value instead.
 
 Limitation
-==========
+----------
 
 Now if we want to set ``None`` to ``DataClass.d``, we can just delete the field widget data.
 Then the field data in the model will be deleted and dataclass constructor will use the default value, which is ``None``.
@@ -227,11 +227,11 @@ It cannot be a valid value which is updated to the model data.
 
 This is the limitation of DaWiQ and in fact is an intended behavior.
 It is because defining a dedicated sentinel object makes things ugly when we serialize the data or construct nested dataclass.
-However a workaround is possible using the widget data converter explained in :ref:`data-model`.
 
 Workaround
-==========
+----------
 
+We can avoid this problem by using the widget data converter explained in :ref:`data-model`.
 Let's redefine the dataclass as follows and run the GUI construction code in the basic example section above.
 
 >>> import dataclasses
@@ -277,58 +277,30 @@ DataClass(x=2)
 Nested widgets
 ==============
 
-Fields with nested widget such as :class:`.TupleGroupBox` or :class:`.DataWidget` are always occupied.
-It is impossible to invoke the default value by not setting the data.
+Nested field widgets such as :class:`.TupleGroupBox` or :class:`.DataWidget` never have ``None`` value.
 
 >>> import dataclasses
 >>> from typing import Tuple
 >>> @dataclasses.dataclass
-... class Inner:
-...     a: int = 0
->>> @dataclasses.dataclass
 ... class DataClass:
-...     inner: Inner = Inner(10)
-...     x: Tuple[int, int] = (20, 30)
+...     x: Tuple[int, int] = (10, 20)
 >>> DataClass()
-DataClass(inner=Inner(a=10), x=(20, 30))
+DataClass(x=(10, 20))
 
-If we construct the widget and model using this dataclass, this is what we get.
-
->>> widget.dataValue()  # doctest: +SKIP
-{'inner': {'a': None}, 'x': (None, None)}
->>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
-{'inner': {}, 'x': (None, None)}
-
-There is no direct workaround to resolve this.
-If you must use nested widgets with default data, try this approach to mitigate the issue.
-
-1. Use nested dataclass instead of ``Tuple``.
-2. Set the default argument to innermost fields.
-
-Here is the example.
-
->>> @dataclasses.dataclass
-... class Inner1:
-...     a: int = 10
->>> @dataclasses.dataclass
-... class Inner2:
-...     arg1: int = 20
-...     arg2: int = 30
->>> @dataclasses.dataclass
-... class DataClass:
-...     inner: Inner1
-...     x: Inner2
-
-Although the value of ``DataClass.x`` is no longer a tuple, converting it to the tuple is not a problem.
-Here is the result:
+If we construct the widget and model using this dataclass, this is what we get from the empty editors.
 
 >>> widget.dataValue()  # doctest: +SKIP
-{'inner': {'a': None}, 'x': {'arg1': None, 'arg2': None}}
->>> arg = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
->>> arg  # doctest: +SKIP
-{'inner': {}, 'x': {}}
->>> DataClass(Inner1(**arg["inner"]), Inner2(**arg["x"]))
-DataClass(inner=Inner1(a=10), x=Inner2(arg1=20, arg2=30))
+{'x': (None, None)}
+>>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
+>>> args  # doctest: +SKIP
+{'x': (None, None)}
+>>> DataClass(**args)  # doctest: +SKIP
+DataClass(x=(None, None))
 
-By using the model data, dataclass instance is constructed as we expect.
-For easier construction of nested widget like this, see :ref:`construct-dataclass`.
+``(None, None)`` from the :class:`.TupleGroupBox` is updated to the model data, because only ``None`` is filtered from the field widget.
+We don't recursively check the subwidget values because doing so will cause tons of troubles.
+
+Workaround
+----------
+
+Again, we can define a data converter to fix this.
