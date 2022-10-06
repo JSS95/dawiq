@@ -303,4 +303,26 @@ We don't recursively check the subwidget values because doing so will cause tons
 Workaround
 ----------
 
-Again, we can define a data converter to fix this.
+We can define ``__post_init__`` method of the dataclass to replace ``None`` with the items of default value.
+
+>>> import dataclasses
+>>> from typing import Tuple, Optional
+>>> @dataclasses.dataclass
+... class DataClass:
+...     x: Tuple[Optional[int], Optional[int]] = (10, 20)
+...     def __post_init__(self):
+...         default, = (f.default for f in dataclasses.fields(self))
+...         self.x = tuple(v if v is not None else default[i] for i, v in enumerate(self.x))
+
+.. note::
+    For frozen dataclass, do ``object.__setattr__(self, ...)`` in ``__post_init__``.
+
+The model data is still ``(None, None)``, but the dataclass is constructed as we desire.
+
+>>> widget.dataValue()  # doctest: +SKIP
+{'x': (None, None)}
+>>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
+>>> args  # doctest: +SKIP
+{'x': (None, None)}
+>>> DataClass(**args)  # doctest: +SKIP
+DataClass(x=(10, 20))
