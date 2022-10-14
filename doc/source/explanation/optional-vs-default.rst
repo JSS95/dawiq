@@ -192,7 +192,7 @@ At this time it is easy to construct the dataclass instance from the model data.
 
 >>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 >>> DataClass(**args)  # doctest: +SKIP
-DataClass(a=3, b=4, c=0, d=None)
+DataClass(a=3, b=4, c=0, d=5)
 
 We can see that ``DataClass.c`` does not exist in the model data so the dataclass constructor used the default value instead.
 
