@@ -5,7 +5,7 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets, TypeRole, DataRole
+from .qt_compat import QtCore, QtWidgets, TypeRole, DataRole
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
@@ -150,17 +150,7 @@ def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtoco
 
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
-    """
-    Delegate to update the model and the :class:`DataWidget`.
-
-    :attr:`TypeRole` and :attr:`DataRole` are ``Qt.ItemDataRole`` for the model
-    to store the dataclass type and the dataclass data. Dataclass instance can be
-    constructed by these values.
-
-    Default values of the dataclass fields are not applied to the widget and to
-    the model. This is to make sure that empty input by user is distinguished.
-
-    """
+    """Delegate to update the model and the :class:`DataWidget`."""
 
     TypeRole = TypeRole
     DataRole = DataRole
@@ -168,6 +158,31 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._freeze_model = False
+
+    def setModelDataclassData(
+        self,
+        index: QtCore.QModelIndex,
+        dcls: Type[DataclassProtocol],
+        data: Dict,
+    ):
+        """Set the dataclass data from the model index."""
+        if dcls is not None:
+            data = convertFromQt(dcls, data)
+        index.model().setData(index, data, role=self.DataRole)
+
+    def setEditorDataclassData(
+        self,
+        editor: DataWidget,
+        dcls: Type[DataclassProtocol],
+        data: Optional[Dict],
+    ):
+        """Set the dataclass data to the editor."""
+        if data is None:
+            data = {}
+        if dcls is not None:
+            data = convertToQt(dcls, data)
+        editor.setDataValue(data)
+        highlightEmptyField(editor, dcls)
 
     def setModelData(self, editor, model, index):
         """
@@ -183,16 +198,15 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
             if dcls != model.data(index, role=self.TypeRole):
-                model.setData(index, dcls, role=self.TypeRole)
+                index.model().setData(index, dcls, role=self.TypeRole)
             self.setModelData(editor.currentWidget(), model, index)
+
         elif isinstance(editor, DataWidget):
             dcls = model.data(index, role=self.TypeRole)
             data = editor.dataValue()
-            if dcls is not None:
-                data = convertFromQt(dcls, data)
-            model.setData(index, data, role=self.DataRole)
-        else:
-            super().setModelData(editor, model, index)
+            self.setModelDataclassData(index, dcls, data)
+
+        super().setModelData(editor, model, index)
 
     def setEditorData(self, editor, index):
         """
@@ -208,25 +222,17 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
                 widgetIndex = editor.indexOfDataclass(dcls)
             else:
                 widgetIndex = -1
-
             self._freeze_model = True
             editor.setCurrentIndex(widgetIndex)
             self._freeze_model = False
-
             self.setEditorData(editor.currentWidget(), index)
 
         elif isinstance(editor, DataWidget):
             dcls = index.data(role=self.TypeRole)
             data = index.data(role=self.DataRole)
-            if data is None:
-                data = {}
-            if dcls is not None:
-                data = convertToQt(dcls, data)
-            editor.setDataValue(data)
-            highlightEmptyField(editor, dcls)
+            self.setEditorDataclassData(editor, dcls, data)
 
-        else:
-            super().setEditorData(editor, index)
+        super().setEditorData(editor, index)
 
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
