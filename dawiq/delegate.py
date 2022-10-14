@@ -5,11 +5,11 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtWidgets, TypeRole, DataRole
+from .qt_compat import QtCore, QtWidgets, TypeRole, DataRole
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
-from typing import Type, Dict, Any, Optional, Union
+from typing import Type, Dict, Any, Optional
 
 
 __all__ = [
@@ -159,7 +159,12 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         super().__init__(parent)
         self._freeze_model = False
 
-    def setModelDataclassData(self, index, dcls, data):
+    def setModelDataclassData(
+        self,
+        index: QtCore.QModelIndex,
+        dcls: Type[DataclassProtocol],
+        data: Dict,
+    ):
         """Set the dataclass data from the model index."""
         if dcls is not None:
             data = convertFromQt(dcls, data)
@@ -192,12 +197,12 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
-            if dcls != index.data(role=self.TypeRole):
+            if dcls != model.data(index, role=self.TypeRole):
                 index.model().setData(index, dcls, role=self.TypeRole)
             self.setModelData(editor.currentWidget(), model, index)
 
         elif isinstance(editor, DataWidget):
-            dcls = index.data(role=self.TypeRole)
+            dcls = model.data(index, role=self.TypeRole)
             data = editor.dataValue()
             self.setModelDataclassData(index, dcls, data)
 
