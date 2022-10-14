@@ -29,6 +29,9 @@ from .multitype import (
     DataclassTabWidget,
 )
 from .delegate import (
+    convertFromQt,
+    convertToQt,
+    highlightEmptyField,
     DataclassDelegate,
     DataclassMapper,
 )
@@ -48,6 +51,9 @@ __all__ = [
     "dataclass2Widget",
     "DataclassStackedWidget",
     "DataclassTabWidget",
+    "convertFromQt",
+    "convertToQt",
+    "highlightEmptyField",
     "DataclassDelegate",
     "DataclassMapper",
 ]
