@@ -204,7 +204,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         self._freeze_model = False
 
     def setEditorDataclassData(
-        self, editor: Union[DataclassStackedWidget, DataclassTabWidget], dcls, data
+        self, editor: DataWidget, dcls, data
     ):
         """Set the dataclass data to the editor."""
         if data is None:
