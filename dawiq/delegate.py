@@ -9,7 +9,7 @@ from .qt_compat import QtWidgets, TypeRole, DataRole
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
-from typing import Type, Dict, Any, Optional
+from typing import Type, Dict, Any, Optional, Union
 
 
 __all__ = [
@@ -153,11 +153,15 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """
     Delegate to update the model and the :class:`DataWidget`.
 
-    By default, the delegate use :attr:`TypeRole` and :attr:`DataRole` which are
-    ``Qt.ItemDataRole`` to store the dataclass type and dataclass data to the
-    model. Subclass can redefine this be reimplementing the methods
-    :meth:`getDataclassType`, :meth:`setDataclassType`, :meth:`getDataclassData`,
-    and :meth:`setDataclassData`.
+    By default, the delegate use :attr:`TypeRole` and :attr:`DataRole` to store
+    the dataclass type and dataclass data to the model.
+    Subclass can redefine this be reimplementing the methods:
+
+    * :meth:`getModelDataclassType`, :meth:`setModelDataclassType`
+    * :meth:`getModelDataclassData`, :meth:`setModelDataclassData`
+    * :meth:`setEditorDataclassType`
+    * :meth:`setEditorDataclassData`
+
 
     """
 
@@ -168,21 +172,47 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         super().__init__(parent)
         self._freeze_model = False
 
-    def getDataclassType(self, index):
+    def getModelDataclassType(self, index):
         """Get the dataclass type from the model index."""
         return index.data(role=self.TypeRole)
 
-    def setDataclassType(self, index, dcls) -> bool:
+    def setModelDataclassType(self, index, dcls):
         """Set the dataclass type to the model index."""
-        return index.model().setData(index, dcls, role=self.TypeRole)
+        if dcls != self.getModelDataclassType(index):
+            index.model().setData(index, dcls, role=self.TypeRole)
 
-    def getDataclassData(self, index):
+    def getModelDataclassData(self, index):
         """Get the dataclass data from the model index."""
         return index.data(role=self.DataRole)
 
-    def setDataclassData(self, index, data) -> bool:
+    def setModelDataclassData(self, index, dcls, data):
         """Set the dataclass data from the model index."""
-        return index.model().setData(index, data, role=self.DataRole)
+        if dcls is not None:
+            data = convertFromQt(dcls, data)
+        index.model().setData(index, data, role=self.DataRole)
+
+    def setEditorDataclassType(
+        self, editor: Union[DataclassStackedWidget, DataclassTabWidget], dcls
+    ):
+        """Set the dataclass data to the editor."""
+        if dcls is not None:
+            widgetIndex = editor.indexOfDataclass(dcls)
+        else:
+            widgetIndex = -1
+        self._freeze_model = True
+        editor.setCurrentIndex(widgetIndex)
+        self._freeze_model = False
+
+    def setEditorDataclassData(
+        self, editor: Union[DataclassStackedWidget, DataclassTabWidget], dcls, data
+    ):
+        """Set the dataclass data to the editor."""
+        if data is None:
+            data = {}
+        if dcls is not None:
+            data = convertToQt(dcls, data)
+        editor.setDataValue(data)
+        highlightEmptyField(editor, dcls)
 
     def setModelData(self, editor, model, index):
         """
@@ -197,16 +227,13 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
-            if dcls != self.getDataclassType(index):
-                self.setDataclassType(index, dcls)
+            self.setModelDataclassType(index, dcls)
             self.setModelData(editor.currentWidget(), model, index)
 
         elif isinstance(editor, DataWidget):
-            dcls = self.getDataclassType(index)
+            dcls = self.getModelDataclassType(index)
             data = editor.dataValue()
-            if dcls is not None:
-                data = convertFromQt(dcls, data)
-            self.setDataclassData(index, data)
+            self.setModelDataclassData(index, dcls, data)
 
         super().setModelData(editor, model, index)
 
@@ -219,27 +246,14 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         being set to the editor.
         """
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
-            dcls = self.getDataclassType(index)
-            if dcls is not None:
-                widgetIndex = editor.indexOfDataclass(dcls)
-            else:
-                widgetIndex = -1
-
-            self._freeze_model = True
-            editor.setCurrentIndex(widgetIndex)
-            self._freeze_model = False
-
+            dcls = self.getModelDataclassType(index)
+            self.setEditorDataclassType(editor, dcls)
             self.setEditorData(editor.currentWidget(), index)
 
         elif isinstance(editor, DataWidget):
-            dcls = self.getDataclassType(index)
-            data = self.getDataclassData(index)
-            if data is None:
-                data = {}
-            if dcls is not None:
-                data = convertToQt(dcls, data)
-            editor.setDataValue(data)
-            highlightEmptyField(editor, dcls)
+            dcls = self.getModelDataclassType(index)
+            data = self.getModelDataclassData(index)
+            self.setEditorDataclassData(editor, dcls, data)
 
         super().setEditorData(editor, index)
 
