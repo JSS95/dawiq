@@ -183,7 +183,7 @@ Now let's change the widget data to update the model data.
 >>> widget.setDataValue(dict(a=3, b=4, d=5))  # doctest: +SKIP
 >>> mapper.submit()  # doctest: +SKIP
 >>> widget.dataValue()  # doctest: +SKIP
-{'a': 3, 'b': 4, 'c': None, 'd': 6}
+{'a': 3, 'b': 4, 'c': None, 'd': 5}
 >>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 {'a': 3, 'b': 4, 'd': 5}
 
@@ -192,7 +192,7 @@ At this time it is easy to construct the dataclass instance from the model data.
 
 >>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 >>> DataClass(**args)  # doctest: +SKIP
-DataClass(a=3, b=4, c=0, d=None)
+DataClass(a=3, b=4, c=0, d=5)
 
 We can see that ``DataClass.c`` does not exist in the model data so the dataclass constructor used the default value instead.
 
