@@ -192,7 +192,9 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         index.model().setData(index, data, role=self.DataRole)
 
     def setEditorDataclassType(
-        self, editor: Union[DataclassStackedWidget, DataclassTabWidget], dcls
+        self,
+        editor: Union[DataclassStackedWidget, DataclassTabWidget],
+        dcls: Type[DataclassProtocol],
     ):
         """Set the dataclass data to the editor."""
         if dcls is not None:
@@ -204,7 +206,10 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         self._freeze_model = False
 
     def setEditorDataclassData(
-        self, editor: DataWidget, dcls, data
+        self,
+        editor: DataWidget,
+        dcls: Type[DataclassProtocol],
+        data: Optional[Dict],
     ):
         """Set the dataclass data to the editor."""
         if data is None:
