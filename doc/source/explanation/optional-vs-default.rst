@@ -183,7 +183,7 @@ Now let's change the widget data to update the model data.
 >>> widget.setDataValue(dict(a=3, b=4, d=5))  # doctest: +SKIP
 >>> mapper.submit()  # doctest: +SKIP
 >>> widget.dataValue()  # doctest: +SKIP
-{'a': 3, 'b': 4, 'c': None, 'd': 6}
+{'a': 3, 'b': 4, 'c': None, 'd': 5}
 >>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 {'a': 3, 'b': 4, 'd': 5}
 
