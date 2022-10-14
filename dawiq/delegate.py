@@ -153,12 +153,11 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """
     Delegate to update the model and the :class:`DataWidget`.
 
-    :attr:`TypeRole` and :attr:`DataRole` are ``Qt.ItemDataRole`` for the model
-    to store the dataclass type and the dataclass data. Dataclass instance can be
-    constructed by these values.
-
-    Default values of the dataclass fields are not applied to the widget and to
-    the model. This is to make sure that empty input by user is distinguished.
+    By default, the delegate use :attr:`TypeRole` and :attr:`DataRole` which are
+    ``Qt.ItemDataRole`` to store the dataclass type and dataclass data to the
+    model. Subclass can redefine this be reimplementing the methods
+    :meth:`getDataclassType`, :meth:`setDataclassType`, :meth:`getDataclassData`,
+    and :meth:`setDataclassData`.
 
     """
 
@@ -168,6 +167,22 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._freeze_model = False
+
+    def getDataclassType(self, index):
+        """Get the dataclass type from the model index."""
+        return index.data(role=self.TypeRole)
+
+    def setDataclassType(self, index, dcls) -> bool:
+        """Set the dataclass type to the model index."""
+        return index.model().setData(index, dcls, role=self.TypeRole)
+
+    def getDataclassData(self, index):
+        """Get the dataclass data from the model index."""
+        return index.data(role=self.DataRole)
+
+    def setDataclassData(self, index, data) -> bool:
+        """Set the dataclass data from the model index."""
+        return index.model().setData(index, data, role=self.DataRole)
 
     def setModelData(self, editor, model, index):
         """
@@ -182,17 +197,18 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
-            if dcls != model.data(index, role=self.TypeRole):
-                model.setData(index, dcls, role=self.TypeRole)
+            if dcls != self.getDataclassType(index):
+                self.setDataclassType(index, dcls)
             self.setModelData(editor.currentWidget(), model, index)
+
         elif isinstance(editor, DataWidget):
-            dcls = model.data(index, role=self.TypeRole)
+            dcls = self.getDataclassType(index)
             data = editor.dataValue()
             if dcls is not None:
                 data = convertFromQt(dcls, data)
-            model.setData(index, data, role=self.DataRole)
-        else:
-            super().setModelData(editor, model, index)
+            self.setDataclassData(index, data)
+
+        super().setModelData(editor, model, index)
 
     def setEditorData(self, editor, index):
         """
@@ -203,7 +219,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         being set to the editor.
         """
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
-            dcls = index.data(role=self.TypeRole)
+            dcls = self.getDataclassType(index)
             if dcls is not None:
                 widgetIndex = editor.indexOfDataclass(dcls)
             else:
@@ -216,8 +232,8 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             self.setEditorData(editor.currentWidget(), index)
 
         elif isinstance(editor, DataWidget):
-            dcls = index.data(role=self.TypeRole)
-            data = index.data(role=self.DataRole)
+            dcls = self.getDataclassType(index)
+            data = self.getDataclassData(index)
             if data is None:
                 data = {}
             if dcls is not None:
@@ -225,8 +241,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             editor.setDataValue(data)
             highlightEmptyField(editor, dcls)
 
-        else:
-            super().setEditorData(editor, index)
+        super().setEditorData(editor, index)
 
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
