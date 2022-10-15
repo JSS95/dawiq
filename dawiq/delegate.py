@@ -54,8 +54,8 @@ def convertFromQt(
     ...     d: list = field(default_factory=list)
     >>> convertFromQt(Cls1, {})
     {}
-    >>> convertFromQt(Cls1, dict(a=None))
-    {}
+    >>> convertFromQt(Cls1, dict(a=1, b=None, c=None))
+    {'a': 1}
 
     *ignoreMissing* controls whether the default value should be used.
 
@@ -84,7 +84,7 @@ def convertFromQt(
     """
     # Return value is not dataclass but dictionary because necessary fields might
     # be missing from the widget.
-    ret = {}
+    ret: Dict[str, Any] = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, None)
         t = f.type
@@ -115,43 +115,88 @@ def convertFromQt(
 def convertToQt(
     dcls: Type[DataclassProtocol],
     data: Dict[str, Any],
+    ignoreMissing=True,
 ) -> Dict[str, Any]:
     """
     Convert structured dict from dataclass to dict for :class:`DataWidget`.
 
-    If the data does not have the value for a field, :obj:`None` is passed as
-    its value instead to clear the widget.
+    If the field value does not exist in *data* or is :obj:`None`, it is
+    considered to be absent. If *ignoreMissing* is True, ``None`` is used as the
+    placeholder in the resulting dictionary. Else, the default value of the field
+    is used if there is any.
 
-    Field may define `toQt_converter` metadata to convert the field data to
+    Field may define ``toQt_converter`` metadata to convert the field data to
     widget data. It is a unary callable which takes the field data and returns
     the widget data.
 
     Examples
     ========
 
+    ``None`` is considered as missing value.
+
     >>> from dataclasses import dataclass, field
     >>> from dawiq.delegate import convertToQt
+    >>> from typing import Optional
     >>> @dataclass
-    ... class Cls:
+    ... class Cls1:
+    ...     a: int
+    ...     b: int = 10
+    ...     c: Optional[int] = None
+    ...     d: list = field(default_factory=list)
+    >>> convertToQt(Cls1, dict(a=1, b=2, c=3))
+    {'a': 1, 'b': 2, 'c': 3, 'd': None}
+    >>> convertToQt(Cls1, {})
+    {'a': None, 'b': None, 'c': None, 'd': None}
+
+    *ignoreMissing* controls whether the default value should be used.
+
+    >>> convertToQt(Cls1, {}, ignoreMissing=False)
+    {'a': None, 'b': 10, 'c': None, 'd': []}
+
+    Nested dataclasses are recusively converted.
+
+    >>> @dataclass
+    ... class Cls2:
+    ...     x: int = 20
+    ...     y: Cls1 = field(default_factory=lambda: Cls1(a=5))
+    >>> convertToQt(Cls2, {}, ignoreMissing=False)
+    {'x': 20, 'y': {'a': 5, 'b': 10, 'c': None, 'd': []}}
+
+    ``toQt_converter`` metadata converts the data to the widget.
+
+    >>> @dataclass
+    ... class Cls3:
     ...     x: int = field(metadata=dict(toQt_converter=lambda tup: tup[0]))
-    >>> convertToQt(Cls, dict(x=(1,)))  # data converted
+    >>> convertToQt(Cls3, dict(x=(1,)))
     {'x': 1}
-    >>> convertToQt(Cls, dict())  # None is used for placeholder
-    {'x': None}
-    >>> convertToQt(Cls, dict(x=None))  # None is not passed to the converter
-    {'x': None}
 
     """
-    ret = {}
+    ret: Dict[str, Any] = {}
     for f in dataclasses.fields(dcls):
         val = data.get(f.name, None)
+        t = f.type
+
         if val is None:
-            pass
-        elif dataclasses.is_dataclass(f.type):
-            val = convertToQt(f.type, val)
-        converter = f.metadata.get("toQt_converter", None)
-        if val is not None and converter is not None:
-            val = converter(val)
+            if ignoreMissing:
+                ret[f.name] = None
+                continue
+            val = (
+                f.default_factory()
+                if f.default_factory is not dataclasses.MISSING
+                else f.default
+            )
+            if val is dataclasses.MISSING:
+                ret[f.name] = None
+                continue
+            if dataclasses.is_dataclass(val) and not isinstance(val, type):
+                val = dataclasses.asdict(val)
+
+        else:
+            if dataclasses.is_dataclass(t):
+                val = convertToQt(t, val, ignoreMissing)
+            converter = f.metadata.get("toQt_converter", None)
+            if converter is not None:
+                val = converter(val)
         ret[f.name] = val
     return ret
 
