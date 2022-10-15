@@ -9,13 +9,34 @@ For a dataclass field, two important questions arise:
 1. It is ``Optional``?
 2. Does it have a default value?
 
+.. code-block:: python
+
+    from dataclasses import dataclass
+    from typing import Optional
+
+    @dataclass
+    class Dataclass:
+        x: Optional[int] = 3
+
 If the field type is ``Optional``, :obj:`None` is allowed for placeholder object in addition to the main type.
-And if there is default value, the field is not mandatory i.e. its data does not need to be passed. In such case the default value is used.
+For example, ``Optional[int]`` indicates that the field is normally an integer but ``None`` is allowed as well.
+
+.. note::
+    In fact, Python does not perform type check and allows you to pass ``None`` to the field with just ``int``.
+    However this shouldn't be performed for robust typing.
+
+If a field has default value, the field is not mandatory and one can omit its value where the default value is used instead.
+
+Handling an empty field and a default value is a tricky problem for DaWiQ.
+Should empty :class:`.StrLineEdit` indicate an empty string ``""``, or should it represent ``None`` as an empty field?
+If a widget is empty, should it be occupied with default value or not?
+
+This document explains how DaWiQ deals with that problem.
 
 Basic example
 =============
 
-Here is a simple dataclass with differnt fields; *optional or not* and *default or not*.
+Here is a simple dataclass with different fields.
 
 >>> import dataclasses
 >>> from typing import Optional
@@ -32,11 +53,10 @@ TypeError: __init__() missing 1 required positional argument: 'b'
 >>> DataClass(1, None)
 DataClass(a=1, b=None, c=0, d=None)
 
-``DataClass.b`` can have ``None`` value but the field is mandatory. On the other hand, ``DataClass.c`` is not mandatory but it should not be ``None``.
-
-.. note::
-    In fact, Python does not perform type check and allows you to pass ``None`` to ``DataClass.c``.
-    However this shouldn't be performed for robust typing.
+* ``DataClass.a``: cannot be ``None``, no default
+* ``DataClass.b``: can be ``None``, no default
+* ``DataClass.c``: cannot be ``None``, has default
+* ``DataClass.d``: can be ``None``, has default
 
 How will the data widget from ``DataClass`` be?
 
@@ -164,10 +184,10 @@ How will the data widget from ``DataClass`` be?
 
    Widget from ``DataClass``
 
-We can see that the default values have nothing to do with the widget value and thus the editors are all empty.
-However if a field does not have a default value, the delegate marks the widget to indicate that it should not be empty and the style sheet highlights it.
+Default values are not updated to the model, as explained in :ref:`data-model`.
+We can set the delegate to change this behavior, but we do not cover it here.
 
-What about the widget data and the model data?
+What will be the widget data and the model data?
 
 >>> widget.dataValue()  # doctest: +SKIP
 {'a': None, 'b': None, 'c': None, 'd': None}
@@ -187,7 +207,7 @@ Now let's change the widget data to update the model data.
 >>> item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
 {'a': 3, 'b': 4, 'd': 5}
 
-Valid data (not None) in the field widget is updated to the model as well.
+Valid data (not ``None``) in the field widget is updated to the model.
 At this time it is easy to construct the dataclass instance from the model data.
 
 >>> args = item.data(role=DataclassDelegate.DataRole)  # doctest: +SKIP
@@ -199,7 +219,7 @@ We can see that ``DataClass.c`` does not exist in the model data so the dataclas
 Limitation
 ----------
 
-Now if we want to set ``None`` to ``DataClass.d``, we can just delete the field widget data.
+Now if we want to set ``None`` to ``DataClass.d``, we can just REMOVE the field widget data.
 Then the field data in the model will be deleted and dataclass constructor will use the default value, which is ``None``.
 
 >>> widget.setDataValue(dict(a=3, b=4))  # doctest: +SKIP
@@ -229,8 +249,7 @@ Sadly, we can't because ``None`` is reserved to indicate the empty widget value 
     However if we used it, user must import :mod:`dawiq` upon dataclass definition to filter the sentinel.
     This is undesirable because we want to separate the core side and GUI side, so we bite the bullet and use ``None``.
 
-This is the limitation of DaWiQ and in fact is an intended behavior.
-It is because defining a dedicated sentinel object makes things ugly when we serialize the data or construct nested dataclass.
+This is the limitation of DaWiQ, and in fact is an intended behavior.
 
 Workaround
 ----------

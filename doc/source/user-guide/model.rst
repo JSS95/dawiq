@@ -34,8 +34,8 @@ First we define a simple dataclass.
 
     @dataclass
     class DataClass:
-        x: float
-        y: bool
+        x: float = 1.0
+        y: bool = True
 
 Then we construct a model with two items, each storing the dataclass type which will be detected by the delegate.
 
@@ -228,6 +228,26 @@ Try change the model index and the editor data, and see if the data is stored an
 
    Widget with model
 
+Note that the dataclass defines default value, but the widget is still empty.
+Default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
+
+To make default values applied to missing fields, set :meth:`.DataclassDelegate.ignoreMissing` to ``False``.
+
+.. code-block:: python
+
+    from dawiq import DataclassMapper
+
+    delegate = DataclassDelegate()
+    delegate.setIgnoreMissing(False)
+    mapper = DataclassMapper()
+    mapper.setItemDelegate(delegate)
+    mapper.setModel(model)
+
+.. figure:: ../_images/default-for-missing.jpg
+   :align: center
+
+   Widget with default value used for missing field
+
 Data converter example
 ======================
 
@@ -256,6 +276,3 @@ In this example, we define the data converters for ``CustomClass``, which we use
    :align: center
 
    Widget with model compatible to custom type
-
-Note that the dataclass defines default value, but the widget is still empty.
-Default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
