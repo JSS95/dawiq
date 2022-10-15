@@ -98,7 +98,10 @@ def convertFromQt(
                 else f.default
             )
             if val is dataclasses.MISSING:
-                continue
+                if dataclasses.is_dataclass(t):
+                    val = convertFromQt(t, {}, ignoreMissing)
+                else:
+                    continue
             if dataclasses.is_dataclass(val) and not isinstance(val, type):
                 val = dataclasses.asdict(val)
 
@@ -186,8 +189,11 @@ def convertToQt(
                 else f.default
             )
             if val is dataclasses.MISSING:
-                ret[f.name] = None
-                continue
+                if dataclasses.is_dataclass(t):
+                    val = convertToQt(t, {}, ignoreMissing)
+                else:
+                    ret[f.name] = None
+                    continue
             if dataclasses.is_dataclass(val) and not isinstance(val, type):
                 val = dataclasses.asdict(val)
 
