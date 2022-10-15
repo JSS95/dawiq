@@ -236,7 +236,13 @@ def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtoco
 
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
-    """Delegate to update the model and the :class:`DataWidget`."""
+    """
+    Delegate to update the model and the :class:`DataWidget`.
+
+    By default, missing values are not replaced by default values of the fields.
+    This is to preserve the intentional empty input by the user. Setting
+    :meth:`ignoreMissing` changes this behavior.
+    """
 
     TypeRole = TypeRole
     DataRole = DataRole
@@ -244,6 +250,14 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     def __init__(self, parent=None):
         super().__init__(parent)
         self._freeze_model = False
+        self._ignoreMissing = True
+
+    def ignoreMissing(self) -> bool:
+        """If True, default values are used for missing fields."""
+        return self._ignoreMissing
+
+    def setIgnoreMissing(self, val: bool):
+        self._ignoreMissing = val
 
     def setModelDataclassData(
         self,
@@ -253,7 +267,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     ):
         """Set the dataclass data from the model index."""
         if dcls is not None:
-            data = convertFromQt(dcls, data)
+            data = convertFromQt(dcls, data, self.ignoreMissing())
         index.model().setData(index, data, role=self.DataRole)
 
     def setEditorDataclassData(
@@ -266,7 +280,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
         if data is None:
             data = {}
         if dcls is not None:
-            data = convertToQt(dcls, data)
+            data = convertToQt(dcls, data, self.ignoreMissing())
         editor.setDataValue(data)
         highlightEmptyField(editor, dcls)
 
