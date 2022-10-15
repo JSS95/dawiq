@@ -24,37 +24,62 @@ __all__ = [
 def convertFromQt(
     dcls: Type[DataclassProtocol],
     data: Dict[str, Any],
+    ignoreMissing=True,
 ) -> Dict[str, Any]:
     """
     Convert the dict from :class:`DataWidget` to structured dict for dataclass.
 
-    If the field value does not exist in *data* or is :obj:`None`, the field
-    is not included in the resulting dictionary. Default value of the field is
-    ignored.
+    If the field value does not exist in *data* or is :obj:`None`, it is
+    considered to be absent. If *ignoreMissing* is True, the absent value is not
+    included in the resulting dictionary. Else, the default value of the field is
+    used if there is any.
 
-    Field may define `fromQt_converter` metadata to convert the widget data to
+    Field may define ``fromQt_converter`` metadata to convert the widget data to
     field data. It is a unary callable which takes the widget data and returns
     the field data.
 
     Examples
     ========
 
+    ``None`` is considered as missing value.
+
     >>> from dataclasses import dataclass, field
     >>> from dawiq.delegate import convertFromQt
     >>> from typing import Optional
+    >>> @dataclass
+    ... class Cls1:
+    ...     a: int
+    ...     b: int = 10
+    ...     c: Optional[int] = None
+    ...     d: list = field(default_factory=list)
+    >>> convertFromQt(Cls1, {})
+    {}
+    >>> convertFromQt(Cls1, dict(a=None))
+    {}
+
+    *ignoreMissing* controls whether the default value should be used.
+
+    >>> convertFromQt(Cls1, {}, ignoreMissing=False)
+    {'b': 10, 'c': None, 'd': []}
+
+    Nested dataclasses are recusively converted.
+
+    >>> @dataclass
+    ... class Cls2:
+    ...     x: int = 20
+    ...     y: Cls1 = field(default_factory=lambda: Cls1(a=5))
+    >>> convertFromQt(Cls2, {}, ignoreMissing=False)
+    {'x': 20, 'y': {'a': 5, 'b': 10, 'c': None, 'd': []}}
+
+    ``fromQt_converter`` metadata converts the data from the widet.
+
     >>> def conv(arg):
     ...     return (arg,)
     >>> @dataclass
-    ... class Cls:
-    ...     x: int = 1
-    ...     y: Optional[int] = None
-    ...     z: tuple = field(default=(1,), metadata=dict(fromQt_converter=conv))
-    >>> convertFromQt(Cls, dict())  # empty dict (default value is not used)
-    {}
-    >>> convertFromQt(Cls, dict(x=None, y=None, z=None))  # None is removed
-    {}
-    >>> convertFromQt(Cls, dict(z=1))  # data is converted
-    {'z': (1,)}
+    ... class Cls3:
+    ...     x: tuple = field(default=(1,), metadata=dict(fromQt_converter=conv))
+    >>> convertFromQt(Cls3, dict(x=1))
+    {'x': (1,)}
 
     """
     # Return value is not dataclass but dictionary because necessary fields might
@@ -65,14 +90,24 @@ def convertFromQt(
         t = f.type
 
         if val is None:
-            continue
+            if ignoreMissing:
+                continue
+            val = (
+                f.default_factory()
+                if f.default_factory is not dataclasses.MISSING
+                else f.default
+            )
+            if val is dataclasses.MISSING:
+                continue
+            if dataclasses.is_dataclass(val) and not isinstance(val, type):
+                val = dataclasses.asdict(val)
 
-        if dataclasses.is_dataclass(t):
-            val = convertFromQt(t, val)
-
-        converter = f.metadata.get("fromQt_converter", None)
-        if converter is not None:
-            val = converter(val)
+        else:
+            if dataclasses.is_dataclass(t):
+                val = convertFromQt(t, val, ignoreMissing)
+            converter = f.metadata.get("fromQt_converter", None)
+            if converter is not None:
+                val = converter(val)
         ret[f.name] = val
     return ret
 
