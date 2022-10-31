@@ -388,24 +388,18 @@ T = TypeVar("T", bound="EnumComboBox")
 
 class EnumComboBox(QtWidgets.QComboBox):
     """
-    Combo box for enum type.
+    Combo box for :class:`enum.Enum` type.
 
     Standard way to construct this widget is by :meth:`fromEnum` class method.
     N-th item contains N-th member of the Enum as its data.
 
-    :meth:`dataValue` returns the current member. When current index is changed
-    by user, :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue`
-    changes the current index.
-
-    Data value is the Enum member. If the current index is empty, data value is
-    :obj:`None`
-
-    :meth:`setDataValue` sets the current index. If :obj:`None` is passed,
-    index is set to -1.
+    Enum instance is stored in item data. Field value is the data of currently
+    activated item. If the current index is -1, field value is ``None``.
 
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     @classmethod
     def fromEnum(cls: Type[T], enum: Type[Enum]) -> T:
@@ -420,6 +414,29 @@ class EnumComboBox(QtWidgets.QComboBox):
         self._block_dataValueChanged = False
 
         self.currentIndexChanged.connect(self.emitDataValueChanged)
+        self.currentIndexChanged.connect(self._onCurrentIndexChange)
+        self.activated.connect(self.fieldEdited)
+
+    def fieldValue(self) -> Optional[Enum]:
+        index = self.currentIndex()
+        if index == -1:
+            ret = None
+        else:
+            ret = self.itemData(index)
+        return ret
+
+    def setFieldValue(self, value: Optional[Enum]):
+        if value is None:
+            index = -1
+        elif isinstance(value, Enum):
+            index = self.findData(value)
+        else:
+            raise TypeError(f"EnumComboBox data must be Enum, not {type(value)}")
+        self.setCurrentIndex(index)
+
+    def _onCurrentIndexChange(self, index: int):
+        data = self.itemData(index)
+        self.fieldValueChanged.emit(data)
 
     def fieldName(self) -> str:
         return self.placeholderText()
@@ -428,13 +445,20 @@ class EnumComboBox(QtWidgets.QComboBox):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> Optional[Enum]:
-        index = self.currentIndex()
-        if index == -1:
-            ret = None
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is None:
+            requires = True
         else:
-            ret = self.itemData(index)
-        return ret
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
+
+    # below will be deleted
+
+    dataValue = fieldValue
+    dataValueChanged = QtCore.Signal(object)
 
     def setDataValue(self, value: Optional[Enum]):
         if value is None:
@@ -452,16 +476,6 @@ class EnumComboBox(QtWidgets.QComboBox):
             return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
-
-    def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
-            requires = True
-        else:
-            requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
-            self.style().unpolish(self)
-            self.style().polish(self)
 
 
 V = TypeVar("V", bound="TupleGroupBox")

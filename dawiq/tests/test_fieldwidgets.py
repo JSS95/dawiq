@@ -77,7 +77,7 @@ def test_BoolCheckBox_tristate(qtbot):
 
 
 def test_BoolCheckBox_setRequired(qtbot):
-    """Check box is always occupied with data."""
+    """Check box always has field value."""
     widget = BoolCheckBox()
 
     widget.setRequired(True)
@@ -148,7 +148,7 @@ def test_IntLineEdit(qtbot):
     ):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == 1
+    assert widget.fieldValue() == 1
 
 
 def test_IntLineEdit_setRequired(qtbot):
@@ -156,7 +156,7 @@ def test_IntLineEdit_setRequired(qtbot):
 
     widget.setRequired(True)
     assert widget.property("requiresFieldData")
-    widget.setDataValue(10)
+    widget.setFieldValue(10)
     widget.setRequired(True)
     assert not widget.property("requiresFieldData")
 
@@ -232,7 +232,7 @@ def test_FloatLineEdit(qtbot):
         qtbot.keyPress(widget, ".")
         qtbot.keyPress(widget, "2")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == 1.2
+    assert widget.fieldValue() == 1.2
 
 
 def test_FloatLineEdit_setRequired(qtbot):
@@ -240,7 +240,7 @@ def test_FloatLineEdit_setRequired(qtbot):
 
     widget.setRequired(True)
     assert widget.property("requiresFieldData")
-    widget.setDataValue(10.0)
+    widget.setFieldValue(10.0)
     widget.setRequired(True)
     assert not widget.property("requiresFieldData")
 
@@ -257,8 +257,7 @@ def test_StrLineEdit(qtbot):
     assert widget.fieldValue() == ""
     assert not widget.text()
 
-    # test value change by setDataValue
-
+    # test value change by setFieldValue
     with qtbot.waitSignal(
         widget.fieldValueChanged,
         check_params_cb=lambda val: val == "1",
@@ -297,16 +296,16 @@ def test_StrLineEdit(qtbot):
     ):
         qtbot.keyPress(widget, "x")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == "x"
+    assert widget.fieldValue() == "x"
 
 
 def test_StrLineEdit_setRequired(qtbot):
-    """String line edit is always occupied with data."""
+    """String line edit always has field value."""
     widget = StrLineEdit()
 
     widget.setRequired(True)
     assert not widget.property("requiresFieldData")
-    widget.setDataValue("spam")
+    widget.setFieldValue("spam")
     widget.setRequired(True)
     assert not widget.property("requiresFieldData")
 
@@ -324,64 +323,52 @@ def test_EnumComboBox(qtbot):
         z = 3
 
     widget = EnumComboBox.fromEnum(MyEnum)
+
     assert widget.count() == 3
     assert widget.currentIndex() == -1
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
 
-    # test with setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MyEnum.x)
-    assert widget.currentIndex() == 0
-    assert widget.dataValue() == MyEnum.x
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MyEnum.y)
-    assert widget.currentIndex() == 1
-    assert widget.dataValue() == MyEnum.y
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MyEnum.z)
-    assert widget.currentIndex() == 2
-    assert widget.dataValue() == MyEnum.z
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.currentIndex() == -1
-    assert widget.dataValue() is None
-
-    # test with setCurrentIndex
-
+    # test with setFieldValue
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == MyEnum.x,
     ):
-        widget.setCurrentIndex(0)
-    assert widget.dataValue() == MyEnum.x
+        widget.setFieldValue(MyEnum.x)
+    assert widget.currentIndex() == 0
+    assert widget.fieldValue() == MyEnum.x
 
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == MyEnum.y,
     ):
-        widget.setCurrentIndex(1)
-    assert widget.dataValue() == MyEnum.y
+        widget.setFieldValue(MyEnum.y)
+    assert widget.currentIndex() == 1
+    assert widget.fieldValue() == MyEnum.y
 
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == MyEnum.z,
     ):
-        widget.setCurrentIndex(2)
-    assert widget.dataValue() == MyEnum.z
+        widget.setFieldValue(MyEnum.z)
+    assert widget.currentIndex() == 2
+    assert widget.fieldValue() == MyEnum.z
 
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        widget.setCurrentIndex(-1)
-    assert widget.dataValue() is None
+        widget.setFieldValue(None)
+    assert widget.currentIndex() == -1
+    assert widget.fieldValue() is None
+
+    # test with setCurrentIndex
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == MyEnum.x, lambda: True],
+    ):
+        qtbot.keyClick(widget, MyEnum.x.name)
+    assert widget.currentIndex() == 0
+    assert widget.fieldValue() == MyEnum.x
 
 
 def test_EnumComboBox_setRequired(qtbot):
