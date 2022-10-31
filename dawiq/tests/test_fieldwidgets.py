@@ -144,12 +144,11 @@ def test_IntLineEdit(qtbot):
 
     with qtbot.waitSignals(
         [widget.fieldValueChanged, widget.fieldEdited],
-        check_params_cbs=[lambda val: val == -1, lambda: True],
+        check_params_cbs=[lambda val: val == 1, lambda: True],
     ):
-        qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == -1
+    assert widget.dataValue() == 1
 
 
 def test_IntLineEdit_setRequired(qtbot):
@@ -196,39 +195,44 @@ def test_EmptyFloatValidator(qtbot):
 def test_FloatLineEdit(qtbot):
     widget = FloatLineEdit()
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
     assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(1.0)
-    assert widget.dataValue() == float(1)
-    assert widget.text() == "1.0"
-
-    widget.clear()
-
-    # test value change by keyboard
+    # test value change by setFieldValue
     with qtbot.waitSignal(
-        widget.dataValueChanged,
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == 1.2,
+    ):
+        widget.setFieldValue(1.2)
+    assert widget.fieldValue() == 1.2
+    assert widget.text() == "1.2"
+
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is None
+    assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        qtbot.keyPress(widget, "-")
+    # test value change by keyboard
+    widget.clear()
+    with qtbot.waitSignals(
+        [widget.fieldEdited],
+        check_params_cbs=[lambda: True],
+    ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == float(-1),
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == 1.2, lambda: True],
     ):
         qtbot.keyPress(widget, "1")
+        qtbot.keyPress(widget, ".")
+        qtbot.keyPress(widget, "2")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == float(-1)
+    assert widget.dataValue() == 1.2
 
 
 def test_FloatLineEdit_setRequired(qtbot):

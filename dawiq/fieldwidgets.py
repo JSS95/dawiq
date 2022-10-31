@@ -186,7 +186,7 @@ class IntLineEdit(QtWidgets.QLineEdit):
         elif isinstance(value, int):
             txt = str(int(value))
         else:
-            raise TypeError(f"IntLineEdit data must be int, not {type(value)}")
+            raise TypeError(f"IntLineEdit value must be int, not {type(value)}")
         self.setText(txt)
 
     def _onTextChange(self, text: str):
@@ -221,14 +221,7 @@ class IntLineEdit(QtWidgets.QLineEdit):
     dataValue = fieldValue
     dataValueChanged = QtCore.Signal(object)
 
-    def setDataValue(self, val: Optional[int]):
-        if val is None:
-            txt = ""
-        elif isinstance(val, int):
-            txt = str(int(val))
-        else:
-            raise TypeError(f"IntLineEdit data must be int, not {type(val)}")
-        self.setText(txt)
+    setDataValue = setFieldValue
 
     def emitDataValueChanged(self):
         val = self.dataValue()
@@ -249,19 +242,14 @@ class FloatLineEdit(QtWidgets.QLineEdit):
     """
     Line edit for float value.
 
-    :meth:`dataValue` returns the current value. When editing is finished,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    text on the line edit.
-
-    If the text is not empty, the data value is the float that the string is
-    converted to. If the line edit is empty, :obj:`None` is the data value.
-
-    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
-    edit is cleared.
-
+    If the text is not empty, the field value is the float that the text is
+    converted to. If the line edit is empty or the text cannot be converted to
+    float, ``None`` is the field value. Setting ``None`` as field value clears
+    the line edit.
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -269,17 +257,11 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         self.setValidator(EmptyFloatValidator(self))
 
         self.editingFinished.connect(self.emitDataValueChanged)
+        self.textChanged.connect(self._onTextChange)
+        self.editingFinished.connect(self.fieldEdited)
 
-    def fieldName(self) -> str:
-        return self.placeholderText()
-
-    def setFieldName(self, name: str):
-        self.setPlaceholderText(name)
-        self.setToolTip(name)
-
-    def dataValue(self) -> Optional[float]:
+    def fieldValue(self) -> Optional[float]:
         text = self.text()
-
         if not text:
             val: Optional[float] = None
         else:
@@ -289,18 +271,31 @@ class FloatLineEdit(QtWidgets.QLineEdit):
                 val = None
         return val
 
-    def setDataValue(self, val: Optional[float]):
-        if val is None:
+    def setFieldValue(self, value: Optional[float]):
+        if value is None:
             txt = ""
-        elif isinstance(val, float):
-            txt = str(float(val))
+        elif isinstance(value, float):
+            txt = str(float(value))
         else:
-            raise TypeError(f"FloatLineEdit data must be float, not {type(val)}")
+            raise TypeError(f"FloatLineEdit value must be float, not {type(value)}")
         self.setText(txt)
 
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
+    def _onTextChange(self, text: str):
+        if not text:
+            val: Optional[float] = None
+        else:
+            try:
+                val = float(text)
+            except ValueError:
+                val = None
+        self.fieldValueChanged.emit(val)
+
+    def fieldName(self) -> str:
+        return self.placeholderText()
+
+    def setFieldName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
 
     def setRequired(self, required: bool):
         if required and self.dataValue() is None:
@@ -311,6 +306,17 @@ class FloatLineEdit(QtWidgets.QLineEdit):
             self.setProperty("requiresFieldData", requires)
             self.style().unpolish(self)
             self.style().polish(self)
+
+    # below will be deleted
+
+    dataValue = fieldValue
+    dataValueChanged = QtCore.Signal(object)
+
+    setDataValue = setFieldValue
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)
 
 
 class StrLineEdit(QtWidgets.QLineEdit):
