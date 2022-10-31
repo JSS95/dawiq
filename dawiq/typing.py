@@ -25,7 +25,46 @@ class DataclassProtocol(Protocol):
 class FieldWidgetProtocol(Protocol):
     """Type annotation for field widget object."""
 
-    dataValueChanged: QtCore.Signal
+    dataValueChanged: QtCore.Signal  # to be deleted
+    fieldValueChanged: QtCore.Signal
+    fieldEdited: QtCore.Signal
+
+    def fieldValue(self) -> Any:
+        """
+        Value that the field widget represents.
+
+        This is the API for the delegate to get the data from the field widget.
+        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        this method converts the current check state to :class:`bool` and
+        returns.
+
+        If the field value is :obj:`None`, it typically indicates that the widget
+        is empty and the delegate should specially handle it. One of the few
+        exceptions is :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        where :obj:`None` indicates partially checked state for fuzzy boolean
+        value.
+
+        When the field value is changed, :attr:`fieldValueChanged` signal must
+        emit the new value. When the field is edited by user, :attr:`fieldEdited`
+        signal must be emitted with empty argument.
+
+        """
+        ...
+
+    def setFieldValue(self, value: Any):
+        """
+        Set the value to the field widget.
+
+        This method is the API for the delegate to set the data to the widget.
+        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
+        this method converts :class:`bool` to :obj:`Qt.CheckState` and sets to
+        the widget.
+
+        For valid *value*, its type must be strictly checked and :obj:`TypeError`
+        must be raised on invalid input.
+
+        """
+        ...
 
     def dataValue(self) -> Any:
         """
