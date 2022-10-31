@@ -393,82 +393,92 @@ def test_EnumComboBox_setRequired(qtbot):
 
 
 def test_TupleGroupBox_addWidget(qtbot):
-    tupleWidget = TupleGroupBox()
-    assert tupleWidget.count() == 0
+    widget = TupleGroupBox()
+    assert widget.count() == 0
 
     w0 = BoolCheckBox()
-    tupleWidget.addWidget(w0)
-    assert tupleWidget.count() == 1
-    assert tupleWidget.widget(0) is w0
-    assert tupleWidget.widget(1) is None
+    widget.addWidget(w0)
+    assert widget.count() == 1
+    assert widget.widget(0) is w0
+    assert widget.widget(1) is None
 
     w1 = IntLineEdit()
-    tupleWidget.addWidget(w1)
-    assert tupleWidget.count() == 2
-    assert tupleWidget.widget(0) is w0
-    assert tupleWidget.widget(1) is w1
+    widget.addWidget(w1)
+    assert widget.count() == 2
+    assert widget.widget(0) is w0
+    assert widget.widget(1) is w1
 
     # test that signals are connected
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
         w0.click()
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
+        qtbot.keyPress(w1, "1")
         qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
 def test_TupleGroupBox_insertWidget(qtbot):
-    tupleWidget = TupleGroupBox()
-    assert tupleWidget.count() == 0
+    widget = TupleGroupBox()
+    assert widget.count() == 0
 
     w0 = BoolCheckBox()
-    tupleWidget.insertWidget(0, w0)
-    assert tupleWidget.count() == 1
-    assert tupleWidget.widget(0) is w0
-    assert tupleWidget.widget(1) is None
+    widget.insertWidget(0, w0)
+    assert widget.count() == 1
+    assert widget.widget(0) is w0
+    assert widget.widget(1) is None
 
     w1 = IntLineEdit()
-    tupleWidget.insertWidget(0, w1)
-    assert tupleWidget.count() == 2
-    assert tupleWidget.widget(0) is w1
-    assert tupleWidget.widget(1) is w0
+    widget.insertWidget(0, w1)
+    assert widget.count() == 2
+    assert widget.widget(0) is w1
+    assert widget.widget(1) is w0
 
     # test that signals are connected
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
         w0.click()
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
+        qtbot.keyPress(w1, "1")
         qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
 def test_TupleGroupBox_removeWidget(qtbot):
-    tupleWidget = TupleGroupBox()
+    widget = TupleGroupBox()
     w0 = BoolCheckBox()
     w1 = IntLineEdit()
 
-    tupleWidget.addWidget(w0)
-    assert tupleWidget.count() == 1
+    widget.addWidget(w0)
+    assert widget.count() == 1
 
-    tupleWidget.removeWidget(w1)
-    assert tupleWidget.count() == 1
+    widget.removeWidget(w1)
+    assert widget.count() == 1
 
-    tupleWidget.removeWidget(w0)
-    assert tupleWidget.count() == 0
+    widget.removeWidget(w0)
+    assert widget.count() == 0
 
     # test that signals are disconnected
-    with qtbot.assertNotEmitted(tupleWidget.dataValueChanged):
+    with qtbot.assertNotEmitted(widget.fieldValueChanged):
         w0.click()
+    with qtbot.assertNotEmitted(widget.fieldEdited):
+        w0.click()
+    with qtbot.assertNotEmitted(widget.fieldValueChanged):
+        qtbot.keyPress(w1, "1")
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
+    with qtbot.assertNotEmitted(widget.fieldEdited):
+        qtbot.keyPress(w1, "1")
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
-def test_TupleGroupBox_dataValue(qtbot):
+def test_TupleGroupBox_fieldValue(qtbot):
     widget = TupleGroupBox()
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
-    assert widget.dataValue() == (None, None)
+    assert widget.fieldValue() == (None, None)
 
     widget.widget(0).setText("1")
     widget.widget(1).setText("2")
-    assert widget.dataValue() == (1, 2)
+    assert widget.fieldValue() == (1, 2)
 
 
-def test_TupleGroupBox_setDataValue(qtbot):
+def test_TupleGroupBox_setFieldValue(qtbot):
     widget = TupleGroupBox()
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
@@ -480,17 +490,28 @@ def test_TupleGroupBox_setDataValue(qtbot):
         def count(self):
             self.i += 1
 
+        def reset(self):
+            self.i = 0
+
     counter = Counter()
-    widget.dataValueChanged.connect(counter.count)
+    widget.fieldValueChanged.connect(counter.count)
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue((1, 2))
-    assert widget.dataValue() == (1, 2)
-    assert counter.i == 0
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == (1, 2),
+    ):
+        widget.setFieldValue((1, 2))
+    assert widget.fieldValue() == (1, 2)
+    assert counter.i == 1
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() == (None, None)
+    counter.reset()
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == (None, None),
+    ):
+        widget.setFieldValue(None)
+    assert widget.fieldValue() == (None, None)
+    assert counter.i == 1
 
 
 def test_TupleGroupBox_subwidget(qtbot):
@@ -498,19 +519,21 @@ def test_TupleGroupBox_subwidget(qtbot):
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, None)
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == (1, None), lambda: True],
     ):
         qtbot.keyPress(widget.widget(0), "1")
         qtbot.keyPress(widget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == (1, None)
+    assert widget.fieldValue() == (1, None)
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, 2)
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == (1, 2), lambda: True],
     ):
         qtbot.keyPress(widget.widget(1), "2")
         qtbot.keyPress(widget.widget(1), QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == (1, 2)
+    assert widget.fieldValue() == (1, 2)
 
 
 def test_TupleGroupBox_setRequired(qtbot):
@@ -521,11 +544,11 @@ def test_TupleGroupBox_setRequired(qtbot):
     widget.setRequired(True)
     assert widget.widget(0).property("requiresFieldData")
     assert widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((None, 1))
+    widget.setFieldValue((None, 1))
     widget.setRequired(True)
     assert widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((0, 1))
+    widget.setFieldValue((0, 1))
     widget.setRequired(True)
     assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
@@ -536,11 +559,11 @@ def test_TupleGroupBox_setRequired(qtbot):
     widget.setRequired(False)
     assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((None, 1))
+    widget.setFieldValue((None, 1))
     widget.setRequired(False)
     assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((0, 1))
+    widget.setFieldValue((0, 1))
     widget.setRequired(False)
     assert not widget.widget(0).property("requiresFieldData")
     assert not widget.widget(1).property("requiresFieldData")

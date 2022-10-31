@@ -8,7 +8,7 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 
 from .qt_compat import QtCore, QtWidgets, QtGui
 from enum import Enum
-from typing import Optional, Union, Tuple, TypeVar, Type
+from typing import Optional, Union, Tuple, TypeVar, Type, Any
 from .typing import FieldWidgetProtocol
 
 
@@ -483,23 +483,15 @@ V = TypeVar("V", bound="TupleGroupBox")
 
 class TupleGroupBox(QtWidgets.QGroupBox):
     """
-    Group box for tuple data with fixed length.
+    Group box for tuple with fixed length.
 
-    This is the group box which contains field widgets as subwidgets. Data value
-    is constructed from the data of subwidgets as tuple.
-
-    :meth:`dataValue` returns the current tuple value. When data value of any
-    subwidget is changed by the user, :attr:`dataValueChanged` signal is emitted.
-    :meth:`setDataValue` changes the data of subwidgets.
-
-    Data value is the tuple containing subwidget data, and never :obj:`None`.
-
-    :meth:`setDataValue` sets the subwidget data. If :obj:`None` is passed,
-    it is propagated to all subwidget.
+    This is the group box which contains field widgets as subwidgets. Field value
+    is the tuple of subwidets values.
 
     """
 
-    dataValueChanged = QtCore.Signal(tuple)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(
         self,
@@ -517,13 +509,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         else:
             raise TypeError(f"Invalid orientation: {orientation}")
         self.setLayout(layout)
-
-    def fieldName(self) -> str:
-        return self.title()
-
-    def setFieldName(self, name: str):
-        self.setTitle(name)
-        self.setToolTip(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
         """Orientation to stack the subwidgets."""
@@ -549,11 +534,13 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
-        """Insert the widget to layout and connect data value change signal."""
+        """Insert the widget to layout and connect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
+        widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        widget.fieldEdited.connect(self.fieldEdited)
         widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().insertWidget(index, widget, stretch, alignment)
 
@@ -563,35 +550,77 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
-        """Add the widget to layout and connect data value change signal."""
+        """Add the widget to layout and connect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
+        widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        widget.fieldEdited.connect(self.fieldEdited)
         widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
-        """
-        Remove the widget from layout and disconnect data value change signal.
-        """
+        """Remove the widget from layout and disconnect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             if w == widget:
+                widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
+                widget.fieldEdited.disconnect(self.fieldEdited)
                 widget.dataValueChanged.disconnect(self.emitDataValueChanged)
                 break
         self.layout().removeWidget(widget)
 
-    def dataValue(self) -> tuple:
+    def fieldValue(self) -> tuple:
         ret = []
         for i in range(self.count()):
             widget = self.widget(i)
             if widget is None:
                 break
-            ret.append(widget.dataValue())
+            ret.append(widget.fieldValue())
         return tuple(ret)
+
+    def setFieldValue(self, value: Optional[tuple]):
+        if value is None:
+            value = tuple(None for _ in range(self.count()))
+        elif isinstance(value, tuple):
+            pass
+        else:
+            raise TypeError(f"TupleGroupBox value must be tuple, not {type(value)}")
+
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                break
+            widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
+            widget.setDataValue(value[i])
+            widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        self.fieldValueChanged.emit(value)
+
+    def _onSubfieldValueChange(self, value: Any):
+        self.fieldValueChanged.emit(self.fieldValue())
+
+    def fieldName(self) -> str:
+        return self.title()
+
+    def setFieldName(self, name: str):
+        self.setTitle(name)
+        self.setToolTip(name)
+
+    def setRequired(self, required: bool):
+        """Recursively set *required* to all subwidgets."""
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                continue
+            widget.setRequired(required)
+
+    # below will be deleted
+
+    dataValue = fieldValue
+    dataValueChanged = QtCore.Signal(object)
 
     def setDataValue(self, value: Optional[tuple]):
         self._block_dataValueChanged = True
@@ -616,11 +645,3 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             return
         val = self.dataValue()
         self.dataValueChanged.emit(val)
-
-    def setRequired(self, required: bool):
-        """Recursively set *required* to all subwidgets."""
-        for i in range(self.count()):
-            widget = self.widget(i)
-            if widget is None:
-                continue
-            widget.setRequired(required)
