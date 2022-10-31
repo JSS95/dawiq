@@ -143,17 +143,10 @@ def test_IntLineEdit(qtbot):
     assert widget.fieldValue() is None
 
     with qtbot.waitSignals(
-        [widget.fieldValueChanged],
-        check_params_cbs=[lambda val: val is None],
-    ):
-        qtbot.keyPress(widget, "-")
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.fieldValue() is None
-
-    with qtbot.waitSignals(
         [widget.fieldValueChanged, widget.fieldEdited],
         check_params_cbs=[lambda val: val == -1, lambda: True],
     ):
+        qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
     assert widget.dataValue() == -1
