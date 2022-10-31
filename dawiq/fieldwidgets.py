@@ -28,27 +28,29 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     """
     Checkbox for fuzzy boolean value.
 
-    :meth:`dataValue` returns the current value. When the check state is changed
-    by user, :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue`
-    changes the check state of the checkbox.
+    Check state of the box represents the field value. If the box is checked, the
+    value is True. If unchecked, the value is False. ``Qt.PartiallyChecked``
+    represents ``None``.
 
-    If the box is checked, the data value is True. If unchecked, the value is
-    False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
-
-    Because of the nature of check box, it is impossible to define empty state of
-    the widget. :meth:`dataValue` is always either True, False or None.
-
-    If Tristate is disabled, :meth:`setDataValue` treats :obj:`None` as False.
+    Setting the field value changes the check state. Because of the nature of
+    check box, it is impossible to define empty state of the widget which means
+    that ``None`` always represent a valid value. If tristate is enabled,
+    setting ``None`` sets the state as ``Qt.PartiallyChecked``. If tristate is
+    disabled, ``None`` is treated as ``False`` and unchecks the box.
 
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    dataValueChanged = QtCore.Signal(object)  # wil be deleted
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
         self._block_dataValueChanged = False
 
         self.stateChanged.connect(self.emitDataValueChanged)
+        self.stateChanged.connect(self._onStateChange)
+        self.clicked.connect(self.fieldEdited)
 
     def fieldName(self) -> str:
         return self.text()
@@ -57,7 +59,7 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         self.setText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> Optional[bool]:
+    def fieldValue(self) -> Optional[bool]:
         checkstate = self.checkState()
         if checkstate == QtCore.Qt.CheckState.Checked:
             state = True
@@ -67,7 +69,38 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         return state
 
-    def setDataValue(self, value: Optional[bool]):
+    def setFieldValue(self, value: Optional[bool]):
+        if value is None and not self.isTristate():
+            value = False
+        if value is True:
+            state = QtCore.Qt.CheckState.Checked
+        elif value is False:
+            state = QtCore.Qt.CheckState.Unchecked
+        elif value is None:
+            state = QtCore.Qt.CheckState.PartiallyChecked
+        else:
+            raise TypeError(
+                f"BoolCheckBox data must be True, False or None, not {type(value)}"
+            )
+        self.setCheckState(state)
+
+    def _onStateChange(self, checkstate: Union[int, QtCore.Qt.CheckState]):
+        checkstate = QtCore.Qt.CheckState(checkstate)
+        if checkstate == QtCore.Qt.CheckState.Checked:
+            state = True
+        elif checkstate == QtCore.Qt.CheckState.Unchecked:
+            state = False
+        else:
+            state = None
+        self.fieldValueChanged.emit(state)
+
+    def setRequired(self, required: bool):
+        # Check box is always occupied
+        pass
+
+    dataValue = fieldValue  # wil be deleted
+
+    def setDataValue(self, value: Optional[bool]):  # wil be deleted
         if value is None and not self.isTristate():
             value = False
 
@@ -87,6 +120,7 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         self._block_dataValueChanged = False
 
     def emitDataValueChanged(self, checkstate: Union[int, QtCore.Qt.CheckState]):
+        # wil be deleted
         if self._block_dataValueChanged:
             return
 
@@ -98,10 +132,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         else:
             state = None
         self.dataValueChanged.emit(state)
-
-    def setRequired(self, required: bool):
-        # Check box is always occupied
-        pass
 
 
 class EmptyIntValidator(QtGui.QIntValidator):

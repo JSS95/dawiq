@@ -14,57 +14,67 @@ from dawiq.qt_compat import QtCore, QtWidgets
 
 def test_BoolCheckBox(qtbot):
     widget = BoolCheckBox()
-    widget.setTristate(True)
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(True)
-    assert widget.dataValue() is True
+    # test value change by setFieldValue
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is True,
+    ):
+        widget.setFieldValue(True)
+    assert widget.fieldValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(False)
-    assert widget.dataValue() is False
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.setFieldValue(False)
+    assert widget.fieldValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
-
-    widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test None
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
-    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
-    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     # test value change by clicking
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is None,
-    ):
-        widget.click()
-    assert widget.dataValue() is None
-    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is True,
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val is True, lambda: True],
     ):
         widget.click()
-    assert widget.dataValue() is True
+    assert widget.fieldValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is False,
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val is False, lambda: True],
     ):
         widget.click()
-    assert widget.dataValue() is False
+    assert widget.fieldValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
+
+def test_BoolCheckBox_tristate(qtbot):
+    widget = BoolCheckBox()
+    widget.setCheckState(QtCore.Qt.CheckState.Checked)
+
+    widget.setTristate(False)
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is False
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
+    widget.setTristate(True)
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is None,
+    ):
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is None
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
 
 def test_BoolCheckBox_setRequired(qtbot):
