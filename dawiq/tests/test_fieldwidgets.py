@@ -36,7 +36,6 @@ def test_BoolCheckBox(qtbot):
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     # test value change by clicking
-
     with qtbot.waitSignals(
         [widget.fieldValueChanged, widget.fieldEdited],
         check_params_cbs=[lambda val: val is True, lambda: True],
@@ -114,35 +113,46 @@ def test_EmptyIntValidator(qtbot):
 def test_IntLineEdit(qtbot):
     widget = IntLineEdit()
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
     assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(1)
-    assert widget.dataValue() == 1
+    # test value change by setFieldValue
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == 1,
+    ):
+        widget.setFieldValue(1)
+    assert widget.fieldValue() == 1
     assert widget.text() == "1"
 
-    widget.clear()
-
-    # test value change by keyboard
     with qtbot.waitSignal(
-        widget.dataValueChanged,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is None
+    assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
+    # test value change by keyboard
+    widget.clear()
+    with qtbot.waitSignals(
+        [widget.fieldEdited],
+        check_params_cbs=[lambda: True],
+    ):
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.fieldValue() is None
+
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged],
+        check_params_cbs=[lambda val: val is None],
+    ):
         qtbot.keyPress(widget, "-")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == -1,
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == -1, lambda: True],
     ):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)

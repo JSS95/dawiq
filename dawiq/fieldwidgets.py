@@ -40,7 +40,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     """
 
-    dataValueChanged = QtCore.Signal(object)  # wil be deleted
     fieldValueChanged = QtCore.Signal(object)
     fieldEdited = QtCore.Signal()
 
@@ -51,13 +50,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         self.stateChanged.connect(self.emitDataValueChanged)
         self.stateChanged.connect(self._onStateChange)
         self.clicked.connect(self.fieldEdited)
-
-    def fieldName(self) -> str:
-        return self.text()
-
-    def setFieldName(self, name: str):
-        self.setText(name)
-        self.setToolTip(name)
 
     def fieldValue(self) -> Optional[bool]:
         checkstate = self.checkState()
@@ -94,13 +86,23 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         self.fieldValueChanged.emit(state)
 
+    def fieldName(self) -> str:
+        return self.text()
+
+    def setFieldName(self, name: str):
+        self.setText(name)
+        self.setToolTip(name)
+
     def setRequired(self, required: bool):
         # Check box is always occupied
         pass
 
-    dataValue = fieldValue  # wil be deleted
+    # below will be deleted
 
-    def setDataValue(self, value: Optional[bool]):  # wil be deleted
+    dataValue = fieldValue
+    dataValueChanged = QtCore.Signal(object)
+
+    def setDataValue(self, value: Optional[bool]):
         if value is None and not self.isTristate():
             value = False
 
@@ -148,19 +150,15 @@ class IntLineEdit(QtWidgets.QLineEdit):
     """
     Line edit for integer value.
 
-    :meth:`dataValue` returns the current value. When editing is finished,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    text on the line edit.
-
-    If the text is not empty, the data value is the integer that the string is
-    converted to. If the line edit is empty, :obj:`None` is the data value.
-
-    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
-    edit is cleared.
+    If the text is not empty, the field value is the integer that the text is
+    converted to. If the line edit is empty or the text cannot be converted to
+    integer, ``None`` is the field value. Setting ``None`` as field value clears
+    the line edit.
 
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -168,17 +166,11 @@ class IntLineEdit(QtWidgets.QLineEdit):
         self.setValidator(EmptyIntValidator(self))
 
         self.editingFinished.connect(self.emitDataValueChanged)
+        self.textChanged.connect(self._onTextChange)
+        self.editingFinished.connect(self.fieldEdited)
 
-    def fieldName(self) -> str:
-        return self.placeholderText()
-
-    def setFieldName(self, name: str):
-        self.setPlaceholderText(name)
-        self.setToolTip(name)
-
-    def dataValue(self) -> Optional[int]:
+    def fieldValue(self) -> Optional[int]:
         text = self.text()
-
         if not text:
             val: Optional[int] = None
         else:
@@ -187,6 +179,47 @@ class IntLineEdit(QtWidgets.QLineEdit):
             except ValueError:
                 val = None
         return val
+
+    def setFieldValue(self, value: Optional[int]):
+        if value is None:
+            txt = ""
+        elif isinstance(value, int):
+            txt = str(int(value))
+        else:
+            raise TypeError(f"IntLineEdit data must be int, not {type(value)}")
+        self.setText(txt)
+
+    def _onTextChange(self, text: str):
+        if not text:
+            val: Optional[int] = None
+        else:
+            try:
+                val = int(text)
+            except ValueError:
+                val = None
+        self.fieldValueChanged.emit(val)
+
+    def fieldName(self) -> str:
+        return self.placeholderText()
+
+    def setFieldName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
+
+    def setRequired(self, required: bool):
+        if required and self.dataValue() is None:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldData") != requires:
+            self.setProperty("requiresFieldData", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
+
+    # below will be deleted
+
+    dataValue = fieldValue
+    dataValueChanged = QtCore.Signal(object)
 
     def setDataValue(self, val: Optional[int]):
         if val is None:
@@ -200,16 +233,6 @@ class IntLineEdit(QtWidgets.QLineEdit):
     def emitDataValueChanged(self):
         val = self.dataValue()
         self.dataValueChanged.emit(val)
-
-    def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
-            requires = True
-        else:
-            requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
-            self.style().unpolish(self)
-            self.style().polish(self)
 
 
 class EmptyFloatValidator(QtGui.QDoubleValidator):
