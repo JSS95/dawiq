@@ -323,17 +323,12 @@ class StrLineEdit(QtWidgets.QLineEdit):
     """
     Line edit for string value.
 
-    :meth:`dataValue` returns the current value. When editing is finished,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    text on the line edit.
-
-    Data value is the text of line edit. If the line edit is empty, data value is
-    empty string. Thus, the data value is never :obj:`None`.
-
-    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
-    edit is cleared.
+    If the line edit is empty, field data is empty string and never ``None``.
 
     """
+
+    fieldValueChanged = QtCore.Signal(str)
+    fieldEdited = QtCore.Signal()
 
     dataValueChanged = QtCore.Signal(str)
 
@@ -341,6 +336,23 @@ class StrLineEdit(QtWidgets.QLineEdit):
         super().__init__(parent)
 
         self.editingFinished.connect(self.emitDataValueChanged)
+        self.textChanged.connect(self._onTextChange)
+        self.editingFinished.connect(self.fieldEdited)
+
+    def fieldValue(self) -> str:
+        return self.text()
+
+    def setFieldValue(self, value: Optional[str]):
+        if value is None:
+            txt = ""
+        elif isinstance(value, str):
+            txt = str(value)  # type: ignore[assignment]
+        else:
+            raise TypeError(f"StrLineEdit data must be str, not {type(value)}")
+        self.setText(txt)
+
+    def _onTextChange(self, text: str):
+        self.fieldValueChanged.emit(text)
 
     def fieldName(self) -> str:
         return self.placeholderText()
@@ -348,22 +360,6 @@ class StrLineEdit(QtWidgets.QLineEdit):
     def setFieldName(self, name: str):
         self.setPlaceholderText(name)
         self.setToolTip(name)
-
-    def dataValue(self) -> str:
-        return self.text()
-
-    def setDataValue(self, val: Optional[str]):
-        if val is None:
-            txt = ""
-        elif isinstance(val, str):
-            txt = str(val)  # type: ignore[assignment]
-        else:
-            raise TypeError(f"StrLineEdit data must be str, not {type(val)}")
-        self.setText(txt)
-
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
         if required and self.dataValue() is None:
@@ -374,6 +370,17 @@ class StrLineEdit(QtWidgets.QLineEdit):
             self.setProperty("requiresFieldData", requires)
             self.style().unpolish(self)
             self.style().polish(self)
+
+    # below will be deleted
+
+    dataValue = fieldValue
+    dataValueChanged = QtCore.Signal(str)
+
+    setDataValue = setFieldValue
+
+    def emitDataValueChanged(self):
+        val = self.dataValue()
+        self.dataValueChanged.emit(val)
 
 
 T = TypeVar("T", bound="EnumComboBox")

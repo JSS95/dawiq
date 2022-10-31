@@ -254,35 +254,46 @@ def test_FloatLineEdit_setRequired(qtbot):
 def test_StrLineEdit(qtbot):
     widget = StrLineEdit()
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() == ""
+    assert widget.fieldValue() == ""
     assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue("1")
-    assert widget.dataValue() == "1"
-    assert widget.text() == "1"
+    # test value change by setDataValue
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue("x")
-    assert widget.dataValue() == "x"
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == "1",
+    ):
+        widget.setFieldValue("1")
+    assert widget.fieldValue() == "1"
+    assert widget.text() == "1"
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == "x",
+    ):
+        widget.setFieldValue("x")
+    assert widget.fieldValue() == "x"
     assert widget.text() == "x"
 
-    widget.clear()
-
-    # test value change by keyboard
     with qtbot.waitSignal(
-        widget.dataValueChanged,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == "",
     ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == ""
+        widget.setFieldValue(None)
+    assert widget.fieldValue() == ""
+    assert widget.text() == ""
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == "x",
+    # test value change by keyboard
+    widget.clear()
+    with qtbot.waitSignals(
+        [widget.fieldEdited],
+        check_params_cbs=[lambda: True],
+    ):
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.fieldValue() == ""
+
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == "x", lambda: True],
     ):
         qtbot.keyPress(widget, "x")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
