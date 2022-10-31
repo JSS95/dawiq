@@ -486,11 +486,11 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     Group box for tuple with fixed length.
 
     This is the group box which contains field widgets as subwidgets. Field value
-    is the tuple of subwidets values.
+    is the tuple of subwidgets values.
 
     """
 
-    fieldValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(tuple)
     fieldEdited = QtCore.Signal()
 
     def __init__(
