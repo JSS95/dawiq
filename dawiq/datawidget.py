@@ -35,12 +35,11 @@ class DataWidget(QtWidgets.QGroupBox):
     This is the group box which contains field widgets as subwidgets.
     :meth:`dataValue` returns the dictionary of subwidgets values and
     :meth:`setDataValue` sets the subwidget values. Whenever the data value
-    changes, :attr:`dataValueChanged` signal is emitted.
+    changes, :attr:`dataValueChanged` signal is emitted. When any field is
+    edited by user, :attr:`dataEdited` signal is emitted.
 
-    When the data value is edited by user, :attr:`dataEdited` signal is emitted.
-
-    This widget is used to represent the field whose type is dataclass in nested
-    dataclass, therefore it follows :class:`FieldWidgetProtocol`.
+    This widget is also used to represent the nested dataclass field, therefore
+    it follows :class:`FieldWidgetProtocol`.
 
     Notes
     =====
@@ -51,11 +50,9 @@ class DataWidget(QtWidgets.QGroupBox):
 
     """
 
-    # TODO: make fieldValueChanged alias of dataValueChanged
-
     dataValueChanged = QtCore.Signal(dict)
-    fieldValueChanged = QtCore.Signal(dict)
     dataEdited = QtCore.Signal()
+    fieldValueChanged = dataValueChanged
     fieldEdited = dataEdited
 
     def __init__(
@@ -65,7 +62,6 @@ class DataWidget(QtWidgets.QGroupBox):
     ):
         super().__init__(parent)
         self._orientation = orientation
-        self._block_dataValueChanged = False
 
         if orientation == QtCore.Qt.Orientation.Vertical:
             layout = QtWidgets.QVBoxLayout()
@@ -108,7 +104,6 @@ class DataWidget(QtWidgets.QGroupBox):
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         widget.fieldValueChanged.connect(self._onSubfieldValueChange)
         widget.fieldEdited.connect(self.dataEdited)
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().insertWidget(index, widget, stretch, alignment)
 
     def addWidget(
@@ -126,7 +121,6 @@ class DataWidget(QtWidgets.QGroupBox):
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
         widget.fieldValueChanged.connect(self._onSubfieldValueChange)
         widget.fieldEdited.connect(self.dataEdited)
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
@@ -138,7 +132,6 @@ class DataWidget(QtWidgets.QGroupBox):
             if w == widget:
                 widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
                 widget.fieldEdited.disconnect(self.dataEdited)
-                widget.dataValueChanged.disconnect(self.emitDataValueChanged)
                 break
         self.layout().removeWidget(widget)
 
@@ -157,34 +150,29 @@ class DataWidget(QtWidgets.QGroupBox):
         if data is None:
             data = {}
 
-        self._block_dataValueChanged = True
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             val = data.get(w.fieldName(), None)  # type: ignore[union-attr]
+            w.fieldValueChanged.disconnect(self._onSubfieldValueChange)
             try:
-                w.setDataValue(val)
+                w.setFieldValue(val)
             except TypeError:
-                w.setDataValue(None)
-        self._block_dataValueChanged = False
+                w.setFieldValue(None)
+            w.fieldValueChanged.connect(self._onSubfieldValueChange)
+        self.dataValueChanged.emit(data)
 
     setFieldValue = setDataValue
 
     def _onSubfieldValueChange(self, value: Any):
-        ...  # to be implemented
+        self.dataValueChanged.emit(self.dataValue())
 
     def fieldName(self) -> str:
         return self.title()
 
     def setFieldName(self, name: str):
         self.setTitle(name)
-
-    def emitDataValueChanged(self):
-        if self._block_dataValueChanged:
-            return
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
 
     def setRequired(self, required: bool):
         """Recursively set *required* to all subwidgets."""

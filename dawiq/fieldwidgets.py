@@ -45,9 +45,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._block_dataValueChanged = False
-
-        self.stateChanged.connect(self.emitDataValueChanged)
         self.stateChanged.connect(self._onStateChange)
         self.clicked.connect(self.fieldEdited)
 
@@ -97,44 +94,6 @@ class BoolCheckBox(QtWidgets.QCheckBox):
         # Check box is always occupied
         pass
 
-    # below will be deleted
-
-    dataValue = fieldValue
-    dataValueChanged = QtCore.Signal(object)
-
-    def setDataValue(self, value: Optional[bool]):
-        if value is None and not self.isTristate():
-            value = False
-
-        if value is True:
-            state = QtCore.Qt.CheckState.Checked
-        elif value is False:
-            state = QtCore.Qt.CheckState.Unchecked
-        elif value is None:
-            state = QtCore.Qt.CheckState.PartiallyChecked
-        else:
-            raise TypeError(
-                f"BoolCheckBox data must be True, False or None, not {type(value)}"
-            )
-
-        self._block_dataValueChanged = True
-        self.setCheckState(state)
-        self._block_dataValueChanged = False
-
-    def emitDataValueChanged(self, checkstate: Union[int, QtCore.Qt.CheckState]):
-        # wil be deleted
-        if self._block_dataValueChanged:
-            return
-
-        checkstate = QtCore.Qt.CheckState(checkstate)
-        if checkstate == QtCore.Qt.CheckState.Checked:
-            state = True
-        elif checkstate == QtCore.Qt.CheckState.Unchecked:
-            state = False
-        else:
-            state = None
-        self.dataValueChanged.emit(state)
-
 
 class EmptyIntValidator(QtGui.QIntValidator):
     """Validator which accpets integer and empty string"""
@@ -165,7 +124,6 @@ class IntLineEdit(QtWidgets.QLineEdit):
 
         self.setValidator(EmptyIntValidator(self))
 
-        self.editingFinished.connect(self.emitDataValueChanged)
         self.textChanged.connect(self._onTextChange)
         self.editingFinished.connect(self.fieldEdited)
 
@@ -207,7 +165,7 @@ class IntLineEdit(QtWidgets.QLineEdit):
         self.setToolTip(name)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
@@ -215,17 +173,6 @@ class IntLineEdit(QtWidgets.QLineEdit):
             self.setProperty("requiresFieldData", requires)
             self.style().unpolish(self)
             self.style().polish(self)
-
-    # below will be deleted
-
-    dataValue = fieldValue
-    dataValueChanged = QtCore.Signal(object)
-
-    setDataValue = setFieldValue
-
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
 
 
 class EmptyFloatValidator(QtGui.QDoubleValidator):
@@ -256,7 +203,6 @@ class FloatLineEdit(QtWidgets.QLineEdit):
 
         self.setValidator(EmptyFloatValidator(self))
 
-        self.editingFinished.connect(self.emitDataValueChanged)
         self.textChanged.connect(self._onTextChange)
         self.editingFinished.connect(self.fieldEdited)
 
@@ -298,7 +244,7 @@ class FloatLineEdit(QtWidgets.QLineEdit):
         self.setToolTip(name)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
@@ -306,17 +252,6 @@ class FloatLineEdit(QtWidgets.QLineEdit):
             self.setProperty("requiresFieldData", requires)
             self.style().unpolish(self)
             self.style().polish(self)
-
-    # below will be deleted
-
-    dataValue = fieldValue
-    dataValueChanged = QtCore.Signal(object)
-
-    setDataValue = setFieldValue
-
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
 
 
 class StrLineEdit(QtWidgets.QLineEdit):
@@ -330,12 +265,8 @@ class StrLineEdit(QtWidgets.QLineEdit):
     fieldValueChanged = QtCore.Signal(str)
     fieldEdited = QtCore.Signal()
 
-    dataValueChanged = QtCore.Signal(str)
-
     def __init__(self, parent=None):
         super().__init__(parent)
-
-        self.editingFinished.connect(self.emitDataValueChanged)
         self.textChanged.connect(self._onTextChange)
         self.editingFinished.connect(self.fieldEdited)
 
@@ -362,7 +293,7 @@ class StrLineEdit(QtWidgets.QLineEdit):
         self.setToolTip(name)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
@@ -370,17 +301,6 @@ class StrLineEdit(QtWidgets.QLineEdit):
             self.setProperty("requiresFieldData", requires)
             self.style().unpolish(self)
             self.style().polish(self)
-
-    # below will be deleted
-
-    dataValue = fieldValue
-    dataValueChanged = QtCore.Signal(str)
-
-    setDataValue = setFieldValue
-
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
 
 
 T = TypeVar("T", bound="EnumComboBox")
@@ -411,9 +331,6 @@ class EnumComboBox(QtWidgets.QComboBox):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._block_dataValueChanged = False
-
-        self.currentIndexChanged.connect(self.emitDataValueChanged)
         self.currentIndexChanged.connect(self._onCurrentIndexChange)
         self.activated.connect(self.fieldEdited)
 
@@ -446,7 +363,7 @@ class EnumComboBox(QtWidgets.QComboBox):
         self.setToolTip(name)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
@@ -454,28 +371,6 @@ class EnumComboBox(QtWidgets.QComboBox):
             self.setProperty("requiresFieldData", requires)
             self.style().unpolish(self)
             self.style().polish(self)
-
-    # below will be deleted
-
-    dataValue = fieldValue
-    dataValueChanged = QtCore.Signal(object)
-
-    def setDataValue(self, value: Optional[Enum]):
-        if value is None:
-            index = -1
-        elif isinstance(value, Enum):
-            index = self.findData(value)
-        else:
-            raise TypeError(f"EnumComboBox data must be Enum, not {type(value)}")
-        self._block_dataValueChanged = True
-        self.setCurrentIndex(index)
-        self._block_dataValueChanged = False
-
-    def emitDataValueChanged(self):
-        if self._block_dataValueChanged:
-            return
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
 
 
 V = TypeVar("V", bound="TupleGroupBox")
@@ -500,7 +395,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     ):
         super().__init__(parent)
         self._orientation = orientation
-        self._block_dataValueChanged = False
 
         if orientation == QtCore.Qt.Orientation.Vertical:
             layout = QtWidgets.QVBoxLayout()
@@ -541,7 +435,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
                 break
         widget.fieldValueChanged.connect(self._onSubfieldValueChange)
         widget.fieldEdited.connect(self.fieldEdited)
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().insertWidget(index, widget, stretch, alignment)
 
     def addWidget(
@@ -557,7 +450,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
                 break
         widget.fieldValueChanged.connect(self._onSubfieldValueChange)
         widget.fieldEdited.connect(self.fieldEdited)
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
@@ -569,7 +461,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             if w == widget:
                 widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
                 widget.fieldEdited.disconnect(self.fieldEdited)
-                widget.dataValueChanged.disconnect(self.emitDataValueChanged)
                 break
         self.layout().removeWidget(widget)
 
@@ -595,7 +486,7 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             if widget is None:
                 break
             widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
-            widget.setDataValue(value[i])
+            widget.setFieldValue(value[i])
             widget.fieldValueChanged.connect(self._onSubfieldValueChange)
         self.fieldValueChanged.emit(value)
 
@@ -616,32 +507,3 @@ class TupleGroupBox(QtWidgets.QGroupBox):
             if widget is None:
                 continue
             widget.setRequired(required)
-
-    # below will be deleted
-
-    dataValue = fieldValue
-    dataValueChanged = QtCore.Signal(object)
-
-    def setDataValue(self, value: Optional[tuple]):
-        self._block_dataValueChanged = True
-        if value is None:
-            for i in range(self.count()):
-                widget = self.widget(i)
-                if widget is None:
-                    break
-                widget.setDataValue(None)
-        elif isinstance(value, tuple):
-            for i in range(self.count()):
-                widget = self.widget(i)
-                if widget is None:
-                    break
-                widget.setDataValue(value[i])  # type: ignore[index]
-        else:
-            raise TypeError(f"TupleGroupBox data must be tuple, not {type(value)}")
-        self._block_dataValueChanged = False
-
-    def emitDataValueChanged(self):
-        if self._block_dataValueChanged:
-            return
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
