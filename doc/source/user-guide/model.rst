@@ -269,7 +269,6 @@ In this example, we define the data converters for ``CustomClass``, which we use
     @dataclass
     class DataClass:
         custom: CustomClass = field(metadata=dict(
-            default=CustomClass(1, 2),
             Qt_typehint=Tuple[int, int],
             toQt_converter=lambda obj: (obj.x, obj.y),
             fromQt_converter=lambda args: CustomClass(*args),
@@ -279,3 +278,5 @@ In this example, we define the data converters for ``CustomClass``, which we use
    :align: center
 
    Widget with model compatible to custom type
+
+Tuple from the field widget is converted to ``CustomClass`` before being stored in the model, and ``CustomClass`` from the model is converted to the tuple and displayed on the widget.
