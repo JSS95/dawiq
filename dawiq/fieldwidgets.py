@@ -8,7 +8,7 @@ dataclass. Widgets are compatible to :class:`dawiq.typing.FieldWidgetProtocol`.
 
 from .qt_compat import QtCore, QtWidgets, QtGui
 from enum import Enum
-from typing import Optional, Union, Tuple, TypeVar, Type
+from typing import Optional, Union, Tuple, TypeVar, Type, Any
 from .typing import FieldWidgetProtocol
 
 
@@ -28,36 +28,24 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     """
     Checkbox for fuzzy boolean value.
 
-    :meth:`dataValue` returns the current value. When the check state is changed
-    by user, :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue`
-    changes the check state of the checkbox.
+    Check state of the box represents the field value. If the box is checked, the
+    value is True. If unchecked, the value is False.
 
-    If the box is checked, the data value is True. If unchecked, the value is
-    False. Else, e.g. ``Qt.PartiallyChecked``, the value is None.
-
-    Because of the nature of check box, it is impossible to define empty state of
-    the widget. :meth:`dataValue` is always either True, False or None.
-
-    If Tristate is disabled, :meth:`setDataValue` treats :obj:`None` as False.
+    If tristate is enabled, setting ``None`` as the field value sets the state as
+    ``Qt.PartiallyChecked``. If tristate is disabled, ``None`` is treated as
+    ``False`` and unchecks the box.
 
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._block_dataValueChanged = False
+        self.stateChanged.connect(self._onStateChange)
+        self.clicked.connect(self.fieldEdited)
 
-        self.stateChanged.connect(self.emitDataValueChanged)
-
-    def fieldName(self) -> str:
-        return self.text()
-
-    def setFieldName(self, name: str):
-        self.setText(name)
-        self.setToolTip(name)
-
-    def dataValue(self) -> Optional[bool]:
+    def fieldValue(self) -> Optional[bool]:
         checkstate = self.checkState()
         if checkstate == QtCore.Qt.CheckState.Checked:
             state = True
@@ -67,10 +55,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = None
         return state
 
-    def setDataValue(self, value: Optional[bool]):
+    def setFieldValue(self, value: Optional[bool]):
         if value is None and not self.isTristate():
             value = False
-
         if value is True:
             state = QtCore.Qt.CheckState.Checked
         elif value is False:
@@ -81,15 +68,9 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             raise TypeError(
                 f"BoolCheckBox data must be True, False or None, not {type(value)}"
             )
-
-        self._block_dataValueChanged = True
         self.setCheckState(state)
-        self._block_dataValueChanged = False
 
-    def emitDataValueChanged(self, checkstate: Union[int, QtCore.Qt.CheckState]):
-        if self._block_dataValueChanged:
-            return
-
+    def _onStateChange(self, checkstate: Union[int, QtCore.Qt.CheckState]):
         checkstate = QtCore.Qt.CheckState(checkstate)
         if checkstate == QtCore.Qt.CheckState.Checked:
             state = True
@@ -97,7 +78,14 @@ class BoolCheckBox(QtWidgets.QCheckBox):
             state = False
         else:
             state = None
-        self.dataValueChanged.emit(state)
+        self.fieldValueChanged.emit(state)
+
+    def fieldName(self) -> str:
+        return self.text()
+
+    def setFieldName(self, name: str):
+        self.setText(name)
+        self.setToolTip(name)
 
     def setRequired(self, required: bool):
         # Check box is always occupied
@@ -118,37 +106,26 @@ class IntLineEdit(QtWidgets.QLineEdit):
     """
     Line edit for integer value.
 
-    :meth:`dataValue` returns the current value. When editing is finished,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    text on the line edit.
-
-    If the text is not empty, the data value is the integer that the string is
-    converted to. If the line edit is empty, :obj:`None` is the data value.
-
-    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
-    edit is cleared.
+    If the text is not empty, the field value is the integer that the text is
+    converted to. If the line edit is empty or the text cannot be converted to
+    integer, ``None`` is the field value. Setting ``None`` as field value clears
+    the line edit.
 
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.setValidator(EmptyIntValidator(self))
 
-        self.editingFinished.connect(self.emitDataValueChanged)
+        self.textChanged.connect(self._onTextChange)
+        self.editingFinished.connect(self.fieldEdited)
 
-    def fieldName(self) -> str:
-        return self.placeholderText()
-
-    def setFieldName(self, name: str):
-        self.setPlaceholderText(name)
-        self.setToolTip(name)
-
-    def dataValue(self) -> Optional[int]:
+    def fieldValue(self) -> Optional[int]:
         text = self.text()
-
         if not text:
             val: Optional[int] = None
         else:
@@ -158,26 +135,39 @@ class IntLineEdit(QtWidgets.QLineEdit):
                 val = None
         return val
 
-    def setDataValue(self, val: Optional[int]):
-        if val is None:
+    def setFieldValue(self, value: Optional[int]):
+        if value is None:
             txt = ""
-        elif isinstance(val, int):
-            txt = str(int(val))
+        elif isinstance(value, int):
+            txt = str(int(value))
         else:
-            raise TypeError(f"IntLineEdit data must be int, not {type(val)}")
+            raise TypeError(f"IntLineEdit value must be int, not {type(value)}")
         self.setText(txt)
 
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
+    def _onTextChange(self, text: str):
+        if not text:
+            val: Optional[int] = None
+        else:
+            try:
+                val = int(text)
+            except ValueError:
+                val = None
+        self.fieldValueChanged.emit(val)
+
+    def fieldName(self) -> str:
+        return self.placeholderText()
+
+    def setFieldName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
 
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
+        if self.property("requiresFieldValue") != requires:
+            self.setProperty("requiresFieldValue", requires)
             self.style().unpolish(self)
             self.style().polish(self)
 
@@ -196,37 +186,25 @@ class FloatLineEdit(QtWidgets.QLineEdit):
     """
     Line edit for float value.
 
-    :meth:`dataValue` returns the current value. When editing is finished,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    text on the line edit.
-
-    If the text is not empty, the data value is the float that the string is
-    converted to. If the line edit is empty, :obj:`None` is the data value.
-
-    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
-    edit is cleared.
-
+    If the text is not empty, the field value is the float that the text is
+    converted to. If the line edit is empty or the text cannot be converted to
+    float, ``None`` is the field value. Setting ``None`` as field value clears
+    the line edit.
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.setValidator(EmptyFloatValidator(self))
 
-        self.editingFinished.connect(self.emitDataValueChanged)
+        self.textChanged.connect(self._onTextChange)
+        self.editingFinished.connect(self.fieldEdited)
 
-    def fieldName(self) -> str:
-        return self.placeholderText()
-
-    def setFieldName(self, name: str):
-        self.setPlaceholderText(name)
-        self.setToolTip(name)
-
-    def dataValue(self) -> Optional[float]:
+    def fieldValue(self) -> Optional[float]:
         text = self.text()
-
         if not text:
             val: Optional[float] = None
         else:
@@ -236,52 +214,24 @@ class FloatLineEdit(QtWidgets.QLineEdit):
                 val = None
         return val
 
-    def setDataValue(self, val: Optional[float]):
-        if val is None:
+    def setFieldValue(self, value: Optional[float]):
+        if value is None:
             txt = ""
-        elif isinstance(val, float):
-            txt = str(float(val))
+        elif isinstance(value, float):
+            txt = str(float(value))
         else:
-            raise TypeError(f"FloatLineEdit data must be float, not {type(val)}")
+            raise TypeError(f"FloatLineEdit value must be float, not {type(value)}")
         self.setText(txt)
 
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
-
-    def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
-            requires = True
+    def _onTextChange(self, text: str):
+        if not text:
+            val: Optional[float] = None
         else:
-            requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
-            self.style().unpolish(self)
-            self.style().polish(self)
-
-
-class StrLineEdit(QtWidgets.QLineEdit):
-    """
-    Line edit for string value.
-
-    :meth:`dataValue` returns the current value. When editing is finished,
-    :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue` changes the
-    text on the line edit.
-
-    Data value is the text of line edit. If the line edit is empty, data value is
-    empty string. Thus, the data value is never :obj:`None`.
-
-    :meth:`setDataValue` sets the line edit text. If :obj:`None` is passed, line
-    edit is cleared.
-
-    """
-
-    dataValueChanged = QtCore.Signal(str)
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-        self.editingFinished.connect(self.emitDataValueChanged)
+            try:
+                val = float(text)
+            except ValueError:
+                val = None
+        self.fieldValueChanged.emit(val)
 
     def fieldName(self) -> str:
         return self.placeholderText()
@@ -290,29 +240,63 @@ class StrLineEdit(QtWidgets.QLineEdit):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> str:
-        return self.text()
-
-    def setDataValue(self, val: Optional[str]):
-        if val is None:
-            txt = ""
-        elif isinstance(val, str):
-            txt = str(val)  # type: ignore[assignment]
-        else:
-            raise TypeError(f"StrLineEdit data must be str, not {type(val)}")
-        self.setText(txt)
-
-    def emitDataValueChanged(self):
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
-
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
+        if self.property("requiresFieldValue") != requires:
+            self.setProperty("requiresFieldValue", requires)
+            self.style().unpolish(self)
+            self.style().polish(self)
+
+
+class StrLineEdit(QtWidgets.QLineEdit):
+    """
+    Line edit for string value.
+
+    If the line edit is empty, field data is empty string. Setting ``None`` as
+    the field value clears the widget.
+
+    """
+
+    fieldValueChanged = QtCore.Signal(str)
+    fieldEdited = QtCore.Signal()
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.textChanged.connect(self._onTextChange)
+        self.editingFinished.connect(self.fieldEdited)
+
+    def fieldValue(self) -> str:
+        return self.text()
+
+    def setFieldValue(self, value: Optional[str]):
+        if value is None:
+            txt = ""
+        elif isinstance(value, str):
+            txt = str(value)  # type: ignore[assignment]
+        else:
+            raise TypeError(f"StrLineEdit data must be str, not {type(value)}")
+        self.setText(txt)
+
+    def _onTextChange(self, text: str):
+        self.fieldValueChanged.emit(text)
+
+    def fieldName(self) -> str:
+        return self.placeholderText()
+
+    def setFieldName(self, name: str):
+        self.setPlaceholderText(name)
+        self.setToolTip(name)
+
+    def setRequired(self, required: bool):
+        if required and self.fieldValue() is None:
+            requires = True
+        else:
+            requires = False
+        if self.property("requiresFieldValue") != requires:
+            self.setProperty("requiresFieldValue", requires)
             self.style().unpolish(self)
             self.style().polish(self)
 
@@ -322,24 +306,18 @@ T = TypeVar("T", bound="EnumComboBox")
 
 class EnumComboBox(QtWidgets.QComboBox):
     """
-    Combo box for enum type.
+    Combo box for :class:`enum.Enum` type.
 
     Standard way to construct this widget is by :meth:`fromEnum` class method.
     N-th item contains N-th member of the Enum as its data.
 
-    :meth:`dataValue` returns the current member. When current index is changed
-    by user, :attr:`dataValueChanged` signal is emitted. :meth:`setDataValue`
-    changes the current index.
-
-    Data value is the Enum member. If the current index is empty, data value is
-    :obj:`None`
-
-    :meth:`setDataValue` sets the current index. If :obj:`None` is passed,
-    index is set to -1.
+    Enum instance is stored in item data. Field value is the data of currently
+    activated item. If the current index is -1, field value is ``None``.
 
     """
 
-    dataValueChanged = QtCore.Signal(object)
+    fieldValueChanged = QtCore.Signal(object)
+    fieldEdited = QtCore.Signal()
 
     @classmethod
     def fromEnum(cls: Type[T], enum: Type[Enum]) -> T:
@@ -351,9 +329,29 @@ class EnumComboBox(QtWidgets.QComboBox):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._block_dataValueChanged = False
+        self.currentIndexChanged.connect(self._onCurrentIndexChange)
+        self.activated.connect(self.fieldEdited)
 
-        self.currentIndexChanged.connect(self.emitDataValueChanged)
+    def fieldValue(self) -> Optional[Enum]:
+        index = self.currentIndex()
+        if index == -1:
+            ret = None
+        else:
+            ret = self.itemData(index)
+        return ret
+
+    def setFieldValue(self, value: Optional[Enum]):
+        if value is None:
+            index = -1
+        elif isinstance(value, Enum):
+            index = self.findData(value)
+        else:
+            raise TypeError(f"EnumComboBox data must be Enum, not {type(value)}")
+        self.setCurrentIndex(index)
+
+    def _onCurrentIndexChange(self, index: int):
+        data = self.itemData(index)
+        self.fieldValueChanged.emit(data)
 
     def fieldName(self) -> str:
         return self.placeholderText()
@@ -362,38 +360,13 @@ class EnumComboBox(QtWidgets.QComboBox):
         self.setPlaceholderText(name)
         self.setToolTip(name)
 
-    def dataValue(self) -> Optional[Enum]:
-        index = self.currentIndex()
-        if index == -1:
-            ret = None
-        else:
-            ret = self.itemData(index)
-        return ret
-
-    def setDataValue(self, value: Optional[Enum]):
-        if value is None:
-            index = -1
-        elif isinstance(value, Enum):
-            index = self.findData(value)
-        else:
-            raise TypeError(f"EnumComboBox data must be Enum, not {type(value)}")
-        self._block_dataValueChanged = True
-        self.setCurrentIndex(index)
-        self._block_dataValueChanged = False
-
-    def emitDataValueChanged(self):
-        if self._block_dataValueChanged:
-            return
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
-
     def setRequired(self, required: bool):
-        if required and self.dataValue() is None:
+        if required and self.fieldValue() is None:
             requires = True
         else:
             requires = False
-        if self.property("requiresFieldData") != requires:
-            self.setProperty("requiresFieldData", requires)
+        if self.property("requiresFieldValue") != requires:
+            self.setProperty("requiresFieldValue", requires)
             self.style().unpolish(self)
             self.style().polish(self)
 
@@ -403,23 +376,15 @@ V = TypeVar("V", bound="TupleGroupBox")
 
 class TupleGroupBox(QtWidgets.QGroupBox):
     """
-    Group box for tuple data with fixed length.
+    Group box for tuple with fixed length.
 
-    This is the group box which contains field widgets as subwidgets. Data value
-    is constructed from the data of subwidgets as tuple.
-
-    :meth:`dataValue` returns the current tuple value. When data value of any
-    subwidget is changed by the user, :attr:`dataValueChanged` signal is emitted.
-    :meth:`setDataValue` changes the data of subwidgets.
-
-    Data value is the tuple containing subwidget data, and never :obj:`None`.
-
-    :meth:`setDataValue` sets the subwidget data. If :obj:`None` is passed,
-    it is propagated to all subwidget.
+    This is the group box which contains field widgets as subwidgets. Field value
+    is the tuple of subwidgets values.
 
     """
 
-    dataValueChanged = QtCore.Signal(tuple)
+    fieldValueChanged = QtCore.Signal(tuple)
+    fieldEdited = QtCore.Signal()
 
     def __init__(
         self,
@@ -428,7 +393,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
     ):
         super().__init__(parent)
         self._orientation = orientation
-        self._block_dataValueChanged = False
 
         if orientation == QtCore.Qt.Orientation.Vertical:
             layout = QtWidgets.QVBoxLayout()
@@ -437,13 +401,6 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         else:
             raise TypeError(f"Invalid orientation: {orientation}")
         self.setLayout(layout)
-
-    def fieldName(self) -> str:
-        return self.title()
-
-    def setFieldName(self, name: str):
-        self.setTitle(name)
-        self.setToolTip(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
         """Orientation to stack the subwidgets."""
@@ -469,12 +426,13 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
-        """Insert the widget to layout and connect data value change signal."""
+        """Insert the widget to layout and connect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
+        widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        widget.fieldEdited.connect(self.fieldEdited)
         self.layout().insertWidget(index, widget, stretch, alignment)
 
     def addWidget(
@@ -483,59 +441,62 @@ class TupleGroupBox(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
-        """Add the widget to layout and connect data value change signal."""
+        """Add the widget to layout and connect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
+        widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        widget.fieldEdited.connect(self.fieldEdited)
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
-        """
-        Remove the widget from layout and disconnect data value change signal.
-        """
+        """Remove the widget from layout and disconnect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             if w == widget:
-                widget.dataValueChanged.disconnect(self.emitDataValueChanged)
+                widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
+                widget.fieldEdited.disconnect(self.fieldEdited)
                 break
         self.layout().removeWidget(widget)
 
-    def dataValue(self) -> tuple:
+    def fieldValue(self) -> tuple:
         ret = []
         for i in range(self.count()):
             widget = self.widget(i)
             if widget is None:
                 break
-            ret.append(widget.dataValue())
+            ret.append(widget.fieldValue())
         return tuple(ret)
 
-    def setDataValue(self, value: Optional[tuple]):
-        self._block_dataValueChanged = True
+    def setFieldValue(self, value: Optional[tuple]):
         if value is None:
-            for i in range(self.count()):
-                widget = self.widget(i)
-                if widget is None:
-                    break
-                widget.setDataValue(None)
+            value = tuple(None for _ in range(self.count()))
         elif isinstance(value, tuple):
-            for i in range(self.count()):
-                widget = self.widget(i)
-                if widget is None:
-                    break
-                widget.setDataValue(value[i])  # type: ignore[index]
+            pass
         else:
-            raise TypeError(f"TupleGroupBox data must be tuple, not {type(value)}")
-        self._block_dataValueChanged = False
+            raise TypeError(f"TupleGroupBox value must be tuple, not {type(value)}")
 
-    def emitDataValueChanged(self):
-        if self._block_dataValueChanged:
-            return
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
+        for i in range(self.count()):
+            widget = self.widget(i)
+            if widget is None:
+                break
+            widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
+            widget.setFieldValue(value[i])
+            widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        self.fieldValueChanged.emit(value)
+
+    def _onSubfieldValueChange(self, value: Any):
+        self.fieldValueChanged.emit(self.fieldValue())
+
+    def fieldName(self) -> str:
+        return self.title()
+
+    def setFieldName(self, name: str):
+        self.setTitle(name)
+        self.setToolTip(name)
 
     def setRequired(self, required: bool):
         """Recursively set *required* to all subwidgets."""

@@ -228,8 +228,11 @@ Try change the model index and the editor data, and see if the data is stored an
 
    Widget with model
 
-Note that the dataclass defines default value, but the widget is still empty.
-Default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
+Default value example
+=====================
+
+In the previous example, the dataclass defines default value but the widget is still empty.
+It is because default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
 
 To make default values applied to missing fields, set :meth:`.DataclassDelegate.ignoreMissing` to ``False``.
 
@@ -266,7 +269,6 @@ In this example, we define the data converters for ``CustomClass``, which we use
     @dataclass
     class DataClass:
         custom: CustomClass = field(metadata=dict(
-            default=CustomClass(1, 2),
             Qt_typehint=Tuple[int, int],
             toQt_converter=lambda obj: (obj.x, obj.y),
             fromQt_converter=lambda args: CustomClass(*args),
@@ -276,3 +278,5 @@ In this example, we define the data converters for ``CustomClass``, which we use
    :align: center
 
    Widget with model compatible to custom type
+
+Tuple from the field widget is converted to ``CustomClass`` before being stored in the model, and ``CustomClass`` from the model is converted to the tuple and displayed on the widget.

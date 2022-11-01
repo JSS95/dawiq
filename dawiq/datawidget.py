@@ -32,17 +32,15 @@ class DataWidget(QtWidgets.QGroupBox):
     """
     Group box for structured data.
 
-    This is the group box which contains field widgets as subwidgets. Data value
-    is constructed from the data of subwidgets as dict.
+    This group box contains the field widgets as subwidgets. :meth:`dataValue`
+    returns the dictionary of field values and :meth:`setDataValue` sets the
+    values to the subwidgets.
 
-    :meth:`dataValue` returns the current dict value. When the data value of any
-    subwidget is changed by user, :attr:`dataValueChanged` signal is emitted.
-    :meth:`setDataValue` changes the data of subwidgets.
+    Whenever the data value changes, :attr:`dataValueChanged` signal is emitted.
+    When any field is edited by the user, :attr:`dataEdited` signal is emitted.
 
-    Data value is the dict containing subwidget data, and never :obj:`None`.
-
-    :meth:`setDataValue` sets the subwidget data. If :obj:`None` is passed,
-    it is propagated to all subwidget.
+    This widget is also used to represent the nested dataclass field, therefore
+    it follows :class:`FieldWidgetProtocol`.
 
     Notes
     =====
@@ -54,6 +52,9 @@ class DataWidget(QtWidgets.QGroupBox):
     """
 
     dataValueChanged = QtCore.Signal(dict)
+    dataEdited = QtCore.Signal()
+    fieldValueChanged = dataValueChanged
+    fieldEdited = dataEdited
 
     def __init__(
         self,
@@ -62,7 +63,6 @@ class DataWidget(QtWidgets.QGroupBox):
     ):
         super().__init__(parent)
         self._orientation = orientation
-        self._block_dataValueChanged = False
 
         if orientation == QtCore.Qt.Orientation.Vertical:
             layout = QtWidgets.QVBoxLayout()
@@ -71,12 +71,6 @@ class DataWidget(QtWidgets.QGroupBox):
         else:
             raise TypeError(f"Invalid orientation: {orientation}")
         self.setLayout(layout)
-
-    def fieldName(self) -> str:
-        return self.title()
-
-    def setFieldName(self, name: str):
-        self.setTitle(name)
 
     def orientation(self) -> QtCore.Qt.Orientation:
         """Orientation to stack the subwidgets."""
@@ -102,14 +96,15 @@ class DataWidget(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
-        """Insert the widget to layout and connect data value change signal."""
+        """Insert the widget to layout and connect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             if widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
+        widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        widget.fieldEdited.connect(self.dataEdited)
         self.layout().insertWidget(index, widget, stretch, alignment)
 
     def addWidget(
@@ -118,26 +113,26 @@ class DataWidget(QtWidgets.QGroupBox):
         stretch: int = 0,
         alignment: QtCore.Qt.AlignmentFlag = QtCore.Qt.AlignmentFlag(0),
     ):
-        """Add the widget to layout and connect data value change signal."""
+        """Add the widget to layout and connect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             if widget.fieldName() == w.fieldName():
                 raise KeyError(f"Data name '{widget.fieldName()}' is duplicate")
-        widget.dataValueChanged.connect(self.emitDataValueChanged)
+        widget.fieldValueChanged.connect(self._onSubfieldValueChange)
+        widget.fieldEdited.connect(self.dataEdited)
         self.layout().addWidget(widget, stretch, alignment)
 
     def removeWidget(self, widget: FieldWidgetProtocol):
-        """
-        Remove the widget from layout and disconnect data value change signal.
-        """
+        """Remove the widget from layout and disconnect the signals."""
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             if w == widget:
-                widget.dataValueChanged.disconnect(self.emitDataValueChanged)
+                widget.fieldValueChanged.disconnect(self._onSubfieldValueChange)
+                widget.fieldEdited.disconnect(self.dataEdited)
                 break
         self.layout().removeWidget(widget)
 
@@ -147,30 +142,38 @@ class DataWidget(QtWidgets.QGroupBox):
             w = self.widget(i)
             if w is None:
                 break
-            ret[w.fieldName()] = w.dataValue()
+            ret[w.fieldName()] = w.fieldValue()
         return ret
+
+    fieldValue = dataValue
 
     def setDataValue(self, data: Optional[Dict[str, Any]]):
         if data is None:
             data = {}
 
-        self._block_dataValueChanged = True
         for i in range(self.count()):
             w = self.widget(i)
             if w is None:
                 break
             val = data.get(w.fieldName(), None)  # type: ignore[union-attr]
+            w.fieldValueChanged.disconnect(self._onSubfieldValueChange)
             try:
-                w.setDataValue(val)
+                w.setFieldValue(val)
             except TypeError:
-                w.setDataValue(None)
-        self._block_dataValueChanged = False
+                w.setFieldValue(None)
+            w.fieldValueChanged.connect(self._onSubfieldValueChange)
+        self.dataValueChanged.emit(data)
 
-    def emitDataValueChanged(self):
-        if self._block_dataValueChanged:
-            return
-        val = self.dataValue()
-        self.dataValueChanged.emit(val)
+    setFieldValue = setDataValue
+
+    def _onSubfieldValueChange(self, value: Any):
+        self.dataValueChanged.emit(self.dataValue())
+
+    def fieldName(self) -> str:
+        return self.title()
+
+    def setFieldName(self, name: str):
+        self.setTitle(name)
 
     def setRequired(self, required: bool):
         """Recursively set *required* to all subwidgets."""

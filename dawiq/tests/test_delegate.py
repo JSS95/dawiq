@@ -170,11 +170,11 @@ def test_highlightEmptyField(qtbot):
     editor1 = dataclass2Widget(DataClass1)
 
     highlightEmptyField(editor1, DataClass1)
-    assert editor1.widget(0).property("requiresFieldData")
+    assert editor1.widget(0).property("requiresFieldValue")
 
     editor1.setDataValue(dict(x=10))
     highlightEmptyField(editor1, DataClass1)
-    assert not editor1.widget(0).property("requiresFieldData")
+    assert not editor1.widget(0).property("requiresFieldValue")
 
     @dataclasses.dataclass
     class DataClass2:
@@ -183,11 +183,11 @@ def test_highlightEmptyField(qtbot):
     editor2 = dataclass2Widget(DataClass2)
 
     highlightEmptyField(editor2, DataClass2)
-    assert not editor2.widget(0).property("requiresFieldData")
+    assert not editor2.widget(0).property("requiresFieldValue")
 
     editor2.setDataValue(dict(x=10))
     highlightEmptyField(editor2, DataClass2)
-    assert not editor2.widget(0).property("requiresFieldData")
+    assert not editor2.widget(0).property("requiresFieldValue")
 
 
 def test_highlightEmptyField_recursive(qtbot):
@@ -203,10 +203,10 @@ def test_highlightEmptyField_recursive(qtbot):
 
     editor = dataclass2Widget(DataClass2)
     highlightEmptyField(editor, DataClass2)
-    assert editor.widget(0).widget(0).property("requiresFieldData")
-    assert not editor.widget(0).widget(1).property("requiresFieldData")
-    assert not editor.widget(1).widget(0).property("requiresFieldData")
-    assert not editor.widget(1).widget(1).property("requiresFieldData")
+    assert editor.widget(0).widget(0).property("requiresFieldValue")
+    assert not editor.widget(0).widget(1).property("requiresFieldValue")
+    assert not editor.widget(1).widget(0).property("requiresFieldValue")
+    assert not editor.widget(1).widget(1).property("requiresFieldValue")
 
 
 def test_highlightEmptyField_noDataclass(qtbot):
@@ -221,8 +221,8 @@ def test_highlightEmptyField_noDataclass(qtbot):
 
     editor = dataclass2Widget(DataClass2)
     highlightEmptyField(editor, None)
-    assert not editor.widget(0).widget(0).property("requiresFieldData")
-    assert not editor.widget(0).widget(1).property("requiresFieldData")
+    assert not editor.widget(0).widget(0).property("requiresFieldValue")
+    assert not editor.widget(0).widget(1).property("requiresFieldValue")
 
 
 @dataclasses.dataclass
@@ -247,7 +247,6 @@ class DataClass3:
 @pytest.fixture
 def dataclassStackedWidget(qtbot):
     widget = DataclassStackedWidget()
-    widget.addWidget(QtWidgets.QWidget())
     for dcls in [DataClass1, DataClass2]:
         widget.addDataWidget(dataclass2Widget(dcls), dcls)
 
@@ -257,9 +256,8 @@ def dataclassStackedWidget(qtbot):
 @pytest.fixture
 def dataclassTabWidget(qtbot):
     widget = DataclassTabWidget()
-    widget.addTab(QtWidgets.QWidget(), "EmptyWidget")
     for dcls in [DataClass1, DataClass2]:
-        widget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+        widget.addDataWidget(dataclass2Widget(dcls), dcls, dcls.__name__)
 
     return widget
 
@@ -290,106 +288,64 @@ def test_DataclassDelegate_setModelData(qtbot):
     mapper.setCurrentModelIndex(modelIndex)
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) is None
 
-    delegate.commitData.emit(dataWidget)
+    mapper.submit()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict()
 
     dataWidget.widget(0).setText("0")
-    delegate.commitData.emit(dataWidget)
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=0)
-
-    dataWidget.widget(0).setText("1")
     mapper.submit()
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=1)
-
-    dataWidget.dataValueChanged.connect(mapper.submit)
-    with qtbot.waitSignal(dataWidget.dataValueChanged):
-        dataWidget.widget(0).setText("2")
-        qtbot.keyPress(dataWidget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=2)
+    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=0)
 
 
 def test_DataclassDelegate_setModelData_dataclassStackedWidget(
     qtbot, dataclassStackedWidget
 ):
+    delegate = DataclassDelegate()
     model = QtGui.QStandardItemModel()
+
     item = QtGui.QStandardItem()
     item.setData(DataClass1, role=DataclassDelegate.TypeRole)
     model.appendRow(item)
 
-    delegate = DataclassDelegate()
     mapper = QtWidgets.QDataWidgetMapper()
-    mapper.setItemDelegate(delegate)
     mapper.setModel(model)
     mapper.addMapping(dataclassStackedWidget, 0)
+    mapper.setItemDelegate(delegate)
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) is None
 
-    delegate.commitData.emit(dataclassStackedWidget)
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=False)
-
-    dataclassStackedWidget.currentWidget().widget(0).click()
-    delegate.commitData.emit(dataclassStackedWidget)
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
-
-    dataclassStackedWidget.currentWidget().widget(0).click()
     mapper.submit()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=False)
 
-    dataclassStackedWidget.currentDataValueChanged.connect(mapper.submit)
-    with qtbot.waitSignal(dataclassStackedWidget.currentDataValueChanged):
-        dataclassStackedWidget.currentWidget().widget(0).click()
+    dataclassStackedWidget.currentWidget().widget(0).click()
+    mapper.submit()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
-
-    # data type change
-    dataclassStackedWidget.setCurrentIndex(0)
-    mapper.submit()
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
-    dataclassStackedWidget.setCurrentIndex(2)
-    mapper.submit()
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
 
 
 def test_DataclassDelegate_setModelData_dataclassTabWidget(qtbot, dataclassTabWidget):
+    delegate = DataclassDelegate()
     model = QtGui.QStandardItemModel()
+
     item = QtGui.QStandardItem()
     item.setData(DataClass1, role=DataclassDelegate.TypeRole)
     model.appendRow(item)
 
-    delegate = DataclassDelegate()
     mapper = QtWidgets.QDataWidgetMapper()
-    mapper.setItemDelegate(delegate)
     mapper.setModel(model)
     mapper.addMapping(dataclassTabWidget, 0)
+    mapper.setItemDelegate(delegate)
 
     modelIndex = model.index(0, 0)
     mapper.setCurrentModelIndex(modelIndex)
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) is None
 
-    delegate.commitData.emit(dataclassTabWidget)
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=False)
-
-    dataclassTabWidget.currentWidget().widget(0).click()
-    delegate.commitData.emit(dataclassTabWidget)
-    assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
-
-    dataclassTabWidget.currentWidget().widget(0).click()
     mapper.submit()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=False)
 
-    dataclassTabWidget.currentDataValueChanged.connect(mapper.submit)
-    with qtbot.waitSignal(dataclassTabWidget.currentDataValueChanged):
-        dataclassTabWidget.currentWidget().widget(0).click()
+    dataclassTabWidget.currentWidget().widget(0).click()
+    mapper.submit()
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
-
-    # data type change
-    dataclassTabWidget.setCurrentIndex(0)
-    mapper.submit()
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
-    dataclassTabWidget.setCurrentIndex(2)
-    mapper.submit()
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
 
 
 def test_DataclassDelegate_setEditorData(qtbot):
@@ -437,76 +393,6 @@ def test_DataclassDelegate_setEditorData(qtbot):
     model.setData(modelIndex2, dict(x=10), role=DataclassDelegate.DataRole)
     assert dataWidget.dataValue() == dict(x=10)
     assert dataWidget.widget(0).text() == "10"
-
-
-def test_DataclassDelegate_setEditorData_dataclassStackedWidget(
-    qtbot, dataclassStackedWidget
-):
-    model = QtGui.QStandardItemModel()
-    for dcls in [DataClass1, DataClass2]:
-        item = QtGui.QStandardItem()
-        item.setData(dcls, role=DataclassDelegate.TypeRole)
-        model.appendRow(item)
-
-    delegate = DataclassDelegate()
-    mapper = QtWidgets.QDataWidgetMapper()
-    mapper.setItemDelegate(delegate)
-    mapper.setModel(model)
-    mapper.addMapping(dataclassStackedWidget, 0)
-
-    modelIndex0 = model.index(0, 0)
-    model.setData(modelIndex0, dict(x=True), role=DataclassDelegate.DataRole)
-    modelIndex1 = model.index(1, 0)
-    model.setData(modelIndex1, dict(a=True, b=True), role=DataclassDelegate.DataRole)
-
-    mapper.setCurrentModelIndex(modelIndex0)
-    assert dataclassStackedWidget.currentIndex() == 1
-    assert dataclassStackedWidget.currentWidget().dataValue() == dict(x=True)
-
-    mapper.setCurrentModelIndex(modelIndex1)
-    assert dataclassStackedWidget.currentIndex() == 2
-    assert dataclassStackedWidget.currentWidget().dataValue() == dict(
-        a=True, b=True, c=False, d=False, e=False
-    )
-
-    model.setData(modelIndex1, dict(a=True), role=DataclassDelegate.DataRole)
-    assert dataclassStackedWidget.currentWidget().dataValue() == dict(
-        a=True, b=False, c=False, d=False, e=False
-    )
-
-
-def test_DataclassDelegate_setEditorData_dataclassTabWidget(qtbot, dataclassTabWidget):
-    model = QtGui.QStandardItemModel()
-    for dcls in [DataClass1, DataClass2]:
-        item = QtGui.QStandardItem()
-        item.setData(dcls, role=DataclassDelegate.TypeRole)
-        model.appendRow(item)
-
-    delegate = DataclassDelegate()
-    mapper = QtWidgets.QDataWidgetMapper()
-    mapper.setItemDelegate(delegate)
-    mapper.setModel(model)
-    mapper.addMapping(dataclassTabWidget, 0)
-
-    modelIndex0 = model.index(0, 0)
-    model.setData(modelIndex0, dict(x=True), role=DataclassDelegate.DataRole)
-    modelIndex1 = model.index(1, 0)
-    model.setData(modelIndex1, dict(a=True, b=True), role=DataclassDelegate.DataRole)
-
-    mapper.setCurrentModelIndex(modelIndex0)
-    assert dataclassTabWidget.currentIndex() == 1
-    assert dataclassTabWidget.currentWidget().dataValue() == dict(x=True)
-
-    mapper.setCurrentModelIndex(modelIndex1)
-    assert dataclassTabWidget.currentIndex() == 2
-    assert dataclassTabWidget.currentWidget().dataValue() == dict(
-        a=True, b=True, c=False, d=False, e=False
-    )
-
-    model.setData(modelIndex1, dict(a=True), role=DataclassDelegate.DataRole)
-    assert dataclassTabWidget.currentWidget().dataValue() == dict(
-        a=True, b=False, c=False, d=False, e=False
-    )
 
 
 # test DataclassMapper
@@ -566,10 +452,16 @@ def test_DataclassMapper_addMapping_dataclassStackedWidget(
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
 
     # data type change
-    dataclassStackedWidget.setCurrentIndex(0)
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
-    dataclassStackedWidget.setCurrentIndex(2)
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
+    item.setData(DataClass2, role=DataclassDelegate.TypeRole)
+    assert (
+        dataclassStackedWidget.currentIndex()
+        == dataclassStackedWidget.indexOfDataclass(DataClass2)
+    )
+    item.setData(DataClass1, role=DataclassDelegate.TypeRole)
+    assert (
+        dataclassStackedWidget.currentIndex()
+        == dataclassStackedWidget.indexOfDataclass(DataClass1)
+    )
 
 
 def test_DataclassMapper_addMapping_dataclassTabWidget(qtbot, dataclassTabWidget):
@@ -592,10 +484,14 @@ def test_DataclassMapper_addMapping_dataclassTabWidget(qtbot, dataclassTabWidget
     assert model.data(modelIndex, role=DataclassDelegate.DataRole) == dict(x=True)
 
     # data type change
-    dataclassTabWidget.setCurrentIndex(0)
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) is None
-    dataclassTabWidget.setCurrentIndex(2)
-    assert model.data(modelIndex, role=DataclassDelegate.TypeRole) == DataClass2
+    item.setData(DataClass2, role=DataclassDelegate.TypeRole)
+    assert dataclassTabWidget.currentIndex() == dataclassTabWidget.indexOfDataclass(
+        DataClass2
+    )
+    item.setData(DataClass1, role=DataclassDelegate.TypeRole)
+    assert dataclassTabWidget.currentIndex() == dataclassTabWidget.indexOfDataclass(
+        DataClass1
+    )
 
 
 def test_DataclassMapper_removeMapping_dataWidget(qtbot):

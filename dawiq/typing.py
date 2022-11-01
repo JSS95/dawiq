@@ -25,47 +25,43 @@ class DataclassProtocol(Protocol):
 class FieldWidgetProtocol(Protocol):
     """Type annotation for field widget object."""
 
-    dataValueChanged: QtCore.Signal
+    fieldValueChanged: QtCore.Signal
+    fieldEdited: QtCore.Signal
 
-    def dataValue(self) -> Any:
+    def fieldValue(self) -> Any:
         """
-        Data value that the widget represents.
+        Value that the field widget represents.
 
-        This is the API for the delegate to get the data from the widget.
+        This is the API for the delegate to get the data from the field widget.
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
         this method converts the current check state to :class:`bool` and
         returns.
 
-        If the data value is :obj:`None`, it typically indicates that the widget
+        If the field value is :obj:`None`, it typically indicates that the widget
         is empty and the delegate should specially handle it. One of the few
         exceptions is :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
-        where :obj:`None` indicates partially checked state.
+        where :obj:`None` indicates partially checked state for fuzzy boolean
+        value.
 
-        When the data value is changed by user input, :attr:`dataValueChanged`
-        signal must emit the new value.
+        When the field value is changed, :attr:`fieldValueChanged` signal must
+        emit the new value. When the field is edited by user, :attr:`fieldEdited`
+        signal must be emitted with empty argument.
 
         """
         ...
 
-    def setDataValue(self, value: Any):
+    def setFieldValue(self, value: Any):
         """
-        Set the data value to the widget.
+        Set the value to the field widget.
 
         This method is the API for the delegate to set the data to the widget.
         For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
         this method converts :class:`bool` to :obj:`Qt.CheckState` and sets to
         the widget.
 
-        If the data value is :obj:`None`, it typically means that the value is
-        null and the widget should be cleared. One of the few exceptions is
-        :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>` where :obj:`None`
-        indicates fuzzy boolean value.
-
         For valid *value*, its type must be strictly checked and :obj:`TypeError`
         must be raised on invalid input.
 
-        This method MUST NOT emit :attr:`dataValueChanged` signal, as doing so
-        can cause infinite loop in nested widgets.
         """
         ...
 
@@ -89,13 +85,13 @@ class FieldWidgetProtocol(Protocol):
         Set if *self* represents a required field.
 
         If *required* is True, it indicates that the field is mandatory. On such
-        case, this methods checks the :meth:`dataValue` of *self* and sets
-        ``requiresFieldData`` property of the editor widget. If the data value of
+        case, this methods checks the :meth:`fieldValue` of *self* and sets
+        ``requiresFieldValue`` property of the editor widget. If the data value of
         required field is missing, the property is set to be True.
 
         .. code-block:: python
 
-            widget.setProperty("requiresFieldData", True)
+            widget.setProperty("requiresFieldValue", True)
             widget.style().unpolish(widget)
             widget.style().polish(widget)
 
@@ -109,7 +105,7 @@ class FieldWidgetProtocol(Protocol):
         .. code-block:: python
 
             qApp.setStyleSheet(
-                "*[requiresFieldData=true]{border: 1px solid red}"
+                "*[requiresFieldValue=true]{border: 1px solid red}"
             )
 
         Notes

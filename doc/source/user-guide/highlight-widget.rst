@@ -7,7 +7,7 @@ How to highlight mandatory fields
 When we combine the dataclass type with :class:`.DataWidget` by :class:`.DataclassDelegate`, we can distinguish which field is mandatory (no default value) and which widget is empty.
 If the widget of the mandatory field is empty, the dataclass instance cannot be generated.
 
-:class:`.DataclassDelegate` automatically sets ``requiresFieldData`` property to the widget when setting the editor data.
+:class:`.DataclassDelegate` automatically sets ``requiresFieldValue`` property to the widget when setting the editor data.
 This property indicates if the widget is mandatory but empty, thus requiring the field data.
 User can set the style sheet to the application to visualize the required widget.
 
@@ -96,7 +96,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         import sys
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)
@@ -114,7 +114,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         import sys
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)
@@ -132,7 +132,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         import sys
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)
@@ -150,7 +150,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         import sys
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)

@@ -5,7 +5,7 @@ Dataclass delegate
 """
 
 import dataclasses
-from .qt_compat import QtCore, QtWidgets, TypeRole, DataRole
+from .qt_compat import QtWidgets, TypeRole, DataRole
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
 from .typing import DataclassProtocol
@@ -242,7 +242,19 @@ def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtoco
 
 class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """
-    Delegate to update the model and the :class:`DataWidget`.
+    Delegate to update the model and the data widget.
+
+    This delegate stores dataclass type and dataclass data to the model, and
+    updates the data widget with model data.
+
+    Supported data widgets are:
+
+    * :class:`DataWidget`
+    * :class:`DataclassStackedWidget`
+    * :class:`DataclassTabWidget`
+
+    Dataclass type is stored to the model with :attr:`TypeRole` as item data role
+    and dataclass data is stored with :attr:`DataRole`.
 
     By default, missing values are not replaced by default values of the fields.
     This is to preserve the intentional empty input by the user. Setting
@@ -254,7 +266,6 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self._freeze_model = False
         self._ignoreMissing = True
 
     def ignoreMissing(self) -> bool:
@@ -264,87 +275,53 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     def setIgnoreMissing(self, val: bool):
         self._ignoreMissing = val
 
-    def setModelDataclassData(
-        self,
-        index: QtCore.QModelIndex,
-        dcls: Type[DataclassProtocol],
-        data: Dict,
-    ):
-        """Set the dataclass data from the model index."""
-        if dcls is not None:
-            data = convertFromQt(dcls, data, self.ignoreMissing())
-        index.model().setData(index, data, role=self.DataRole)
-
-    def setEditorDataclassData(
-        self,
-        editor: DataWidget,
-        dcls: Type[DataclassProtocol],
-        data: Optional[Dict],
-    ):
-        """Set the dataclass data to the editor."""
-        if data is None:
-            data = {}
-        if dcls is not None:
-            data = convertToQt(dcls, data, self.ignoreMissing())
-        editor.setDataValue(data)
-        highlightEmptyField(editor, dcls)
-
     def setModelData(self, editor, model, index):
-        """
-        Set the data from *editor* to the item of *model* at *index*.
-
-        If *editor* is :class:`DataWidget` and the model contains dataclass type,
-        the data from the editor is converted by :func:`convertFromQt` before
-        being set to the model.
-        """
-        if self._freeze_model:
-            return
-
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
-            if dcls != model.data(index, role=self.TypeRole):
-                index.model().setData(index, dcls, role=self.TypeRole)
+            model.setData(index, dcls, role=self.TypeRole)
             self.setModelData(editor.currentWidget(), model, index)
 
         elif isinstance(editor, DataWidget):
             dcls = model.data(index, role=self.TypeRole)
             data = editor.dataValue()
-            self.setModelDataclassData(index, dcls, data)
+            if dcls is not None:
+                data = convertFromQt(dcls, data, self.ignoreMissing())
+            model.setData(index, data, role=self.DataRole)
 
         super().setModelData(editor, model, index)
 
     def setEditorData(self, editor, index):
-        """
-        Set the data from *index* to *editor*.
-
-        If *editor* is :class:`DataWidget` and the model contains dataclass type,
-        the data from the editor is converted by :func:`convertToQt` before
-        being set to the editor.
-        """
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = index.data(role=self.TypeRole)
             if dcls is not None:
                 widgetIndex = editor.indexOfDataclass(dcls)
             else:
                 widgetIndex = -1
-            self._freeze_model = True
             editor.setCurrentIndex(widgetIndex)
-            self._freeze_model = False
             self.setEditorData(editor.currentWidget(), index)
 
         elif isinstance(editor, DataWidget):
             dcls = index.data(role=self.TypeRole)
             data = index.data(role=self.DataRole)
-            self.setEditorDataclassData(editor, dcls, data)
+            if data is None:
+                data = {}
+            if dcls is not None:
+                data = convertToQt(dcls, data, self.ignoreMissing())
+            editor.setDataValue(data)
+            highlightEmptyField(editor, dcls)
 
         super().setEditorData(editor, index)
 
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
     """
-    Mapper between the :class:`DataWidget` and the model.
+    Mapper between the data widget and the model.
 
-    Default submit policy is ``SubmitPolicy.ManualSubmit``.
+    Supported data widgets are:
+
+    * :class:`DataWidget`
+    * :class:`DataclassStackedWidget`
+    * :class:`DataclassTabWidget`
 
     Notes
     =====
@@ -358,17 +335,21 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
         self.setSubmitPolicy(self.SubmitPolicy.ManualSubmit)
 
     def addMapping(self, widget, section, propertyName=b""):
-        if isinstance(widget, (DataclassStackedWidget, DataclassTabWidget)):
-            widget.currentChanged.connect(self.submit)
-            widget.currentDataValueChanged.connect(self.submit)
+        if isinstance(widget, DataclassStackedWidget):
+            widget.currentDataEdited.connect(self.submit)
+        elif isinstance(widget, DataclassTabWidget):
+            widget.activated.connect(self.submit)
+            widget.currentDataEdited.connect(self.submit)
         elif isinstance(widget, DataWidget):
-            widget.dataValueChanged.connect(self.submit)
+            widget.dataEdited.connect(self.submit)
         super().addMapping(widget, section, propertyName)
 
     def removeMapping(self, widget):
-        if isinstance(widget, (DataclassStackedWidget, DataclassTabWidget)):
-            widget.currentChanged.disconnect(self.submit)
-            widget.currentDataValueChanged.disconnect(self.submit)
+        if isinstance(widget, DataclassStackedWidget):
+            widget.currentDataEdited.disconnect(self.submit)
+        elif isinstance(widget, DataclassTabWidget):
+            widget.activated.disconnect(self.submit)
+            widget.currentDataEdited.disconnect(self.submit)
         elif isinstance(widget, DataWidget):
-            widget.dataValueChanged.disconnect(self.submit)
+            widget.dataEdited.disconnect(self.submit)
         super().removeMapping(widget)

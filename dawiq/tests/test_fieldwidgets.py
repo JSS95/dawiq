@@ -14,74 +14,83 @@ from dawiq.qt_compat import QtCore, QtWidgets
 
 def test_BoolCheckBox(qtbot):
     widget = BoolCheckBox()
-    widget.setTristate(True)
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(True)
-    assert widget.dataValue() is True
+    # test value change by setFieldValue
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is True,
+    ):
+        widget.setFieldValue(True)
+    assert widget.fieldValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(False)
-    assert widget.dataValue() is False
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.setFieldValue(False)
+    assert widget.fieldValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
-
-    widget.setCheckState(QtCore.Qt.CheckState.Checked)  # set to True to test None
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
-    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
-    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
 
     widget.setCheckState(QtCore.Qt.CheckState.Unchecked)
 
     # test value change by clicking
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is None,
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val is True, lambda: True],
     ):
         widget.click()
-    assert widget.dataValue() is None
-    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
-
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is True,
-    ):
-        widget.click()
-    assert widget.dataValue() is True
+    assert widget.fieldValue() is True
     assert widget.checkState() == QtCore.Qt.CheckState.Checked
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val is False,
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val is False, lambda: True],
     ):
         widget.click()
-    assert widget.dataValue() is False
+    assert widget.fieldValue() is False
     assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
 
 
+def test_BoolCheckBox_tristate(qtbot):
+    widget = BoolCheckBox()
+    widget.setCheckState(QtCore.Qt.CheckState.Checked)
+
+    widget.setTristate(False)
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is False,
+    ):
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is False
+    assert widget.checkState() == QtCore.Qt.CheckState.Unchecked
+
+    widget.setTristate(True)
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val is None,
+    ):
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is None
+    assert widget.checkState() == QtCore.Qt.CheckState.PartiallyChecked
+
+
 def test_BoolCheckBox_setRequired(qtbot):
-    """Check box is always occupied with data."""
+    """Check box always has field value."""
     widget = BoolCheckBox()
 
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.click()
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.click()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
 
 def test_EmptyIntValidator(qtbot):
@@ -104,55 +113,58 @@ def test_EmptyIntValidator(qtbot):
 def test_IntLineEdit(qtbot):
     widget = IntLineEdit()
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
     assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(1)
-    assert widget.dataValue() == 1
+    # test value change by setFieldValue
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == 1,
+    ):
+        widget.setFieldValue(1)
+    assert widget.fieldValue() == 1
     assert widget.text() == "1"
 
-    widget.clear()
-
-    # test value change by keyboard
     with qtbot.waitSignal(
-        widget.dataValueChanged,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is None
+    assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        qtbot.keyPress(widget, "-")
+    # test value change by keyboard
+    widget.clear()
+    with qtbot.waitSignals(
+        [widget.fieldEdited],
+        check_params_cbs=[lambda: True],
+    ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == -1,
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == 1, lambda: True],
     ):
         qtbot.keyPress(widget, "1")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == -1
+    assert widget.fieldValue() == 1
 
 
 def test_IntLineEdit_setRequired(qtbot):
     widget = IntLineEdit()
 
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
-    widget.setDataValue(10)
+    assert widget.property("requiresFieldValue")
+    widget.setFieldValue(10)
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.clear()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
 
 
 def test_EmptyFloatValidator(qtbot):
@@ -183,110 +195,125 @@ def test_EmptyFloatValidator(qtbot):
 def test_FloatLineEdit(qtbot):
     widget = FloatLineEdit()
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
     assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(1.0)
-    assert widget.dataValue() == float(1)
-    assert widget.text() == "1.0"
-
-    widget.clear()
-
-    # test value change by keyboard
+    # test value change by setFieldValue
     with qtbot.waitSignal(
-        widget.dataValueChanged,
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == 1.2,
+    ):
+        widget.setFieldValue(1.2)
+    assert widget.fieldValue() == 1.2
+    assert widget.text() == "1.2"
+
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+        widget.setFieldValue(None)
+    assert widget.fieldValue() is None
+    assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        qtbot.keyPress(widget, "-")
+    # test value change by keyboard
+    widget.clear()
+    with qtbot.waitSignals(
+        [widget.fieldEdited],
+        check_params_cbs=[lambda: True],
+    ):
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == float(-1),
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == 1.2, lambda: True],
     ):
         qtbot.keyPress(widget, "1")
+        qtbot.keyPress(widget, ".")
+        qtbot.keyPress(widget, "2")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == float(-1)
+    assert widget.fieldValue() == 1.2
 
 
 def test_FloatLineEdit_setRequired(qtbot):
     widget = FloatLineEdit()
 
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
-    widget.setDataValue(10.0)
+    assert widget.property("requiresFieldValue")
+    widget.setFieldValue(10.0)
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.clear()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
 
 
 def test_StrLineEdit(qtbot):
     widget = StrLineEdit()
 
-    # test value change by setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() == ""
+    assert widget.fieldValue() == ""
     assert not widget.text()
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue("1")
-    assert widget.dataValue() == "1"
+    # test value change by setFieldValue
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == "1",
+    ):
+        widget.setFieldValue("1")
+    assert widget.fieldValue() == "1"
     assert widget.text() == "1"
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue("x")
-    assert widget.dataValue() == "x"
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == "x",
+    ):
+        widget.setFieldValue("x")
+    assert widget.fieldValue() == "x"
     assert widget.text() == "x"
 
-    widget.clear()
-
-    # test value change by keyboard
     with qtbot.waitSignal(
-        widget.dataValueChanged,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == "",
     ):
-        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == ""
+        widget.setFieldValue(None)
+    assert widget.fieldValue() == ""
+    assert widget.text() == ""
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged,
-        check_params_cb=lambda val: val == "x",
+    # test value change by keyboard
+    widget.clear()
+    with qtbot.waitSignals(
+        [widget.fieldEdited],
+        check_params_cbs=[lambda: True],
+    ):
+        qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
+    assert widget.fieldValue() == ""
+
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == "x", lambda: True],
     ):
         qtbot.keyPress(widget, "x")
         qtbot.keyPress(widget, QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == "x"
+    assert widget.fieldValue() == "x"
 
 
 def test_StrLineEdit_setRequired(qtbot):
-    """String line edit is always occupied with data."""
+    """String line edit always has field value."""
     widget = StrLineEdit()
 
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
-    widget.setDataValue("spam")
+    assert not widget.property("requiresFieldValue")
+    widget.setFieldValue("spam")
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.clear()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
 
 def test_EnumComboBox(qtbot):
@@ -296,64 +323,52 @@ def test_EnumComboBox(qtbot):
         z = 3
 
     widget = EnumComboBox.fromEnum(MyEnum)
+
     assert widget.count() == 3
     assert widget.currentIndex() == -1
-    assert widget.dataValue() is None
+    assert widget.fieldValue() is None
 
-    # test with setDataValue
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MyEnum.x)
-    assert widget.currentIndex() == 0
-    assert widget.dataValue() == MyEnum.x
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MyEnum.y)
-    assert widget.currentIndex() == 1
-    assert widget.dataValue() == MyEnum.y
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(MyEnum.z)
-    assert widget.currentIndex() == 2
-    assert widget.dataValue() == MyEnum.z
-
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.currentIndex() == -1
-    assert widget.dataValue() is None
-
-    # test with setCurrentIndex
-
+    # test with setFieldValue
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == MyEnum.x,
     ):
-        widget.setCurrentIndex(0)
-    assert widget.dataValue() == MyEnum.x
+        widget.setFieldValue(MyEnum.x)
+    assert widget.currentIndex() == 0
+    assert widget.fieldValue() == MyEnum.x
 
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == MyEnum.y,
     ):
-        widget.setCurrentIndex(1)
-    assert widget.dataValue() == MyEnum.y
+        widget.setFieldValue(MyEnum.y)
+    assert widget.currentIndex() == 1
+    assert widget.fieldValue() == MyEnum.y
 
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val == MyEnum.z,
     ):
-        widget.setCurrentIndex(2)
-    assert widget.dataValue() == MyEnum.z
+        widget.setFieldValue(MyEnum.z)
+    assert widget.currentIndex() == 2
+    assert widget.fieldValue() == MyEnum.z
 
     with qtbot.waitSignal(
-        widget.dataValueChanged,
-        raising=True,
+        widget.fieldValueChanged,
         check_params_cb=lambda val: val is None,
     ):
-        widget.setCurrentIndex(-1)
-    assert widget.dataValue() is None
+        widget.setFieldValue(None)
+    assert widget.currentIndex() == -1
+    assert widget.fieldValue() is None
+
+    # test with setCurrentIndex
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == MyEnum.x, lambda: True],
+    ):
+        qtbot.keyClick(widget, MyEnum.x.name)
+    assert widget.currentIndex() == 0
+    assert widget.fieldValue() == MyEnum.x
 
 
 def test_EnumComboBox_setRequired(qtbot):
@@ -365,95 +380,105 @@ def test_EnumComboBox_setRequired(qtbot):
     widget = EnumComboBox.fromEnum(MyEnum)
 
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
     widget.setCurrentIndex(1)
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setCurrentIndex(-1)
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
 
 def test_TupleGroupBox_addWidget(qtbot):
-    tupleWidget = TupleGroupBox()
-    assert tupleWidget.count() == 0
+    widget = TupleGroupBox()
+    assert widget.count() == 0
 
     w0 = BoolCheckBox()
-    tupleWidget.addWidget(w0)
-    assert tupleWidget.count() == 1
-    assert tupleWidget.widget(0) is w0
-    assert tupleWidget.widget(1) is None
+    widget.addWidget(w0)
+    assert widget.count() == 1
+    assert widget.widget(0) is w0
+    assert widget.widget(1) is None
 
     w1 = IntLineEdit()
-    tupleWidget.addWidget(w1)
-    assert tupleWidget.count() == 2
-    assert tupleWidget.widget(0) is w0
-    assert tupleWidget.widget(1) is w1
+    widget.addWidget(w1)
+    assert widget.count() == 2
+    assert widget.widget(0) is w0
+    assert widget.widget(1) is w1
 
     # test that signals are connected
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
         w0.click()
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
+        qtbot.keyPress(w1, "1")
         qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
 def test_TupleGroupBox_insertWidget(qtbot):
-    tupleWidget = TupleGroupBox()
-    assert tupleWidget.count() == 0
+    widget = TupleGroupBox()
+    assert widget.count() == 0
 
     w0 = BoolCheckBox()
-    tupleWidget.insertWidget(0, w0)
-    assert tupleWidget.count() == 1
-    assert tupleWidget.widget(0) is w0
-    assert tupleWidget.widget(1) is None
+    widget.insertWidget(0, w0)
+    assert widget.count() == 1
+    assert widget.widget(0) is w0
+    assert widget.widget(1) is None
 
     w1 = IntLineEdit()
-    tupleWidget.insertWidget(0, w1)
-    assert tupleWidget.count() == 2
-    assert tupleWidget.widget(0) is w1
-    assert tupleWidget.widget(1) is w0
+    widget.insertWidget(0, w1)
+    assert widget.count() == 2
+    assert widget.widget(0) is w1
+    assert widget.widget(1) is w0
 
     # test that signals are connected
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
         w0.click()
-    with qtbot.waitSignal(tupleWidget.dataValueChanged):
+    with qtbot.waitSignals([widget.fieldValueChanged, widget.fieldEdited]):
+        qtbot.keyPress(w1, "1")
         qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
 def test_TupleGroupBox_removeWidget(qtbot):
-    tupleWidget = TupleGroupBox()
+    widget = TupleGroupBox()
     w0 = BoolCheckBox()
     w1 = IntLineEdit()
 
-    tupleWidget.addWidget(w0)
-    assert tupleWidget.count() == 1
+    widget.addWidget(w0)
+    assert widget.count() == 1
 
-    tupleWidget.removeWidget(w1)
-    assert tupleWidget.count() == 1
+    widget.removeWidget(w1)
+    assert widget.count() == 1
 
-    tupleWidget.removeWidget(w0)
-    assert tupleWidget.count() == 0
+    widget.removeWidget(w0)
+    assert widget.count() == 0
 
     # test that signals are disconnected
-    with qtbot.assertNotEmitted(tupleWidget.dataValueChanged):
+    with qtbot.assertNotEmitted(widget.fieldValueChanged):
         w0.click()
+    with qtbot.assertNotEmitted(widget.fieldEdited):
+        w0.click()
+    with qtbot.assertNotEmitted(widget.fieldValueChanged):
+        qtbot.keyPress(w1, "1")
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
+    with qtbot.assertNotEmitted(widget.fieldEdited):
+        qtbot.keyPress(w1, "1")
+        qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
-def test_TupleGroupBox_dataValue(qtbot):
+def test_TupleGroupBox_fieldValue(qtbot):
     widget = TupleGroupBox()
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
-    assert widget.dataValue() == (None, None)
+    assert widget.fieldValue() == (None, None)
 
     widget.widget(0).setText("1")
     widget.widget(1).setText("2")
-    assert widget.dataValue() == (1, 2)
+    assert widget.fieldValue() == (1, 2)
 
 
-def test_TupleGroupBox_setDataValue(qtbot):
+def test_TupleGroupBox_setFieldValue(qtbot):
     widget = TupleGroupBox()
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
@@ -465,17 +490,28 @@ def test_TupleGroupBox_setDataValue(qtbot):
         def count(self):
             self.i += 1
 
+        def reset(self):
+            self.i = 0
+
     counter = Counter()
-    widget.dataValueChanged.connect(counter.count)
+    widget.fieldValueChanged.connect(counter.count)
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue((1, 2))
-    assert widget.dataValue() == (1, 2)
-    assert counter.i == 0
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == (1, 2),
+    ):
+        widget.setFieldValue((1, 2))
+    assert widget.fieldValue() == (1, 2)
+    assert counter.i == 1
 
-    with qtbot.assertNotEmitted(widget.dataValueChanged):
-        widget.setDataValue(None)
-    assert widget.dataValue() == (None, None)
+    counter.reset()
+    with qtbot.waitSignal(
+        widget.fieldValueChanged,
+        check_params_cb=lambda val: val == (None, None),
+    ):
+        widget.setFieldValue(None)
+    assert widget.fieldValue() == (None, None)
+    assert counter.i == 1
 
 
 def test_TupleGroupBox_subwidget(qtbot):
@@ -483,19 +519,21 @@ def test_TupleGroupBox_subwidget(qtbot):
     widget.addWidget(IntLineEdit())
     widget.addWidget(IntLineEdit())
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, None)
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == (1, None), lambda: True],
     ):
         qtbot.keyPress(widget.widget(0), "1")
         qtbot.keyPress(widget.widget(0), QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == (1, None)
+    assert widget.fieldValue() == (1, None)
 
-    with qtbot.waitSignal(
-        widget.dataValueChanged, check_params_cb=lambda tup: tup == (1, 2)
+    with qtbot.waitSignals(
+        [widget.fieldValueChanged, widget.fieldEdited],
+        check_params_cbs=[lambda val: val == (1, 2), lambda: True],
     ):
         qtbot.keyPress(widget.widget(1), "2")
         qtbot.keyPress(widget.widget(1), QtCore.Qt.Key.Key_Return)
-    assert widget.dataValue() == (1, 2)
+    assert widget.fieldValue() == (1, 2)
 
 
 def test_TupleGroupBox_setRequired(qtbot):
@@ -504,28 +542,28 @@ def test_TupleGroupBox_setRequired(qtbot):
     widget.addWidget(IntLineEdit())
 
     widget.setRequired(True)
-    assert widget.widget(0).property("requiresFieldData")
-    assert widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((None, 1))
+    assert widget.widget(0).property("requiresFieldValue")
+    assert widget.widget(1).property("requiresFieldValue")
+    widget.setFieldValue((None, 1))
     widget.setRequired(True)
-    assert widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((0, 1))
+    assert widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
+    widget.setFieldValue((0, 1))
     widget.setRequired(True)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
 
     widget.widget(0).clear()
     widget.widget(1).clear()
 
     widget.setRequired(False)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((None, 1))
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
+    widget.setFieldValue((None, 1))
     widget.setRequired(False)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
-    widget.setDataValue((0, 1))
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
+    widget.setFieldValue((0, 1))
     widget.setRequired(False)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")

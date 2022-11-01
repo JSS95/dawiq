@@ -81,7 +81,7 @@ How will the data widget from ``DataClass`` be?
         mapper.setModel(model)
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)
@@ -110,7 +110,7 @@ How will the data widget from ``DataClass`` be?
         mapper.setModel(model)
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)
@@ -139,7 +139,7 @@ How will the data widget from ``DataClass`` be?
         mapper.setModel(model)
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)
@@ -168,7 +168,7 @@ How will the data widget from ``DataClass`` be?
         mapper.setModel(model)
 
         app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldData=true]{border: 1px solid red}")
+        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
         widget = dataclass2Widget(DataClass)
         mapper.addMapping(widget, 0)

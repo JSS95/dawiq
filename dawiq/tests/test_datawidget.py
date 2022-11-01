@@ -39,9 +39,10 @@ def test_DataWidget_addWidget(qtbot):
     assert datawidget.widget(1) is w1
 
     # test that signals are connected
-    with qtbot.waitSignal(datawidget.dataValueChanged):
+    with qtbot.waitSignals([datawidget.dataValueChanged, datawidget.dataEdited]):
         w0.click()
-    with qtbot.waitSignal(datawidget.dataValueChanged):
+    with qtbot.waitSignals([datawidget.dataValueChanged, datawidget.dataEdited]):
+        qtbot.keyPress(w1, "1")
         qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
@@ -67,10 +68,11 @@ def test_DataWidget_insertWidget(qtbot):
     assert datawidget.widget(0) is w1
     assert datawidget.widget(1) is w0
 
-    # test that signals are disconnected
-    with qtbot.waitSignal(datawidget.dataValueChanged):
+    # test that signals are connected
+    with qtbot.waitSignals([datawidget.dataValueChanged, datawidget.dataEdited]):
         w0.click()
-    with qtbot.waitSignal(datawidget.dataValueChanged):
+    with qtbot.waitSignals([datawidget.dataValueChanged, datawidget.dataEdited]):
+        qtbot.keyPress(w1, "1")
         qtbot.keyPress(w1, QtCore.Qt.Key.Key_Return)
 
 
@@ -92,6 +94,8 @@ def test_DataWidget_removeWidget(qtbot):
 
     # test that signals are disconnected
     with qtbot.assertNotEmitted(datawidget.dataValueChanged):
+        w0.click()
+    with qtbot.assertNotEmitted(datawidget.dataEdited):
         w0.click()
 
 
@@ -136,12 +140,12 @@ def test_DataWidget_setDataValue(qtbot):
     dataWidget.dataValueChanged.connect(counter.count)
     dval = dict(a=1, b=dict(x=True))
 
-    with qtbot.assertNotEmitted(dataWidget.dataValueChanged):
+    with qtbot.waitSignal(dataWidget.dataValueChanged):
         dataWidget.setDataValue(dval)
     assert dataWidget.dataValue() == dval
-    assert counter.i == 0
+    assert counter.i == 1
 
-    with qtbot.assertNotEmitted(dataWidget.dataValueChanged):
+    with qtbot.waitSignal(dataWidget.dataValueChanged):
         dataWidget.setDataValue(None)
     assert dataWidget.dataValue() == dict(a=None, b=dict(x=False))
 
