@@ -335,7 +335,7 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
         if isinstance(widget, DataclassStackedWidget):
             widget.currentDataEdited.connect(self.submit)
         elif isinstance(widget, DataclassTabWidget):
-            widget.tabBarClicked.connect(self.submit)
+            widget.activated.connect(self.submit)
             widget.currentDataEdited.connect(self.submit)
         elif isinstance(widget, DataWidget):
             widget.dataEdited.connect(self.submit)
@@ -345,7 +345,7 @@ class DataclassMapper(QtWidgets.QDataWidgetMapper):
         if isinstance(widget, DataclassStackedWidget):
             widget.currentDataEdited.disconnect(self.submit)
         elif isinstance(widget, DataclassTabWidget):
-            widget.tabBarClicked.disconnect(self.submit)
+            widget.activated.disconnect(self.submit)
             widget.currentDataEdited.disconnect(self.submit)
         elif isinstance(widget, DataWidget):
             widget.dataEdited.disconnect(self.submit)

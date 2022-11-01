@@ -97,12 +97,14 @@ class DataclassTabWidget(QtWidgets.QTabWidget):
     To add :class:`DataWidget`, pass the widget and its dataclass to
     :meth:`addDataWidget` or to :meth:`insertDataWidget`.
 
+    When current index is changed by user, :attr:`activated` signal is emitted.
     When the data value of current data widget changes, this widget emits
     :attr:`currentDataValueChanged` signal. When the current data widget is
     edited by user, :attr:`currentDataEdited` signal is emitted.
 
     """
 
+    activated = QtCore.Signal(int)
     currentDataValueChanged = QtCore.Signal(dict)
     currentDataEdited = QtCore.Signal()
 
@@ -110,7 +112,13 @@ class DataclassTabWidget(QtWidgets.QTabWidget):
         super().__init__(parent)
         self._dataWidgets = {}
         self._previousIndex = -1
+        self._blockActivated = False
         self.currentChanged.connect(self._onCurrentChange)
+
+    def setCurrentIndex(self, index):
+        self._blockActivated = True
+        super().setCurrentIndex(index)
+        self._blockActivated = False
 
     def _onCurrentChange(self, index: int):
         """Handle the signals of old widget and current widget."""
@@ -123,6 +131,8 @@ class DataclassTabWidget(QtWidgets.QTabWidget):
             new.dataValueChanged.connect(self.currentDataValueChanged)
             new.dataEdited.connect(self.currentDataEdited)
         self._previousIndex = index
+        if not self._blockActivated:
+            self.activated.emit(index)
 
     def addDataWidget(self, widget, dataclass, icon=None, label=None) -> int:
         """Add *widget* with binding it to *dataclass*."""
