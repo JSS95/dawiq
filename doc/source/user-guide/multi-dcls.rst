@@ -511,8 +511,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-We need to define a delegate so that it can synchronize the stacked widget and the combo box.
-Caution should be made to prevent the model from being updated multiple times.
+We need to define a delegate so that it can synchronize ``DataclassStackedWidget`` and ``QComboBox``.
 
 .. code-block:: python
 
@@ -520,31 +519,19 @@ Caution should be made to prevent the model from being updated multiple times.
 
     class MyDelegate(DataclassDelegate):
 
-        def __init__(self, parent=None):
-            super().__init__(parent)
-            self._freeze_model = False
-
         def setModelData(self, editor, model, index):
-            if self._freeze_model:
-                return
             if isinstance(editor, MyWidget):
                 dcls = editor.comboBox.currentData()
-                if dcls != model.data(index, role=self.TypeRole):
-                    # stackedWidget index will be changed by the model data change
-                    model.setData(index, dcls, role=self.TypeRole)
+                model.setData(index, dcls, role=self.TypeRole)
                 self.setModelData(editor.stackedWidget, model, index)
-            else:
-                super().setModelData(editor, model, index)
+            super().setModelData(editor, model, index)
 
         def setEditorData(self, editor, index):
             if isinstance(editor, MyWidget):
                 modeldata = index.data(role=self.TypeRole)
-                self._freeze_model = True
                 editor.comboBox.setCurrentIndex(editor.comboBox.findData(modeldata))
                 self.setEditorData(editor.stackedWidget, index)
-                self._freeze_model = False
-            else:
-                super().setEditorData(editor, index)
+            super().setEditorData(editor, index)
 
     delegate = MyDelegate()
 
