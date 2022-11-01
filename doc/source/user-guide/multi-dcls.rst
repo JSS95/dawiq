@@ -77,7 +77,7 @@ Then we construct the widget with basic API, and add the dataclass types.
                 self.btn2.clicked.connect(self.toNext)
 
             def addDataclass(self, dcls):
-                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls, dcls.__name__)
 
         myWidget = MyWidget()
 
@@ -116,7 +116,7 @@ Then we construct the widget with basic API, and add the dataclass types.
                 self.btn2.clicked.connect(self.toNext)
 
             def addDataclass(self, dcls):
-                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls, dcls.__name__)
 
         myWidget = MyWidget()
 
@@ -155,7 +155,7 @@ Then we construct the widget with basic API, and add the dataclass types.
                 self.btn2.clicked.connect(self.toNext)
 
             def addDataclass(self, dcls):
-                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls, dcls.__name__)
 
         myWidget = MyWidget()
 
@@ -194,7 +194,7 @@ Then we construct the widget with basic API, and add the dataclass types.
                 self.btn2.clicked.connect(self.toNext)
 
             def addDataclass(self, dcls):
-                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls.__name__, dcls)
+                self.tabWidget.addDataWidget(dataclass2Widget(dcls), dcls, dcls.__name__)
 
         myWidget = MyWidget()
 
@@ -605,8 +605,8 @@ We also need to define a mapper so that whenever the combo box index changes the
     class MyMapper(DataclassMapper):
         def addMapping(self, widget, section, propertyname=b""):
             if isinstance(widget, MyWidget):
-                widget.comboBox.currentIndexChanged.connect(self.submit)
-                widget.stackedWidget.currentDataValueChanged.connect(self.submit)
+                widget.comboBox.activated.connect(self.submit)
+                widget.stackedWidget.currentDataEdited.connect(self.submit)
             super().addMapping(widget, section, propertyname)
 
     mapper = MyMapper()
