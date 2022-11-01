@@ -86,12 +86,12 @@ class FieldWidgetProtocol(Protocol):
 
         If *required* is True, it indicates that the field is mandatory. On such
         case, this methods checks the :meth:`fieldValue` of *self* and sets
-        ``requiresFieldData`` property of the editor widget. If the data value of
+        ``requiresFieldValue`` property of the editor widget. If the data value of
         required field is missing, the property is set to be True.
 
         .. code-block:: python
 
-            widget.setProperty("requiresFieldData", True)
+            widget.setProperty("requiresFieldValue", True)
             widget.style().unpolish(widget)
             widget.style().polish(widget)
 
@@ -105,7 +105,7 @@ class FieldWidgetProtocol(Protocol):
         .. code-block:: python
 
             qApp.setStyleSheet(
-                "*[requiresFieldData=true]{border: 1px solid red}"
+                "*[requiresFieldValue=true]{border: 1px solid red}"
             )
 
         Notes

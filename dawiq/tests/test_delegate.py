@@ -170,11 +170,11 @@ def test_highlightEmptyField(qtbot):
     editor1 = dataclass2Widget(DataClass1)
 
     highlightEmptyField(editor1, DataClass1)
-    assert editor1.widget(0).property("requiresFieldData")
+    assert editor1.widget(0).property("requiresFieldValue")
 
     editor1.setDataValue(dict(x=10))
     highlightEmptyField(editor1, DataClass1)
-    assert not editor1.widget(0).property("requiresFieldData")
+    assert not editor1.widget(0).property("requiresFieldValue")
 
     @dataclasses.dataclass
     class DataClass2:
@@ -183,11 +183,11 @@ def test_highlightEmptyField(qtbot):
     editor2 = dataclass2Widget(DataClass2)
 
     highlightEmptyField(editor2, DataClass2)
-    assert not editor2.widget(0).property("requiresFieldData")
+    assert not editor2.widget(0).property("requiresFieldValue")
 
     editor2.setDataValue(dict(x=10))
     highlightEmptyField(editor2, DataClass2)
-    assert not editor2.widget(0).property("requiresFieldData")
+    assert not editor2.widget(0).property("requiresFieldValue")
 
 
 def test_highlightEmptyField_recursive(qtbot):
@@ -203,10 +203,10 @@ def test_highlightEmptyField_recursive(qtbot):
 
     editor = dataclass2Widget(DataClass2)
     highlightEmptyField(editor, DataClass2)
-    assert editor.widget(0).widget(0).property("requiresFieldData")
-    assert not editor.widget(0).widget(1).property("requiresFieldData")
-    assert not editor.widget(1).widget(0).property("requiresFieldData")
-    assert not editor.widget(1).widget(1).property("requiresFieldData")
+    assert editor.widget(0).widget(0).property("requiresFieldValue")
+    assert not editor.widget(0).widget(1).property("requiresFieldValue")
+    assert not editor.widget(1).widget(0).property("requiresFieldValue")
+    assert not editor.widget(1).widget(1).property("requiresFieldValue")
 
 
 def test_highlightEmptyField_noDataclass(qtbot):
@@ -221,8 +221,8 @@ def test_highlightEmptyField_noDataclass(qtbot):
 
     editor = dataclass2Widget(DataClass2)
     highlightEmptyField(editor, None)
-    assert not editor.widget(0).widget(0).property("requiresFieldData")
-    assert not editor.widget(0).widget(1).property("requiresFieldData")
+    assert not editor.widget(0).widget(0).property("requiresFieldValue")
+    assert not editor.widget(0).widget(1).property("requiresFieldValue")
 
 
 @dataclasses.dataclass

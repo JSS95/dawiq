@@ -81,16 +81,16 @@ def test_BoolCheckBox_setRequired(qtbot):
     widget = BoolCheckBox()
 
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.click()
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.click()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
 
 def test_EmptyIntValidator(qtbot):
@@ -155,16 +155,16 @@ def test_IntLineEdit_setRequired(qtbot):
     widget = IntLineEdit()
 
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
     widget.setFieldValue(10)
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.clear()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
 
 
 def test_EmptyFloatValidator(qtbot):
@@ -239,16 +239,16 @@ def test_FloatLineEdit_setRequired(qtbot):
     widget = FloatLineEdit()
 
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
     widget.setFieldValue(10.0)
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.clear()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
 
 
 def test_StrLineEdit(qtbot):
@@ -304,16 +304,16 @@ def test_StrLineEdit_setRequired(qtbot):
     widget = StrLineEdit()
 
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setFieldValue("spam")
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.clear()
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
 
 def test_EnumComboBox(qtbot):
@@ -380,16 +380,16 @@ def test_EnumComboBox_setRequired(qtbot):
     widget = EnumComboBox.fromEnum(MyEnum)
 
     widget.setRequired(True)
-    assert widget.property("requiresFieldData")
+    assert widget.property("requiresFieldValue")
     widget.setCurrentIndex(1)
     widget.setRequired(True)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
     widget.setCurrentIndex(-1)
     widget.setRequired(False)
-    assert not widget.property("requiresFieldData")
+    assert not widget.property("requiresFieldValue")
 
 
 def test_TupleGroupBox_addWidget(qtbot):
@@ -542,28 +542,28 @@ def test_TupleGroupBox_setRequired(qtbot):
     widget.addWidget(IntLineEdit())
 
     widget.setRequired(True)
-    assert widget.widget(0).property("requiresFieldData")
-    assert widget.widget(1).property("requiresFieldData")
+    assert widget.widget(0).property("requiresFieldValue")
+    assert widget.widget(1).property("requiresFieldValue")
     widget.setFieldValue((None, 1))
     widget.setRequired(True)
-    assert widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
     widget.setFieldValue((0, 1))
     widget.setRequired(True)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
 
     widget.widget(0).clear()
     widget.widget(1).clear()
 
     widget.setRequired(False)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
     widget.setFieldValue((None, 1))
     widget.setRequired(False)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
     widget.setFieldValue((0, 1))
     widget.setRequired(False)
-    assert not widget.widget(0).property("requiresFieldData")
-    assert not widget.widget(1).property("requiresFieldData")
+    assert not widget.widget(0).property("requiresFieldValue")
+    assert not widget.widget(1).property("requiresFieldValue")
