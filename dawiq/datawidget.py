@@ -32,11 +32,12 @@ class DataWidget(QtWidgets.QGroupBox):
     """
     Group box for structured data.
 
-    This is the group box which contains field widgets as subwidgets.
-    :meth:`dataValue` returns the dictionary of subwidgets values and
-    :meth:`setDataValue` sets the subwidget values. Whenever the data value
-    changes, :attr:`dataValueChanged` signal is emitted. When any field is
-    edited by user, :attr:`dataEdited` signal is emitted.
+    This group box contains the field widgets as subwidgets. :meth:`dataValue`
+    returns the dictionary of field values and :meth:`setDataValue` sets the
+    values to the subwidgets.
+
+    Whenever the data value changes, :attr:`dataValueChanged` signal is emitted.
+    When any field is edited by the user, :attr:`dataEdited` signal is emitted.
 
     This widget is also used to represent the nested dataclass field, therefore
     it follows :class:`FieldWidgetProtocol`.

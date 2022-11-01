@@ -19,7 +19,6 @@ __all__ = [
 
 
 class DataclassStackedWidget(QtWidgets.QStackedWidget):
-
     """
     Stacked widget containing multiple :class:`DataWidget` and their dataclasses.
 

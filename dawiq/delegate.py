@@ -253,6 +253,9 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     * :class:`DataclassStackedWidget`
     * :class:`DataclassTabWidget`
 
+    Dataclass type is stored to the model with :attr:`TypeRole` as item data role
+    and dataclass data is stored with :attr:`DataRole`.
+
     By default, missing values are not replaced by default values of the fields.
     This is to preserve the intentional empty input by the user. Setting
     :meth:`ignoreMissing` changes this behavior.

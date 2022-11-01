@@ -29,14 +29,11 @@ class BoolCheckBox(QtWidgets.QCheckBox):
     Checkbox for fuzzy boolean value.
 
     Check state of the box represents the field value. If the box is checked, the
-    value is True. If unchecked, the value is False. ``Qt.PartiallyChecked``
-    represents ``None``.
+    value is True. If unchecked, the value is False.
 
-    Setting the field value changes the check state. Because of the nature of
-    check box, it is impossible to define empty state of the widget which means
-    that ``None`` always represent a valid value. If tristate is enabled,
-    setting ``None`` sets the state as ``Qt.PartiallyChecked``. If tristate is
-    disabled, ``None`` is treated as ``False`` and unchecks the box.
+    If tristate is enabled, setting ``None`` as the field value sets the state as
+    ``Qt.PartiallyChecked``. If tristate is disabled, ``None`` is treated as
+    ``False`` and unchecks the box.
 
     """
 
@@ -258,7 +255,8 @@ class StrLineEdit(QtWidgets.QLineEdit):
     """
     Line edit for string value.
 
-    If the line edit is empty, field data is empty string and never ``None``.
+    If the line edit is empty, field data is empty string. Setting ``None`` as
+    the field value clears the widget.
 
     """
 
