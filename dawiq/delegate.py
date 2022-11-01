@@ -275,7 +275,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
-            index.model().setData(index, dcls, role=self.TypeRole)
+            model.setData(index, dcls, role=self.TypeRole)
             self.setModelData(editor.currentWidget(), model, index)
 
         elif isinstance(editor, DataWidget):
@@ -283,7 +283,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             data = editor.dataValue()
             if dcls is not None:
                 data = convertFromQt(dcls, data, self.ignoreMissing())
-            index.model().setData(index, data, role=self.DataRole)
+            model.setData(index, data, role=self.DataRole)
 
         super().setModelData(editor, model, index)
 
