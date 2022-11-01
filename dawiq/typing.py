@@ -25,7 +25,6 @@ class DataclassProtocol(Protocol):
 class FieldWidgetProtocol(Protocol):
     """Type annotation for field widget object."""
 
-    dataValueChanged: QtCore.Signal  # to be deleted
     fieldValueChanged: QtCore.Signal
     fieldEdited: QtCore.Signal
 
@@ -66,48 +65,6 @@ class FieldWidgetProtocol(Protocol):
         """
         ...
 
-    def dataValue(self) -> Any:
-        """
-        Data value that the widget represents.
-
-        This is the API for the delegate to get the data from the widget.
-        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
-        this method converts the current check state to :class:`bool` and
-        returns.
-
-        If the data value is :obj:`None`, it typically indicates that the widget
-        is empty and the delegate should specially handle it. One of the few
-        exceptions is :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
-        where :obj:`None` indicates partially checked state.
-
-        When the data value is changed by user input, :attr:`dataValueChanged`
-        signal must emit the new value.
-
-        """
-        ...
-
-    def setDataValue(self, value: Any):
-        """
-        Set the data value to the widget.
-
-        This method is the API for the delegate to set the data to the widget.
-        For example, in :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>`
-        this method converts :class:`bool` to :obj:`Qt.CheckState` and sets to
-        the widget.
-
-        If the data value is :obj:`None`, it typically means that the value is
-        null and the widget should be cleared. One of the few exceptions is
-        :class:`BoolCheckBox <dawiq.fieldwidgets.BoolCheckBox>` where :obj:`None`
-        indicates fuzzy boolean value.
-
-        For valid *value*, its type must be strictly checked and :obj:`TypeError`
-        must be raised on invalid input.
-
-        This method MUST NOT emit :attr:`dataValueChanged` signal, as doing so
-        can cause infinite loop in nested widgets.
-        """
-        ...
-
     def fieldName(self) -> str:
         """
         Name of the field.
@@ -128,7 +85,7 @@ class FieldWidgetProtocol(Protocol):
         Set if *self* represents a required field.
 
         If *required* is True, it indicates that the field is mandatory. On such
-        case, this methods checks the :meth:`dataValue` of *self* and sets
+        case, this methods checks the :meth:`fieldValue` of *self* and sets
         ``requiresFieldData`` property of the editor widget. If the data value of
         required field is missing, the property is set to be True.
 

@@ -244,7 +244,14 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     """
     Delegate to update the model and the data widget.
 
-    This delegate stores dataclass type and dataclass data to the model.
+    This delegate stores dataclass type and dataclass data to the model, and
+    updates the data widget with model data.
+
+    Supported data widgets are:
+
+    * :class:`DataWidget`
+    * :class:`DataclassStackedWidget`
+    * :class:`DataclassTabWidget`
 
     By default, missing values are not replaced by default values of the fields.
     This is to preserve the intentional empty input by the user. Setting
@@ -305,9 +312,13 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
 
 class DataclassMapper(QtWidgets.QDataWidgetMapper):
     """
-    Mapper between the :class:`DataWidget` and the model.
+    Mapper between the data widget and the model.
 
-    Default submit policy is ``SubmitPolicy.ManualSubmit``.
+    Supported data widgets are:
+
+    * :class:`DataWidget`
+    * :class:`DataclassStackedWidget`
+    * :class:`DataclassTabWidget`
 
     Notes
     =====
