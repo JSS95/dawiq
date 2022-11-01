@@ -228,8 +228,11 @@ Try change the model index and the editor data, and see if the data is stored an
 
    Widget with model
 
-Note that the dataclass defines default value, but the widget is still empty.
-Default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
+Default value example
+=====================
+
+In the previous example, the dataclass defines default value but the widget is still empty.
+It is because default value is not updated to the model and to the empty widget, in order to distinguish the intensional empty input by the user.
 
 To make default values applied to missing fields, set :meth:`.DataclassDelegate.ignoreMissing` to ``False``.
 
