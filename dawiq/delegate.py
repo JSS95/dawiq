@@ -278,7 +278,7 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
     def setModelData(self, editor, model, index):
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
             dcls = editor.currentDataclass()
-            model.setData(index, dcls, role=self.TypeRole)
+            self.cacheModelData(model, index, dcls, self.TypeRole)
             self.setModelData(editor.currentWidget(), model, index)
 
         elif isinstance(editor, DataWidget):
@@ -286,9 +286,24 @@ class DataclassDelegate(QtWidgets.QStyledItemDelegate):
             data = editor.dataValue()
             if dcls is not None:
                 data = convertFromQt(dcls, data, self.ignoreMissing())
-            model.setData(index, data, role=self.DataRole)
+            self.cacheModelData(model, index, data, self.DataRole)
 
         super().setModelData(editor, model, index)
+
+    @classmethod
+    def cacheModelData(cls, model, index, value, role):
+        """
+        Cache the *value* to *model*'s *index* with *role* so that ``submit()``
+        method of *model* can permanently store the data.
+
+        Caching API is not defined for general ``QAbstractItemModel``. So by
+        default, this method just stores the data to the model without caching.
+
+        Subclass may reimplement this method to actually cache the data to the
+        model.
+
+        """
+        model.setData(index, value, role)
 
     def setEditorData(self, editor, index):
         if isinstance(editor, (DataclassStackedWidget, DataclassTabWidget)):
