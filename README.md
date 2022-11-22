@@ -25,7 +25,6 @@ Here is a simple dataclass:
 
 ```python
 from dataclasses import dataclass
-from typing import Tuple
 
 @dataclass
 class DataClass:
