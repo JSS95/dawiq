@@ -65,10 +65,7 @@ setup(
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
-        (
-            "License :: OSI Approved :: "
-            "GNU Library or Lesser General Public License (LGPL)"
-        ),
+        "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
@@ -84,7 +81,7 @@ setup(
     maintainer="Jisoo Song",
     maintainer_email="jeesoo9595@snu.ac.kr",
     url="https://github.com/JSS95/dawiq",
-    license="LGPL",
+    license="MIT",
     packages=find_packages(),
     package_data=get_package_data(),
     install_requires=read_requirements("requirements/install.txt"),
