@@ -121,10 +121,6 @@ class QtAPI:
             msg = "Supported Qt not installed.\n" + errors
             raise QtAPIError(msg)
 
-        if self.qt_binding in ("PyQt5", "PyQt6"):
-            self.QtCore.Signal = self.QtCore.pyqtSignal
-            self.QtCore.Slot = self.QtCore.pyqtSlot
-
         def _import_module(module_name):
             m = __import__(self.qt_binding, globals(), locals(), [module_name], 0)
             return getattr(m, module_name)
@@ -132,6 +128,10 @@ class QtAPI:
         self.QtCore = _import_module("QtCore")
         self.QtWidgets = _import_module("QtWidgets")
         self.QtGui = _import_module("QtGui")
+
+        if self.qt_binding in ("PyQt5", "PyQt6"):
+            self.QtCore.Signal = self.QtCore.pyqtSignal
+            self.QtCore.Slot = self.QtCore.pyqtSlot
 
 
 class QtAPIError(Exception):
