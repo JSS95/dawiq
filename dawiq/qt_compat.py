@@ -23,7 +23,7 @@ Notes
 
 This module is not part of public API, therefore users must not rely on it.
 
-Based on https://github.com/pytest-dev/pytest-qt.
+Based on from https://github.com/pytest-dev/pytest-qt.
 
 """
 
