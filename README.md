@@ -28,8 +28,8 @@ from dataclasses import dataclass
 
 @dataclass
 class DataClass:
-    a: int
-    b: bool
+    x: int
+    y: bool
 ```
 
 DaWiQ can build a widget from this dataclass. For PySide6 example,
