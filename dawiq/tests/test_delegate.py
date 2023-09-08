@@ -56,7 +56,7 @@ def test_convertFromQt_defaultvalue():
             metadata=dict(fromQt_converter=lambda arg: CustomField(arg))
         )
         y: CustomField = dataclasses.field(
-            default=CustomField(0),
+            default_factory=lambda: CustomField(0),
             metadata=dict(fromQt_converter=lambda arg: CustomField(arg)),
         )
         z: int = 3
@@ -70,7 +70,7 @@ def test_convertFromQt_defaultvalue():
     @dataclasses.dataclass
     class Cls1:
         a: Cls0
-        b: Cls0 = Cls0(x=CustomField(1))
+        b: Cls0 = dataclasses.field(default_factory=lambda: Cls0(x=CustomField(1)))
 
     assert convertFromQt(
         Cls1, dict(a=dict(x=1, y=2, z=5), b=dict(x=3, y=2, z=1))
@@ -87,7 +87,7 @@ def test_convertFromQt_defaultvalue():
     @dataclasses.dataclass
     class Cls2:
         c: Cls1
-        d: Cls1 = Cls1(Cls0(CustomField(10)))
+        d: Cls1 = dataclasses.field(default_factory=lambda: Cls1(Cls0(CustomField(10))))
 
     assert convertFromQt(Cls2, dict()) == dict()
 
@@ -136,7 +136,7 @@ def test_convertToQt_defaultvalue():
             metadata=dict(toQt_converter=lambda val: val.x)
         )
         y: CustomField = dataclasses.field(
-            default=CustomField(0),
+            default_factory=lambda: CustomField(0),
             metadata=dict(toQt_converter=lambda val: val.x),
         )
         z: int = 3
@@ -146,7 +146,7 @@ def test_convertToQt_defaultvalue():
     @dataclasses.dataclass
     class Cls1:
         a: Cls0
-        b: Cls0 = Cls0(x=CustomField(1))
+        b: Cls0 = dataclasses.field(default_factory=lambda: Cls0(x=CustomField(1)))
 
     assert convertToQt(Cls1, dict()) == dict(a=None, b=None)
     assert convertToQt(Cls1, dict(b=dict())) == dict(
@@ -156,7 +156,7 @@ def test_convertToQt_defaultvalue():
     @dataclasses.dataclass
     class Cls2:
         c: Cls1
-        d: Cls1 = Cls1(Cls0(CustomField(10)))
+        d: Cls1 = dataclasses.field(default_factory=lambda: Cls1(Cls0(CustomField(10))))
 
     assert convertToQt(Cls2, dict()) == dict(c=None, d=None)
     assert convertToQt(Cls2, dict(d=dict())) == dict(c=None, d=dict(a=None, b=None))
@@ -199,7 +199,7 @@ def test_highlightEmptyField_recursive(qtbot):
     @dataclasses.dataclass
     class DataClass2:
         a: DataClass1
-        b: DataClass1 = DataClass1(1, 2)
+        b: DataClass1 = dataclasses.field(default_factory=lambda: DataClass1(1, 2))
 
     editor = dataclass2Widget(DataClass2)
     highlightEmptyField(editor, DataClass2)
