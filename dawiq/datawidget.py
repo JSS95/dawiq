@@ -17,8 +17,8 @@ from .fieldwidgets import (
 )
 import dataclasses
 from enum import Enum
-from typing import Optional, Any, Union, Type, Callable, Dict, get_type_hints
-from .typing import FieldWidgetProtocol, DataclassProtocol
+from typing import Optional, Any, Union, Callable, Dict, get_type_hints
+from .typing import FieldWidgetProtocol
 
 
 __all__ = [
@@ -247,7 +247,7 @@ def type2Widget(t: Any) -> FieldWidgetProtocol:
 
 
 def dataclass2Widget(
-    dcls: Type[DataclassProtocol],
+    dcls,
     field_converter: Callable[[Any], FieldWidgetProtocol] = type2Widget,
     orientation: QtCore.Qt.Orientation = QtCore.Qt.Orientation.Vertical,
     globalns: Optional[Dict] = None,
