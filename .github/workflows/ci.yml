@@ -66,6 +66,11 @@ jobs:
         os : [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.9", "3.10", "3.11"]
         qt: [PySide2, PySide6, PyQt5, PyQt6]
+        exclude:
+          # Not installable:
+          - os: windows-latest
+            python: "3.11"
+            qt: pyside2
 
     steps:
 
