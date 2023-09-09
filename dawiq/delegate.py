@@ -8,9 +8,7 @@ import dataclasses
 from .qt_compat import QtWidgets, TypeRole, DataRole
 from .datawidget import DataWidget
 from .multitype import DataclassStackedWidget, DataclassTabWidget
-from .typing import DataclassProtocol
-from typing import Type, Dict, Any, Optional
-
+from typing import Dict, Any
 
 __all__ = [
     "convertFromQt",
@@ -22,7 +20,7 @@ __all__ = [
 
 
 def convertFromQt(
-    dcls: Type[DataclassProtocol],
+    dcls,
     data: Dict[str, Any],
     ignoreMissing=True,
 ) -> Dict[str, Any]:
@@ -116,7 +114,7 @@ def convertFromQt(
 
 
 def convertToQt(
-    dcls: Type[DataclassProtocol],
+    dcls,
     data: Dict[str, Any],
     ignoreMissing=True,
 ) -> Dict[str, Any]:
@@ -207,7 +205,7 @@ def convertToQt(
     return ret
 
 
-def highlightEmptyField(editor: DataWidget, dcls: Optional[Type[DataclassProtocol]]):
+def highlightEmptyField(editor: DataWidget, dcls):
     """Recursively highlight the empty field whose data is required."""
     if dcls is None:
         editor.setRequired(False)
