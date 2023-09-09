@@ -37,9 +37,7 @@ repository = "https://github.com/JSS95/dawiq"
 
 [project.optional-dependencies]
 test = [
-    "black",
     "cattrs",
-    "flake8",
     "mypy",
     "pytest",
     "pytest-qt",
