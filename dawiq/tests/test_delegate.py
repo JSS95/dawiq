@@ -18,7 +18,7 @@ def test_convertFromQt():
             self.x = x
 
         def __eq__(self, other):
-            return type(self) == type(other) and self.x == other.x
+            return type(self) is type(other) and self.x == other.x
 
     @dataclasses.dataclass
     class Cls0:
@@ -48,7 +48,7 @@ def test_convertFromQt_defaultvalue():
             self.x = x
 
         def __eq__(self, other):
-            return type(self) == type(other) and self.x == other.x
+            return type(self) is type(other) and self.x == other.x
 
     @dataclasses.dataclass
     class Cls0:
@@ -98,7 +98,7 @@ def test_convertToQt():
             self.x = x
 
         def __eq__(self, other):
-            return type(self) == type(other) and self.x == other.x
+            return type(self) is type(other) and self.x == other.x
 
     @dataclasses.dataclass
     class Cls0:
@@ -128,7 +128,7 @@ def test_convertToQt_defaultvalue():
             self.x = x
 
         def __eq__(self, other):
-            return type(self) == type(other) and self.x == other.x
+            return type(self) is type(other) and self.x == other.x
 
     @dataclasses.dataclass
     class Cls0:
