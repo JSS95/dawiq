@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "dawiq"
+description = "Package to construct Qt widgets from dataclasses"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+keywords = ["Dataclass", "GUI"]
+authors = [
+    {name = "Jisoo Song", email = "jeesoo9595@snu.ac.kr"}
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Software Development :: User Interfaces",
+    "Topic :: Software Development :: Widget Sets",
+]
+dependencies = [
+]
+dynamic = [
+    "version",
+]
+
+[project.urls]
+repository = "https://github.com/JSS95/dawiq"
+
+[project.optional-dependencies]
+test = [
+    "cattrs",
+    "mypy",
+    "pytest",
+    "pytest-qt",
+]
+test-ci = [
+    "dawiq[test]",
+    "pytest-xvfb",
+]
+doc = [
+    "numpydoc",
+    "sphinx < 5.2",
+    "sphinx_code_tabs",
+    "sphinx_rtd_theme",
+]
+full = ["dawiq[test,doc]"]
+
+[tool.setuptools.dynamic]
+version = {attr = "dawiq.version.__version__"}
