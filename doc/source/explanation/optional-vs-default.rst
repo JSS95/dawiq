@@ -62,121 +62,121 @@ How will the data widget from ``DataClass`` be?
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. tab:: PySide6
 
-        from PySide6.QtGui import QStandardItemModel, QStandardItem
-        from PySide6.QtWidgets import QApplication
-        from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
-        import sys
+        .. code-block:: python
+            from PySide6.QtGui import QStandardItemModel, QStandardItem
+            from PySide6.QtWidgets import QApplication
+            from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
+            import sys
 
-        model = QStandardItemModel()
-        item = QStandardItem()
-        item.setData(DataClass, role=DataclassDelegate.TypeRole)
-        model.appendRow(item)
+            model = QStandardItemModel()
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-        delegate = DataclassDelegate()
-        mapper = DataclassMapper()
-        mapper.setItemDelegate(delegate)
-        mapper.setModel(model)
+            delegate = DataclassDelegate()
+            mapper = DataclassMapper()
+            mapper.setItemDelegate(delegate)
+            mapper.setModel(model)
 
-        app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
+            app = QApplication(sys.argv)
+            app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
-        widget = dataclass2Widget(DataClass)
-        mapper.addMapping(widget, 0)
-        mapper.setCurrentIndex(0)
+            widget = dataclass2Widget(DataClass)
+            mapper.addMapping(widget, 0)
+            mapper.setCurrentIndex(0)
 
-        widget.show()
-        app.exec()
-        app.quit()
+            widget.show()
+            app.exec()
+            app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. tab:: PyQt6
 
-        from PyQt6.QtGui import QStandardItemModel, QStandardItem
-        from PyQt6.QtWidgets import QApplication
-        from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
-        import sys
+        .. code-block:: python
+            from PyQt6.QtGui import QStandardItemModel, QStandardItem
+            from PyQt6.QtWidgets import QApplication
+            from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
+            import sys
 
-        model = QStandardItemModel()
-        item = QStandardItem()
-        item.setData(DataClass, role=DataclassDelegate.TypeRole)
-        model.appendRow(item)
+            model = QStandardItemModel()
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-        delegate = DataclassDelegate()
-        mapper = DataclassMapper()
-        mapper.setItemDelegate(delegate)
-        mapper.setModel(model)
+            delegate = DataclassDelegate()
+            mapper = DataclassMapper()
+            mapper.setItemDelegate(delegate)
+            mapper.setModel(model)
 
-        app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
+            app = QApplication(sys.argv)
+            app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
-        widget = dataclass2Widget(DataClass)
-        mapper.addMapping(widget, 0)
-        mapper.setCurrentIndex(0)
+            widget = dataclass2Widget(DataClass)
+            mapper.addMapping(widget, 0)
+            mapper.setCurrentIndex(0)
 
-        widget.show()
-        app.exec()
-        app.quit()
+            widget.show()
+            app.exec()
+            app.quit()
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. tab:: PySide2
 
-        from PySide2.QtGui import QStandardItemModel, QStandardItem
-        from PySide2.QtWidgets import QApplication
-        from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
-        import sys
+        .. code-block:: python
+            from PySide2.QtGui import QStandardItemModel, QStandardItem
+            from PySide2.QtWidgets import QApplication
+            from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
+            import sys
 
-        model = QStandardItemModel()
-        item = QStandardItem()
-        item.setData(DataClass, role=DataclassDelegate.TypeRole)
-        model.appendRow(item)
+            model = QStandardItemModel()
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-        delegate = DataclassDelegate()
-        mapper = DataclassMapper()
-        mapper.setItemDelegate(delegate)
-        mapper.setModel(model)
+            delegate = DataclassDelegate()
+            mapper = DataclassMapper()
+            mapper.setItemDelegate(delegate)
+            mapper.setModel(model)
 
-        app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
+            app = QApplication(sys.argv)
+            app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
-        widget = dataclass2Widget(DataClass)
-        mapper.addMapping(widget, 0)
-        mapper.setCurrentIndex(0)
+            widget = dataclass2Widget(DataClass)
+            mapper.addMapping(widget, 0)
+            mapper.setCurrentIndex(0)
 
-        widget.show()
-        app.exec_()
-        app.quit()
+            widget.show()
+            app.exec_()
+            app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. tab:: PyQt5
 
-        from PyQt5.QtGui import QStandardItemModel, QStandardItem
-        from PyQt5.QtWidgets import QApplication
-        from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
-        import sys
+        .. code-block:: python
+            from PyQt5.QtGui import QStandardItemModel, QStandardItem
+            from PyQt5.QtWidgets import QApplication
+            from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
+            import sys
 
-        model = QStandardItemModel()
-        item = QStandardItem()
-        item.setData(DataClass, role=DataclassDelegate.TypeRole)
-        model.appendRow(item)
+            model = QStandardItemModel()
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-        delegate = DataclassDelegate()
-        mapper = DataclassMapper()
-        mapper.setItemDelegate(delegate)
-        mapper.setModel(model)
+            delegate = DataclassDelegate()
+            mapper = DataclassMapper()
+            mapper.setItemDelegate(delegate)
+            mapper.setModel(model)
 
-        app = QApplication(sys.argv)
-        app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
+            app = QApplication(sys.argv)
+            app.setStyleSheet("*[requiresFieldValue=true]{border: 1px solid red}")
 
-        widget = dataclass2Widget(DataClass)
-        mapper.addMapping(widget, 0)
-        mapper.setCurrentIndex(0)
+            widget = dataclass2Widget(DataClass)
+            mapper.addMapping(widget, 0)
+            mapper.setCurrentIndex(0)
 
-        widget.show()
-        app.exec()
-        app.quit()
+            widget.show()
+            app.exec()
+            app.quit()
 
 
 .. figure:: ../_images/optionalfield-example.jpg
