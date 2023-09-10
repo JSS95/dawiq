@@ -45,8 +45,7 @@ Then we construct the widget with basic API, and add the dataclass types.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PySide6.QtCore import Signal
@@ -84,8 +83,7 @@ Then we construct the widget with basic API, and add the dataclass types.
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PyQt6.QtCore import pyqtSignal
@@ -123,8 +121,7 @@ Then we construct the widget with basic API, and add the dataclass types.
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PySide2.QtCore import Signal
@@ -162,8 +159,7 @@ Then we construct the widget with basic API, and add the dataclass types.
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from PyQt5.QtCore import pyqtSignal
@@ -206,8 +202,7 @@ Now we construct a model with two items, each having different data types.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -218,8 +213,7 @@ Now we construct a model with two items, each having different data types.
             item.setData(dcls, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -230,8 +224,7 @@ Now we construct a model with two items, each having different data types.
             item.setData(dcls, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -242,8 +235,7 @@ Now we construct a model with two items, each having different data types.
             item.setData(dcls, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -274,8 +266,7 @@ Now let's set the data and display the widget.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -284,8 +275,7 @@ Now let's set the data and display the widget.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -294,8 +284,7 @@ Now let's set the data and display the widget.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -304,8 +293,7 @@ Now let's set the data and display the widget.
         app.exec_()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -335,8 +323,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
         from PySide6.QtCore import Signal
@@ -379,8 +366,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
         from PyQt6.QtCore import pyqtSignal
@@ -423,8 +409,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
         from PySide2.QtCore import Signal
@@ -467,8 +452,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
         for dcls in [DataClass1, DataClass2]:
             myWidget.addDataclass(dcls)
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
         from PyQt5.QtCore import pyqtSignal
@@ -539,8 +523,7 @@ Now we construct a model with two items, each having different data types.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtGui import QStandardItemModel, QStandardItem
 
@@ -550,8 +533,7 @@ Now we construct a model with two items, each having different data types.
             item.setData(dcls, role=delegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
@@ -561,8 +543,7 @@ Now we construct a model with two items, each having different data types.
             item.setData(dcls, role=delegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtGui import QStandardItemModel, QStandardItem
 
@@ -572,8 +553,7 @@ Now we construct a model with two items, each having different data types.
             item.setData(dcls, role=delegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
@@ -614,8 +594,7 @@ Now let's set the data and display the widget.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -624,8 +603,7 @@ Now let's set the data and display the widget.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -634,8 +612,7 @@ Now let's set the data and display the widget.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
@@ -644,8 +621,7 @@ Now let's set the data and display the widget.
         app.exec_()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
         model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)

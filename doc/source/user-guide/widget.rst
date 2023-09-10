@@ -30,8 +30,7 @@ We then create a widget and display it.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtWidgets import QApplication
         from dawiq import dataclass2Widget
@@ -43,8 +42,7 @@ We then create a widget and display it.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtWidgets import QApplication
         from dawiq import dataclass2Widget
@@ -56,8 +54,7 @@ We then create a widget and display it.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtWidgets import QApplication
         from dawiq import dataclass2Widget
@@ -69,8 +66,7 @@ We then create a widget and display it.
         app.exec_()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtWidgets import QApplication
         from dawiq import dataclass2Widget

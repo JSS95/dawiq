@@ -28,8 +28,7 @@ We construct a simple model with one item.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -39,8 +38,7 @@ We construct a simple model with one item.
         item.setData(DataClass, role=DataclassDelegate.TypeRole)
         model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -50,8 +48,7 @@ We construct a simple model with one item.
         item.setData(DataClass, role=DataclassDelegate.TypeRole)
         model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -61,8 +58,7 @@ We construct a simple model with one item.
         item.setData(DataClass, role=DataclassDelegate.TypeRole)
         model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -88,8 +84,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtWidgets import QApplication
         from dawiq import dataclass2Widget
@@ -106,8 +101,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtWidgets import QApplication
         from dawiq import dataclass2Widget
@@ -124,8 +118,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtWidgets import QApplication
         from dawiq import dataclass2Widget
@@ -142,8 +135,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
         app.exec_()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtWidgets import QApplication
         from dawiq import dataclass2Widget

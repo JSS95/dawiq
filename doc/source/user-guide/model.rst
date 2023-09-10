@@ -41,8 +41,7 @@ Then we construct a model with two items, each storing the dataclass type which 
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -53,8 +52,7 @@ Then we construct a model with two items, each storing the dataclass type which 
             item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -65,8 +63,7 @@ Then we construct a model with two items, each storing the dataclass type which 
             item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -77,8 +74,7 @@ Then we construct a model with two items, each storing the dataclass type which 
             item.setData(DataClass, role=DataclassDelegate.TypeRole)
             model.appendRow(item)
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtGui import QStandardItemModel, QStandardItem
         from dawiq import DataclassDelegate
@@ -108,8 +104,7 @@ The widget consists of:
 
 .. tabs::
 
-    .. code-tab:: python
-        :caption: PySide6
+    .. code-tab:: python PySide6
 
         from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from dawiq import dataclass2Widget
@@ -136,8 +131,7 @@ The widget consists of:
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt6
+    .. code-tab:: python PyQt6
 
         from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from dawiq import dataclass2Widget
@@ -164,8 +158,7 @@ The widget consists of:
         app.exec()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PySide2
+    .. code-tab:: python PySide2
 
         from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from dawiq import dataclass2Widget
@@ -192,8 +185,7 @@ The widget consists of:
         app.exec_()
         app.quit()
 
-    .. code-tab:: python
-        :caption: PyQt5
+    .. code-tab:: python PyQt5
 
         from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
         from dawiq import dataclass2Widget
