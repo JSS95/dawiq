@@ -65,6 +65,7 @@ How will the data widget from ``DataClass`` be?
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtGui import QStandardItemModel, QStandardItem
             from PySide6.QtWidgets import QApplication
             from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
@@ -94,6 +95,7 @@ How will the data widget from ``DataClass`` be?
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtGui import QStandardItemModel, QStandardItem
             from PyQt6.QtWidgets import QApplication
             from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
@@ -123,6 +125,7 @@ How will the data widget from ``DataClass`` be?
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtGui import QStandardItemModel, QStandardItem
             from PySide2.QtWidgets import QApplication
             from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget
@@ -152,6 +155,7 @@ How will the data widget from ``DataClass`` be?
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtGui import QStandardItemModel, QStandardItem
             from PyQt5.QtWidgets import QApplication
             from dawiq import DataclassDelegate, DataclassMapper, dataclass2Widget

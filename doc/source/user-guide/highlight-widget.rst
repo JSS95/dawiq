@@ -31,6 +31,7 @@ We construct a simple model with one item.
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -42,6 +43,7 @@ We construct a simple model with one item.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -53,6 +55,7 @@ We construct a simple model with one item.
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -64,6 +67,7 @@ We construct a simple model with one item.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -91,6 +95,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtWidgets import QApplication
             from dawiq import dataclass2Widget
             import sys
@@ -109,6 +114,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtWidgets import QApplication
             from dawiq import dataclass2Widget
             import sys
@@ -127,6 +133,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtWidgets import QApplication
             from dawiq import dataclass2Widget
             import sys
@@ -145,6 +152,7 @@ Before running the application, we set the style sheet to :class:`QApplication`.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtWidgets import QApplication
             from dawiq import dataclass2Widget
             import sys

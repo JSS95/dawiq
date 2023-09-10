@@ -48,6 +48,7 @@ Then we construct the widget with basic API, and add the dataclass types.
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from PySide6.QtCore import Signal
             from dawiq import DataclassTabWidget, dataclass2Widget
@@ -87,6 +88,7 @@ Then we construct the widget with basic API, and add the dataclass types.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from PyQt6.QtCore import pyqtSignal
             from dawiq import DataclassTabWidget, dataclass2Widget
@@ -126,6 +128,7 @@ Then we construct the widget with basic API, and add the dataclass types.
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from PySide2.QtCore import Signal
             from dawiq import DataclassTabWidget, dataclass2Widget
@@ -165,6 +168,7 @@ Then we construct the widget with basic API, and add the dataclass types.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from PyQt5.QtCore import pyqtSignal
             from dawiq import DataclassTabWidget, dataclass2Widget
@@ -209,6 +213,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -221,6 +226,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -233,6 +239,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -245,6 +252,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -277,6 +285,7 @@ Now let's set the data and display the widget.
     .. tab:: PySide6
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -287,6 +296,7 @@ Now let's set the data and display the widget.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -297,6 +307,7 @@ Now let's set the data and display the widget.
     .. tab:: PySide2
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -307,6 +318,7 @@ Now let's set the data and display the widget.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -338,6 +350,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
             from PySide6.QtCore import Signal
             from dawiq import DataclassStackedWidget, dataclass2Widget
@@ -382,6 +395,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
             from PyQt6.QtCore import pyqtSignal
             from dawiq import DataclassStackedWidget, dataclass2Widget
@@ -426,6 +440,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
             from PySide2.QtCore import Signal
             from dawiq import DataclassStackedWidget, dataclass2Widget
@@ -470,6 +485,7 @@ Dataclasses are same to :ref:`multi-dcls-basic`, so we go directly to widget con
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QComboBox, QPushButton
             from PyQt5.QtCore import pyqtSignal
             from dawiq import DataclassStackedWidget, dataclass2Widget
@@ -542,6 +558,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtGui import QStandardItemModel, QStandardItem
 
             model = QStandardItemModel()
@@ -553,6 +570,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtGui import QStandardItemModel, QStandardItem
 
             model = QStandardItemModel()
@@ -564,6 +582,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtGui import QStandardItemModel, QStandardItem
 
             model = QStandardItemModel()
@@ -575,6 +594,7 @@ Now we construct a model with two items, each having different data types.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtGui import QStandardItemModel, QStandardItem
 
             model = QStandardItemModel()
@@ -617,6 +637,7 @@ Now let's set the data and display the widget.
     .. tab:: PySide6
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -627,6 +648,7 @@ Now let's set the data and display the widget.
     .. tab:: PyQt6
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -637,6 +659,7 @@ Now let's set the data and display the widget.
     .. tab:: PySide2
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 
@@ -647,6 +670,7 @@ Now let's set the data and display the widget.
     .. tab:: PyQt5
 
         .. code-block:: python
+
             model.setData(model.index(0, 0), dict(x=1.0), delegate.DataRole)
             model.setData(model.index(1, 0), dict(y=2), delegate.DataRole)
 

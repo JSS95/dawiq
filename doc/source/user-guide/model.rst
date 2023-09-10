@@ -44,6 +44,7 @@ Then we construct a model with two items, each storing the dataclass type which 
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -56,6 +57,7 @@ Then we construct a model with two items, each storing the dataclass type which 
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -68,6 +70,7 @@ Then we construct a model with two items, each storing the dataclass type which 
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -80,6 +83,7 @@ Then we construct a model with two items, each storing the dataclass type which 
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtGui import QStandardItemModel, QStandardItem
             from dawiq import DataclassDelegate
 
@@ -111,6 +115,7 @@ The widget consists of:
     .. tab:: PySide6
 
         .. code-block:: python
+
             from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from dawiq import dataclass2Widget
             import sys
@@ -139,6 +144,7 @@ The widget consists of:
     .. tab:: PyQt6
 
         .. code-block:: python
+
             from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from dawiq import dataclass2Widget
             import sys
@@ -167,6 +173,7 @@ The widget consists of:
     .. tab:: PySide2
 
         .. code-block:: python
+
             from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from dawiq import dataclass2Widget
             import sys
@@ -195,6 +202,7 @@ The widget consists of:
     .. tab:: PyQt5
 
         .. code-block:: python
+
             from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
             from dawiq import dataclass2Widget
             import sys
