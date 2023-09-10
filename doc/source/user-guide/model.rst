@@ -41,57 +41,49 @@ Then we construct a model with two items, each storing the dataclass type which 
 
 .. tabs::
 
-    .. tab:: PySide6
+    .. code-tab:: python PySide6
 
-        .. code-block:: python
+        from PySide6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
-            from PySide6.QtGui import QStandardItemModel, QStandardItem
-            from dawiq import DataclassDelegate
+        model = QStandardItemModel()
+        for _ in range(2):
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-            model = QStandardItemModel()
-            for _ in range(2):
-                item = QStandardItem()
-                item.setData(DataClass, role=DataclassDelegate.TypeRole)
-                model.appendRow(item)
+    .. code-tab:: python PyQt6
 
-    .. tab:: PyQt6
+        from PyQt6.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
-        .. code-block:: python
+        model = QStandardItemModel()
+        for _ in range(2):
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-            from PyQt6.QtGui import QStandardItemModel, QStandardItem
-            from dawiq import DataclassDelegate
+    .. code-tab:: python PySide2
 
-            model = QStandardItemModel()
-            for _ in range(2):
-                item = QStandardItem()
-                item.setData(DataClass, role=DataclassDelegate.TypeRole)
-                model.appendRow(item)
+        from PySide2.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
-    .. tab:: PySide2
+        model = QStandardItemModel()
+        for _ in range(2):
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
-        .. code-block:: python
+    .. code-tab:: python PyQt5
 
-            from PySide2.QtGui import QStandardItemModel, QStandardItem
-            from dawiq import DataclassDelegate
+        from PyQt5.QtGui import QStandardItemModel, QStandardItem
+        from dawiq import DataclassDelegate
 
-            model = QStandardItemModel()
-            for _ in range(2):
-                item = QStandardItem()
-                item.setData(DataClass, role=DataclassDelegate.TypeRole)
-                model.appendRow(item)
-
-    .. tab:: PyQt5
-
-        .. code-block:: python
-
-            from PyQt5.QtGui import QStandardItemModel, QStandardItem
-            from dawiq import DataclassDelegate
-
-            model = QStandardItemModel()
-            for _ in range(2):
-                item = QStandardItem()
-                item.setData(DataClass, role=DataclassDelegate.TypeRole)
-                model.appendRow(item)
+        model = QStandardItemModel()
+        for _ in range(2):
+            item = QStandardItem()
+            item.setData(DataClass, role=DataclassDelegate.TypeRole)
+            model.appendRow(item)
 
 Now we construct the delegate and the mapper.
 
@@ -112,121 +104,113 @@ The widget consists of:
 
 .. tabs::
 
-    .. tab:: PySide6
+    .. code-tab:: python PySide6
 
-        .. code-block:: python
+        from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
 
-            from PySide6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
-            from dawiq import dataclass2Widget
-            import sys
+        app = QApplication(sys.argv)
 
-            app = QApplication(sys.argv)
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
 
-            widget = QWidget()
-            widget.setLayout(QVBoxLayout())
-            dataWidget = dataclass2Widget(DataClass)
-            widget.layout().addWidget(dataWidget)
-            btn1 = QPushButton("Previous")
-            widget.layout().addWidget(btn1)
-            btn2 = QPushButton("Next")
-            widget.layout().addWidget(btn2)
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
 
-            btn1.clicked.connect(mapper.toPrevious)
-            btn2.clicked.connect(mapper.toNext)
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
 
-            mapper.addMapping(dataWidget, 0)
-            mapper.setCurrentIndex(0)
+        widget.show()
+        app.exec()
+        app.quit()
 
-            widget.show()
-            app.exec()
-            app.quit()
+    .. code-tab:: python PyQt6
 
-    .. tab:: PyQt6
+        from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
 
-        .. code-block:: python
+        app = QApplication(sys.argv)
 
-            from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
-            from dawiq import dataclass2Widget
-            import sys
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
 
-            app = QApplication(sys.argv)
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
 
-            widget = QWidget()
-            widget.setLayout(QVBoxLayout())
-            dataWidget = dataclass2Widget(DataClass)
-            widget.layout().addWidget(dataWidget)
-            btn1 = QPushButton("Previous")
-            widget.layout().addWidget(btn1)
-            btn2 = QPushButton("Next")
-            widget.layout().addWidget(btn2)
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
 
-            btn1.clicked.connect(mapper.toPrevious)
-            btn2.clicked.connect(mapper.toNext)
+        widget.show()
+        app.exec()
+        app.quit()
 
-            mapper.addMapping(dataWidget, 0)
-            mapper.setCurrentIndex(0)
+    .. code-tab:: python PySide2
 
-            widget.show()
-            app.exec()
-            app.quit()
+        from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
 
-    .. tab:: PySide2
+        app = QApplication(sys.argv)
 
-        .. code-block:: python
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
 
-            from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
-            from dawiq import dataclass2Widget
-            import sys
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
 
-            app = QApplication(sys.argv)
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
 
-            widget = QWidget()
-            widget.setLayout(QVBoxLayout())
-            dataWidget = dataclass2Widget(DataClass)
-            widget.layout().addWidget(dataWidget)
-            btn1 = QPushButton("Previous")
-            widget.layout().addWidget(btn1)
-            btn2 = QPushButton("Next")
-            widget.layout().addWidget(btn2)
+        widget.show()
+        app.exec_()
+        app.quit()
 
-            btn1.clicked.connect(mapper.toPrevious)
-            btn2.clicked.connect(mapper.toNext)
+    .. code-tab:: python PyQt5
 
-            mapper.addMapping(dataWidget, 0)
-            mapper.setCurrentIndex(0)
+        from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
+        from dawiq import dataclass2Widget
+        import sys
 
-            widget.show()
-            app.exec_()
-            app.quit()
+        app = QApplication(sys.argv)
 
-    .. tab:: PyQt5
+        widget = QWidget()
+        widget.setLayout(QVBoxLayout())
+        dataWidget = dataclass2Widget(DataClass)
+        widget.layout().addWidget(dataWidget)
+        btn1 = QPushButton("Previous")
+        widget.layout().addWidget(btn1)
+        btn2 = QPushButton("Next")
+        widget.layout().addWidget(btn2)
 
-        .. code-block:: python
+        btn1.clicked.connect(mapper.toPrevious)
+        btn2.clicked.connect(mapper.toNext)
 
-            from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton
-            from dawiq import dataclass2Widget
-            import sys
+        mapper.addMapping(dataWidget, 0)
+        mapper.setCurrentIndex(0)
 
-            app = QApplication(sys.argv)
-
-            widget = QWidget()
-            widget.setLayout(QVBoxLayout())
-            dataWidget = dataclass2Widget(DataClass)
-            widget.layout().addWidget(dataWidget)
-            btn1 = QPushButton("Previous")
-            widget.layout().addWidget(btn1)
-            btn2 = QPushButton("Next")
-            widget.layout().addWidget(btn2)
-
-            btn1.clicked.connect(mapper.toPrevious)
-            btn2.clicked.connect(mapper.toNext)
-
-            mapper.addMapping(dataWidget, 0)
-            mapper.setCurrentIndex(0)
-
-            widget.show()
-            app.exec()
-            app.quit()
+        widget.show()
+        app.exec()
+        app.quit()
 
 Below is the image of the resulting widget.
 Try change the model index and the editor data, and see if the data is stored and read correctly.

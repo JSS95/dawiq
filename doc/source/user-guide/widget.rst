@@ -30,61 +30,53 @@ We then create a widget and display it.
 
 .. tabs::
 
-    .. tab:: PySide6
+    .. code-tab:: python PySide6
 
-        .. code-block:: python
+        from PySide6.QtWidgets import QApplication
+        from dawiq import dataclass2Widget
+        import sys
 
-            from PySide6.QtWidgets import QApplication
-            from dawiq import dataclass2Widget
-            import sys
+        app = QApplication(sys.argv)
+        dataWidget = dataclass2Widget(DataClass)
+        dataWidget.show()
+        app.exec()
+        app.quit()
 
-            app = QApplication(sys.argv)
-            dataWidget = dataclass2Widget(DataClass)
-            dataWidget.show()
-            app.exec()
-            app.quit()
+    .. code-tab:: python PyQt6
 
-    .. tab:: PyQt6
+        from PyQt6.QtWidgets import QApplication
+        from dawiq import dataclass2Widget
+        import sys
 
-        .. code-block:: python
+        app = QApplication(sys.argv)
+        dataWidget = dataclass2Widget(DataClass)
+        dataWidget.show()
+        app.exec()
+        app.quit()
 
-            from PyQt6.QtWidgets import QApplication
-            from dawiq import dataclass2Widget
-            import sys
+    .. code-tab:: python PySide2
 
-            app = QApplication(sys.argv)
-            dataWidget = dataclass2Widget(DataClass)
-            dataWidget.show()
-            app.exec()
-            app.quit()
+        from PySide2.QtWidgets import QApplication
+        from dawiq import dataclass2Widget
+        import sys
 
-    .. tab:: PySide2
+        app = QApplication(sys.argv)
+        dataWidget = dataclass2Widget(DataClass)
+        dataWidget.show()
+        app.exec_()
+        app.quit()
 
-        .. code-block:: python
+    .. code-tab:: python PyQt5
 
-            from PySide2.QtWidgets import QApplication
-            from dawiq import dataclass2Widget
-            import sys
+        from PyQt5.QtWidgets import QApplication
+        from dawiq import dataclass2Widget
+        import sys
 
-            app = QApplication(sys.argv)
-            dataWidget = dataclass2Widget(DataClass)
-            dataWidget.show()
-            app.exec_()
-            app.quit()
-
-    .. tab:: PyQt5
-
-        .. code-block:: python
-
-            from PyQt5.QtWidgets import QApplication
-            from dawiq import dataclass2Widget
-            import sys
-
-            app = QApplication(sys.argv)
-            dataWidget = dataclass2Widget(DataClass)
-            dataWidget.show()
-            app.exec()
-            app.quit()
+        app = QApplication(sys.argv)
+        dataWidget = dataclass2Widget(DataClass)
+        dataWidget.show()
+        app.exec()
+        app.quit()
 
 Your widget will look like this:
 
