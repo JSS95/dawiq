@@ -41,7 +41,7 @@ test = [
     "pytest",
     "pytest-qt",
 ]
-test-ci = [
+test-headless = [
     "dawiq[test]",
     "pytest-xvfb",
 ]

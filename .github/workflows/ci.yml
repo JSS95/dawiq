@@ -91,7 +91,7 @@ jobs:
 
       - name: install package
         run: |
-          pip install .[test-ci]
+          pip install .[test-headless]
 
       - run: pytest
 
