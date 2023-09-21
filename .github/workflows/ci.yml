@@ -44,7 +44,7 @@ jobs:
 
       - name: install package
         run: |
-          pip install .[test]
+          pip install mypy .[test]
 
       - name: run mypy check
         run: mypy dawiq

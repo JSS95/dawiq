@@ -38,7 +38,6 @@ repository = "https://github.com/JSS95/dawiq"
 [project.optional-dependencies]
 test = [
     "cattrs",
-    "mypy",
     "pytest",
     "pytest-qt",
 ]
