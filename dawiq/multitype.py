@@ -9,7 +9,11 @@ to support multiple dataclass types.
 from .qt_compat import QtWidgets, QtCore
 from .datawidget import DataWidget
 from typing import Type, Optional
-from .typing import DataclassProtocol
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from _typeshed import DataclassInstance
 
 
 __all__ = [
@@ -53,7 +57,7 @@ class DataclassStackedWidget(QtWidgets.QStackedWidget):
         self._previousIndex = index
 
     def addDataWidget(
-        self, widget: DataWidget, dataclass: Type[DataclassProtocol]
+        self, widget: DataWidget, dataclass: Type["DataclassInstance"]
     ) -> int:
         """Add *widget* with binding it to *dataclass*."""
         index = self.addWidget(widget)
@@ -61,7 +65,7 @@ class DataclassStackedWidget(QtWidgets.QStackedWidget):
         return index
 
     def insertDataWidget(
-        self, index: int, widget: DataWidget, dataclass: Type[DataclassProtocol]
+        self, index: int, widget: DataWidget, dataclass: Type["DataclassInstance"]
     ) -> int:
         index = self.insertWidget(index, widget)
         self._dataWidgets[widget] = dataclass
@@ -75,10 +79,10 @@ class DataclassStackedWidget(QtWidgets.QStackedWidget):
                 widget.dataEdited.disconnect(self.currentDataEdited)
         super().removeWidget(widget)
 
-    def currentDataclass(self) -> Optional[Type[DataclassProtocol]]:
+    def currentDataclass(self) -> Optional[Type["DataclassInstance"]]:
         return self._dataWidgets.get(self.currentWidget())
 
-    def indexOfDataclass(self, dataclass: Type[DataclassProtocol]) -> int:
+    def indexOfDataclass(self, dataclass: Type["DataclassInstance"]) -> int:
         """Return the index of the widget bound to *dataclass*."""
         for widget, dcls in self._dataWidgets.items():
             if dcls == dataclass:
@@ -156,10 +160,10 @@ class DataclassTabWidget(QtWidgets.QTabWidget):
                 widget.dataEdited.disconnect(self.currentDataEdited)
         super().removeTab(index)
 
-    def currentDataclass(self) -> Optional[Type[DataclassProtocol]]:
+    def currentDataclass(self) -> Optional[Type["DataclassInstance"]]:
         return self._dataWidgets.get(self.currentWidget())
 
-    def indexOfDataclass(self, dataclass: Type[DataclassProtocol]) -> int:
+    def indexOfDataclass(self, dataclass: Type["DataclassInstance"]) -> int:
         """Return the index of the widget bound to *dataclass*."""
         for widget, dcls in self._dataWidgets.items():
             if dcls == dataclass:
