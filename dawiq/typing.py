@@ -5,21 +5,13 @@ Type annotations
 :mod:`dawiq.typing` provides special type annotations.
 """
 
-from typing import Protocol, Dict, Any
+from typing import Protocol, Any
 from .qt_compat import QtCore
 
 
 __all__ = [
-    "DataclassProtocol",
     "FieldWidgetProtocol",
 ]
-
-
-class DataclassProtocol(Protocol):
-    """Type annotation for dataclass type object."""
-
-    # https://stackoverflow.com/a/55240861/11501976
-    __dataclass_fields__: Dict
 
 
 class FieldWidgetProtocol(Protocol):
