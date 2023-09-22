@@ -1,5 +1,6 @@
 [build-system]
 requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "dawiq"
@@ -41,10 +42,6 @@ test = [
     "pytest",
     "pytest-qt",
 ]
-test-headless = [
-    "dawiq[test]",
-    "pytest-xvfb",
-]
 doc = [
     "numpydoc",
     "sphinx",
@@ -55,3 +52,6 @@ full = ["dawiq[test,doc]"]
 
 [tool.setuptools.dynamic]
 version = {attr = "dawiq.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

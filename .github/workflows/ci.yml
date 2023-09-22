@@ -11,10 +11,10 @@ jobs:
     steps: 
 
       - name: get repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
 
       - name: install dependencies
         run: |
@@ -37,17 +37,20 @@ jobs:
     steps: 
 
       - name: get repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
       - name: install package
         run: |
-          pip install mypy .[test]
+          pip install mypy
 
       - name: run mypy check
-        run: mypy dawiq
+        run: |
+          mypy src
 
   unit-test:
 
@@ -61,7 +64,6 @@ jobs:
 
     strategy:
       fail-fast: false
-
       matrix:
         os : [ubuntu-latest, windows-latest, macos-latest]
         python: ["3.9", "3.10", "3.11"]
@@ -75,10 +77,10 @@ jobs:
     steps:
 
       - name: get repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
 
@@ -91,7 +93,8 @@ jobs:
 
       - name: install package
         run: |
-          pip install .[test-headless]
+          pip install pytest-xvfb
+          pip install .[test]
 
       - run: pytest
 
@@ -104,10 +107,12 @@ jobs:
     steps: 
 
       - name: get repo
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
 
       - name: install package
         run: |
