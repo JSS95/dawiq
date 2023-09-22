@@ -4,31 +4,26 @@ Installation
 
 This document explains how to install DaWiQ.
 
-Making virtual environment
-==========================
-
-It is recommended to make a dedicated virtual environment to avoid any possible collision with external libraries using different Qt dependencies.
-The easiest way is to use `Anaconda <https://www.anaconda.com/>`_:
+If you just want quick installation, run the following command and forget about the rest of this document.
 
 .. code-block:: bash
 
-   $ conda create -n my-env pip
-   $ conda activate my-env
+   $ pip install dawiq
 
-You are now in a new environment "my-env", with only `pip <https://pip.pypa.io/en/stable/>`_ package installed.
-Ready to go!
+This will install ``dawiq6`` package in your environment.
+
+Developers are encouraged to :ref:`download the source <download-source>` and :ref:`install from the source <install-from-source>`.
 
 Downloading the source (Optional)
 =================================
 
-You can download full source code of DaWiQ project without installing it by git.
+.. _download-source:
+
+You can download full source code of DaWiQ project from its repository.
 
 .. code-block:: bash
 
    $ git clone git@github.com:JSS95/dawiq.git
-
-Note that you can download the source with ``pip`` command, but it will install the package at the same time.
-It will be explaned in the next section.
 
 Installing
 ==========
@@ -39,31 +34,27 @@ The package can be installed by
 
    $ pip install [-e] <PyPI name/url/path>[dependency options]
 
-For example, the following code installs the latest release from PyPI.
+.. rubric:: Install options
 
-.. code-block:: bash
+.. _install-options:
 
-   $ pip install dawiq
-
-.. rubric:: install options
-
-There are two types of install options for developers.
+There are two noticeable install options for developers.
 
 * Install with editable option (``-e``)
-* Install with dependency specification (``[...]``)
+* Install with optional dependencies (``[...]``)
 
-Editable option installs the package as link to the original location.
-Change to the source directly applies as you import the package.
+The editable option allows changes made to the source code to be immediately reflected in the installed package.
+For more information, refer to `pip documentation <https://pip.pypa.io/en/stable/topics/local-project-installs/#editable-installs>`_.
 
-Dependency specification installs additional modules which are required to access extra features of the package.
-You may add them in brackets right after the package argument.
+Optional dependencies can be specified by adding them into brackets right after the package url/path.
+When specified, additional module are installed to help accessing extra features of the package.
 
-Available specifications for DaWiQ are:
+In DaWiQ6, all optional dependencies are for package development.
+Available specifications are:
 
-* ``test``: installs modules to run tests
-* ``test-headless``: installs modules to run tests in headless environment.
-* ``doc``: installs modules to build documentations
-* ``full``: installs every additional dependency
+* ``test``: installs modules to run tests.
+* ``doc``: installs modules to build documentations.
+* ``dev``: installs every additional dependency for developers.
 
 With commas without trailing whitespaces, i.e. ``[A,B]``, you can pass multiple specifications.
 
@@ -85,17 +76,19 @@ For example, the following code installs the package with every additional depen
 
 .. note::
 
-   If you pass ``-e`` option, full source code of the project will be downloaded under ``src/`` directory in your current location.
+   If you pass ``-e`` option, source code of the project will be downloaded in your current location.
 
 Installing from source
 ----------------------
 
+.. _install-from-source:
+
 If you have already downloaded the source, you can install it by passing its path to ``pip install``.
-For example, in the path where ``setup.py`` is located the following command installs the package in editable mode, with full dependencies.
+For example, in the path where ``pyproject.toml`` is located, the following command installs the package in editable mode, with full dependencies for developers.
 
 .. code-block:: bash
 
-   $ pip install -e .[full]
+   $ pip install -e .[dev]
 
 Installing Qt binding
 =====================

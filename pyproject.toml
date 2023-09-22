@@ -48,7 +48,15 @@ doc = [
     "sphinx-tabs",
     "sphinx_rtd_theme",
 ]
-full = ["dawiq[test,doc]"]
+dev = [
+    "flake8",
+    "black",
+    "mypy",
+    "dawiq[test,doc]",
+]
+full = [
+    "dawiq[dev]"
+]  # for backwards compatibility
 
 [tool.setuptools.dynamic]
 version = {attr = "dawiq.version.__version__"}
